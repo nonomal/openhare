@@ -216,13 +216,13 @@ class AddSession extends HookConsumerWidget {
                     ],
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.only(left: 12),
-                  width: 200,
-                  child: Row(
-                    children: [
-                      Text(inst.connectValue.desc),
-                    ],
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: Text(
+                      inst.connectValue.desc,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
               ],
