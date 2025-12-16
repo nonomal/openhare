@@ -54,7 +54,7 @@ class SQLResultRepoImpl extends SQLResultRepo {
 
   @override
   void deleteSQLResults(SessionId sessionId) {
-    sqlResults.remove(sessionId.value);
+    sqlResults.remove(sessionId);
   }
 
   @override
