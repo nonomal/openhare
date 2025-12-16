@@ -7,7 +7,8 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:client/widgets/divider.dart';
 
 class WindowButtons extends StatelessWidget {
-  const WindowButtons({Key? key}) : super(key: key);
+  const WindowButtons({super.key});
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).colorScheme;
@@ -74,13 +75,13 @@ class PageSkeleton extends StatelessWidget {
   final Color? backgroundColor;
 
   const PageSkeleton({
-    Key? key,
+    super.key,
     this.topBar,
     this.bottomBar,
     this.drawer,
     required this.child,
     this.backgroundColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -130,12 +131,13 @@ class BodyPageSkeleton extends StatelessWidget {
   final Widget header;
   final Widget child;
   final double? bottomSpaceSize;
+
   const BodyPageSkeleton({
-    Key? key,
+    super.key,
     required this.header,
     required this.child,
     this.bottomSpaceSize = kSpacingMedium,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

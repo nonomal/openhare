@@ -114,7 +114,10 @@ String lastInstancePage = "/instances/list";
 class ScaffoldWithNavRail extends StatefulWidget {
   final Widget child;
 
-  const ScaffoldWithNavRail({Key? key, required this.child}) : super(key: key);
+  const ScaffoldWithNavRail({
+    super.key,
+    required this.child,
+  });
 
   @override
   State<ScaffoldWithNavRail> createState() => _ScaffoldWithNavRailState();

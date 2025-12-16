@@ -16,7 +16,7 @@ import 'package:client/l10n/app_localizations.dart';
 import 'package:client/widgets/loading.dart';
 
 class AddInstancePage extends StatefulWidget {
-  const AddInstancePage({Key? key}) : super(key: key);
+  const AddInstancePage({super.key});
 
   @override
   State<AddInstancePage> createState() => _AddInstancePageState();
@@ -57,7 +57,7 @@ class _AddInstancePageState extends State<AddInstancePage> {
 }
 
 class AddInstance extends ConsumerStatefulWidget {
-  const AddInstance({Key? key}) : super(key: key);
+  const AddInstance({super.key});
 
   @override
   ConsumerState<AddInstance> createState() => _AddInstanceState();
@@ -177,15 +177,15 @@ class DatabaseTypeCard extends StatelessWidget {
   final Color? selectedColor;
   final Function(DatabaseType type)? onTap;
 
-  const DatabaseTypeCard(
-      {Key? key,
-      required this.type,
-      required this.name,
-      required this.logoPath,
-      this.selected = false,
-      this.selectedColor,
-      this.onTap})
-      : super(key: key);
+  const DatabaseTypeCard({
+    super.key,
+    required this.type,
+    required this.name,
+    required this.logoPath,
+    this.selected = false,
+    this.selectedColor,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -238,13 +238,12 @@ class DatabaseTypeCardList extends StatelessWidget {
   final Color? selectedColor;
 
   const DatabaseTypeCardList({
-    Key? key,
+    super.key,
     required this.connectionMetas,
     this.onDatabaseTypeChange,
     DatabaseType? selectedDatabaseType,
     this.selectedColor,
-  })  : _selectedDatabaseType = selectedDatabaseType,
-        super(key: key);
+  }) : _selectedDatabaseType = selectedDatabaseType;
 
   DatabaseType? get selectedDatabaseType => _selectedDatabaseType ?? connectionMetas.first.type;
 
@@ -285,15 +284,15 @@ class CommonFormField extends StatefulWidget {
   final GlobalKey<FormFieldState>? state;
   final bool obscureText;
 
-  const CommonFormField(
-      {Key? key,
-      required this.label,
-      required this.controller,
-      this.state,
-      this.validator,
-      this.readOnly = false,
-      this.obscureText = false})
-      : super(key: key);
+  const CommonFormField({
+    super.key,
+    required this.label,
+    required this.controller,
+    this.state,
+    this.validator,
+    this.readOnly = false,
+    this.obscureText = false,
+  });
 
   @override
   State<CommonFormField> createState() => _CommonFormFieldState();
@@ -324,7 +323,11 @@ class DescFormField extends StatelessWidget {
   final TextEditingController controller;
   final GlobalKey<FormFieldState>? state;
 
-  const DescFormField({Key? key, required this.controller, this.state}) : super(key: key);
+  const DescFormField({
+    super.key,
+    required this.controller,
+    this.state,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -351,14 +354,14 @@ class AddInstanceForm extends StatelessWidget {
   final Function(String group)? onGroupChange;
   final CodeLineEditingController codeController;
 
-  const AddInstanceForm(
-      {Key? key,
-      required this.infos,
-      this.onValid,
-      this.onGroupChange,
-      this.selectedGroup,
-      required this.codeController})
-      : super(key: key);
+  const AddInstanceForm({
+    super.key,
+    required this.infos,
+    this.onValid,
+    this.onGroupChange,
+    this.selectedGroup,
+    required this.codeController,
+  });
 
   FormFieldValidator validatorFn(BuildContext context, FormInfo info, FormFieldValidator validate) {
     return (value) {
@@ -618,11 +621,11 @@ class AddInstanceBottomBar extends StatelessWidget {
   final bool isDatabasePingDoing;
 
   const AddInstanceBottomBar({
-    Key? key,
+    super.key,
     this.databaseConnectError,
     required this.isDatabasePingDoing,
     this.isDatabaseConnectable,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

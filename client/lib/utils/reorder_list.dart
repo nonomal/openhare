@@ -65,7 +65,7 @@ class ReorderSelectedList<E> extends DelegatingList<E> {
     return _selected == e;
   }
 
-  replace(E origin, E target) {
+  void replace(E origin, E target) {
     int index = _data.indexOf(origin);
     // 如果不存在则 add, 如果存在, 则下标替换
     index == -1 ? _data.add(target) : _data[index] = target;

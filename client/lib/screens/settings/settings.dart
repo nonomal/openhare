@@ -461,8 +461,13 @@ class SettingTabButton extends StatefulWidget {
   final String text;
   final Function() onTap;
   final bool isSelected;
-  const SettingTabButton({Key? key, required this.text, required this.onTap, required this.isSelected})
-      : super(key: key);
+
+  const SettingTabButton({
+    super.key,
+    required this.text,
+    required this.onTap,
+    required this.isSelected,
+  });
 
   @override
   State<SettingTabButton> createState() => _SettingTabButtonState();

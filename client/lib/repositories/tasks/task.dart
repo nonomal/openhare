@@ -1,8 +1,6 @@
 import 'package:client/models/tasks.dart';
 import 'package:client/repositories/objectbox.g.dart';
 import 'package:client/repositories/repo.dart';
-import 'package:objectbox/objectbox.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'task.g.dart';

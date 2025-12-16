@@ -14,7 +14,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:client/l10n/app_localizations.dart';
 
 class AddSession extends HookConsumerWidget {
-  const AddSession({Key? key}) : super(key: key);
+  const AddSession({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -24,7 +24,11 @@ class SessionOpBar extends ConsumerWidget {
   final CodeLineEditingController codeController;
   final double height;
 
-  const SessionOpBar({Key? key, required this.codeController, this.height = 36}) : super(key: key);
+  const SessionOpBar({
+    super.key,
+    required this.codeController,
+    this.height = 36,
+  });
 
   String getQuery() {
     var content = codeController.text.toString();
@@ -275,13 +279,13 @@ class SchemaBar extends ConsumerStatefulWidget {
   final Color? iconColor;
 
   const SchemaBar({
-    Key? key,
+    super.key,
     this.instanceId,
     required this.disable,
     this.currentSchema,
     this.iconColor,
     this.connId,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<SchemaBar> createState() => _SchemaBarState();
@@ -367,7 +371,10 @@ class _SchemaBarState extends ConsumerState<SchemaBar> {
 class SessionDrawerBar extends ConsumerWidget {
   final double height;
 
-  const SessionDrawerBar({Key? key, this.height = 36}) : super(key: key);
+  const SessionDrawerBar({
+    super.key,
+    this.height = 36,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

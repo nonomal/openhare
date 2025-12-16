@@ -10,7 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:client/l10n/app_localizations.dart';
 
 class SessionTabs extends ConsumerWidget {
-  const SessionTabs({Key? key}) : super(key: key);
+  const SessionTabs({super.key});
 
   void closeSessionDialog(BuildContext context, WidgetRef ref, SessionDetailListModel model, int index) {
     // 如果正在执行语句，则提示连接繁忙，请稍后执行

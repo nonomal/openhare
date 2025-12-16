@@ -13,7 +13,7 @@ import 'package:re_highlight/styles/atom-one-light.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SessionDrawerSqlResult extends ConsumerWidget {
-  const SessionDrawerSqlResult({Key? key}) : super(key: key);
+  const SessionDrawerSqlResult({super.key});
 
   Widget buildDisplayField(BuildContext context, SessionDrawerModel sessionDrawer) {
     BaseQueryValue? result = sessionDrawer.sqlResult;

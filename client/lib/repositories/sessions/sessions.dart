@@ -2,7 +2,6 @@ import 'package:client/models/instances.dart';
 import 'package:client/models/sessions.dart';
 import 'package:client/repositories/instances/instances.dart';
 import 'package:objectbox/objectbox.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:client/repositories/repo.dart';
 import 'package:client/utils/reorder_list.dart';

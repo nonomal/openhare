@@ -18,7 +18,7 @@ import 'package:client/widgets/divider.dart';
 import 'package:client/services/sessions/session_controller.dart';
 
 class SqlResultTables extends ConsumerWidget {
-  const SqlResultTables({Key? key}) : super(key: key);
+  const SqlResultTables({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

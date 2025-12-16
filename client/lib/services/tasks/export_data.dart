@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:client/models/tasks.dart';
 import 'package:client/repositories/tasks/task.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:client/services/sessions/session_conn.dart';
 import 'package:client/services/instances/instances.dart';

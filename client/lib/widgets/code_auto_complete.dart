@@ -257,10 +257,10 @@ class SQLEditorAutoCompleteListView extends StatefulWidget implements PreferredS
   final ValueChanged<CodeAutocompleteResult> onSelected;
 
   const SQLEditorAutoCompleteListView({
-    Key? key,
+    super.key,
     required this.notifier,
     required this.onSelected,
-  }) : super(key: key);
+  });
 
   @override
   Size get preferredSize {

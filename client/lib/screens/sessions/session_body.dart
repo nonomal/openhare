@@ -12,7 +12,7 @@ import 'package:client/widgets/split_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SessionBodyPage extends ConsumerWidget {
-  const SessionBodyPage({Key? key}) : super(key: key);
+  const SessionBodyPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

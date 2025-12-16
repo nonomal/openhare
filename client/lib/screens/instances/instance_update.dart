@@ -11,7 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:client/l10n/app_localizations.dart';
 
 class UpdateInstancePage extends StatefulWidget {
-  const UpdateInstancePage({Key? key}) : super(key: key);
+  const UpdateInstancePage({super.key});
 
   @override
   State<UpdateInstancePage> createState() => _UpdateInstancePageState();
@@ -52,7 +52,7 @@ class _UpdateInstancePageState extends State<UpdateInstancePage> {
 }
 
 class UpdateInstance extends ConsumerStatefulWidget {
-  const UpdateInstance({Key? key}) : super(key: key);
+  const UpdateInstance({super.key});
 
   @override
   ConsumerState<UpdateInstance> createState() => _UpdateInstanceState();

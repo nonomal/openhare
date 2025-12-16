@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SessionDrawerBody extends ConsumerWidget {
-  const SessionDrawerBody({Key? key}) : super(key: key);
+  const SessionDrawerBody({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

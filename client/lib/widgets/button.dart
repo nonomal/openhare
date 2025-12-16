@@ -16,22 +16,22 @@ class RectangleIconButton extends StatefulWidget {
   final Color? hoverBackgroundColor;
   final VoidCallback? onPressed;
 
-  const RectangleIconButton(
-      {Key? key,
-      this.tooltip,
-      required this.icon,
-      this.onPressed,
-      required this.size,
-      required this.iconSize,
-      required this.padding,
-      this.verticalOffset = 0,
-      this.iconColor,
-      this.backgroundColor,
-      this.hoverBackgroundColor})
-      : super(key: key);
+  const RectangleIconButton({
+    super.key,
+    this.tooltip,
+    required this.icon,
+    this.onPressed,
+    required this.size,
+    required this.iconSize,
+    required this.padding,
+    this.verticalOffset = 0,
+    this.iconColor,
+    this.backgroundColor,
+    this.hoverBackgroundColor,
+  });
 
   const RectangleIconButton.medium({
-    Key? key,
+    super.key,
     this.tooltip,
     required this.icon,
     this.onPressed,
@@ -41,11 +41,10 @@ class RectangleIconButton extends StatefulWidget {
     this.verticalOffset = 0,
   })  : size = kIconButtonSizeMedium,
         iconSize = kIconSizeMedium,
-        padding = 4,
-        super(key: key);
+        padding = 4;
 
   const RectangleIconButton.small({
-    Key? key,
+    super.key,
     this.tooltip,
     required this.icon,
     this.onPressed,
@@ -55,11 +54,10 @@ class RectangleIconButton extends StatefulWidget {
     this.verticalOffset = 0,
   })  : size = kIconButtonSizeSmall,
         iconSize = kIconSizeSmall,
-        padding = 2,
-        super(key: key);
+        padding = 2;
 
   const RectangleIconButton.tiny({
-    Key? key,
+    super.key,
     this.tooltip,
     required this.icon,
     this.onPressed,
@@ -69,8 +67,7 @@ class RectangleIconButton extends StatefulWidget {
     this.verticalOffset = 0,
   })  : size = kIconButtonSizeTiny,
         iconSize = kIconSizeTiny,
-        padding = 2,
-        super(key: key);
+        padding = 2;
 
   @override
   State<RectangleIconButton> createState() => _RectangleIconButtonState();
@@ -140,7 +137,12 @@ class LinkButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final double? maxWidth;
 
-  const LinkButton({Key? key, required this.text, this.onPressed, this.maxWidth}) : super(key: key);
+  const LinkButton({
+    super.key,
+    required this.text,
+    this.onPressed,
+    this.maxWidth,
+  });
 
   @override
   State<LinkButton> createState() => _LinkButtonState();

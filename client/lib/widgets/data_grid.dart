@@ -112,7 +112,7 @@ class DataGrid extends StatefulWidget {
   final void Function(Postion position)? onCellDoubleTap;
 
   const DataGrid({
-    Key? key,
+    super.key,
     required this.controller,
     this.rowHeight = 24.0,
     this.headerHeight = 32.0,
@@ -120,7 +120,7 @@ class DataGrid extends StatefulWidget {
     this.verticalController,
     this.onCellTap,
     this.onCellDoubleTap,
-  }) : super(key: key);
+  });
 
   @override
   State<DataGrid> createState() => _DataGridState();

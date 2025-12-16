@@ -123,12 +123,12 @@ class CodeLineNumber extends StatefulWidget {
   final CodeLineEditingController codeController;
 
   const CodeLineNumber({
-    Key? key,
+    super.key,
     required this.notifier,
     required this.totalHeight,
     required this.textStyle,
     required this.codeController,
-  }) : super(key: key);
+  });
 
   @override
   State<CodeLineNumber> createState() => _CodeLineNumberState();

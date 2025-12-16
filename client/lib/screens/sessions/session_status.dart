@@ -8,7 +8,7 @@ import 'package:client/l10n/app_localizations.dart';
 import 'package:client/widgets/divider.dart';
 
 class SessionStatusTab extends ConsumerWidget {
-  const SessionStatusTab({Key? key}) : super(key: key);
+  const SessionStatusTab({super.key});
 
   Widget divider(BuildContext context) {
     return const Padding(
@@ -103,12 +103,12 @@ class ValueStatusWidget extends StatelessWidget {
   final double width;
 
   const ValueStatusWidget({
-    Key? key,
+    super.key,
     required this.label,
     required this.value,
     this.tooltip,
     this.width = 150,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
