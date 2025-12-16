@@ -9,8 +9,16 @@ part 'chat.g.dart';
 @Riverpod(keepAlive: true)
 class AIChatService extends _$AIChatService {
   @override
-  AIChatListModel build() {
-    return ref.watch(aiChatRepoProvider).getAIChatList();
+  int build() {
+    return 0;
+  }
+
+  void _invalidateSelf() {
+    state++;
+  }
+
+  AIChatModel? getAIChatById(AIChatId id) {
+    return ref.watch(aiChatRepoProvider).getAIChatById(id);
   }
 
   void create(AIChatModel model) {
@@ -18,7 +26,7 @@ class AIChatService extends _$AIChatService {
   }
 
   List<AIChatMessageModel> _getChatMessage(AIChatId id) {
-    return state.chats[id]!.messages;
+    return ref.read(aiChatRepoProvider).getAIChatById(id)!.messages;
   }
 
   void _updateLastMessage(AIChatId id, AIChatMessageModel message) {
@@ -40,12 +48,12 @@ class AIChatService extends _$AIChatService {
     messages.add(message);
     ref.read(aiChatRepoProvider).updateMessages(id, messages);
     // 刷新state
-    ref.invalidateSelf();
+    _invalidateSelf();
   }
 
   void _updateState(AIChatId id, AIChatState state) {
     ref.read(aiChatRepoProvider).updateState(id, state);
-    ref.invalidateSelf();
+    _invalidateSelf();
   }
 
   /// 进行AI对话，请求接口，存储消息并刷新使用 provider 来动态刷新页面

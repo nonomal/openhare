@@ -28,7 +28,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:client/l10n/app_localizations.dart';
 
 class SessionDrawerChat extends ConsumerStatefulWidget {
-  const SessionDrawerChat({Key? key}) : super(key: key);
+  const SessionDrawerChat({super.key});
 
   @override
   ConsumerState<SessionDrawerChat> createState() => _SessionDrawerChatState();
@@ -37,26 +37,20 @@ class SessionDrawerChat extends ConsumerStatefulWidget {
 class _SessionDrawerChatState extends ConsumerState<SessionDrawerChat> {
   @override
   Widget build(BuildContext context) {
-    AsyncValue<SessionAIChatModel> model = ref.watch(sessionAIChatProvider);
-    return model.when(
-      data: (data) {
-        return Column(
-          children: [
-            // 聊天内容
-            Expanded(
-              child: (data.llmAgents.agents.isEmpty)
-                  ? const SessionChatGuide()
-                  : SessionChatMessages(model: data),
-            ),
-            const SizedBox(height: kSpacingSmall),
-            // 下方的输入框区域
-            SessionChatInputCard(model: data),
-            const SizedBox(height: kSpacingMedium),
-          ],
-        );
-      },
-      error: (error, trace) => const Spacer(),
-      loading: () => const Spacer(),
+    SessionAIChatModel model = ref.watch(sessionAIChatProvider);
+    return Column(
+      children: [
+        // 聊天内容
+        Expanded(
+          child: (model.llmAgents.agents.isEmpty)
+              ? const SessionChatGuide()
+              : SessionChatMessages(model: model),
+        ),
+        const SizedBox(height: kSpacingSmall),
+        // 下方的输入框区域
+        SessionChatInputCard(model: model),
+        const SizedBox(height: kSpacingMedium),
+      ],
     );
   }
 }
