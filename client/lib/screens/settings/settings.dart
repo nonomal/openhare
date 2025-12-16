@@ -40,23 +40,17 @@ class SettingsPage extends ConsumerWidget {
                   SettingTabButton(
                     text: AppLocalizations.of(context)!.preferences,
                     onTap: () {
-                      ref
-                          .read(settingTabServiceProvider.notifier)
-                          .setSelectedSettingType(SettingType.system);
+                      ref.read(settingTabServiceProvider.notifier).setSelectedSettingType(SettingType.system);
                     },
-                    isSelected: model.settingTab.selectedSettingType ==
-                        SettingType.system,
+                    isSelected: model.settingTab.selectedSettingType == SettingType.system,
                   ),
                   const SizedBox(width: kSpacingMedium),
                   SettingTabButton(
                     text: AppLocalizations.of(context)!.llm_api,
                     onTap: () {
-                      ref
-                          .read(settingTabServiceProvider.notifier)
-                          .setSelectedSettingType(SettingType.llmApi);
+                      ref.read(settingTabServiceProvider.notifier).setSelectedSettingType(SettingType.llmApi);
                     },
-                    isSelected: model.settingTab.selectedSettingType ==
-                        SettingType.llmApi,
+                    isSelected: model.settingTab.selectedSettingType == SettingType.llmApi,
                   ),
                 ],
               ),
@@ -106,9 +100,7 @@ class SystemSettingPage extends ConsumerWidget {
                 value: "en",
                 groupValue: model.language,
                 onChanged: (value) {
-                  ref
-                      .read(systemSettingServiceProvider.notifier)
-                      .setLanguage(value!);
+                  ref.read(systemSettingServiceProvider.notifier).setLanguage(value!);
                 },
                 dense: true,
                 visualDensity: VisualDensity.compact,
@@ -122,9 +114,7 @@ class SystemSettingPage extends ConsumerWidget {
                 value: "zh",
                 groupValue: model.language,
                 onChanged: (value) {
-                  ref
-                      .read(systemSettingServiceProvider.notifier)
-                      .setLanguage(value!);
+                  ref.read(systemSettingServiceProvider.notifier).setLanguage(value!);
                 },
                 dense: true,
                 visualDensity: VisualDensity.compact,
@@ -156,9 +146,7 @@ class SystemSettingPage extends ConsumerWidget {
                 value: "light",
                 groupValue: model.theme,
                 onChanged: (value) {
-                  ref
-                      .read(systemSettingServiceProvider.notifier)
-                      .setTheme(value!);
+                  ref.read(systemSettingServiceProvider.notifier).setTheme(value!);
                 },
                 dense: true,
                 visualDensity: VisualDensity.compact,
@@ -172,9 +160,7 @@ class SystemSettingPage extends ConsumerWidget {
                 value: "dark",
                 groupValue: model.theme,
                 onChanged: (value) {
-                  ref
-                      .read(systemSettingServiceProvider.notifier)
-                      .setTheme(value!);
+                  ref.read(systemSettingServiceProvider.notifier).setTheme(value!);
                 },
                 dense: true,
                 visualDensity: VisualDensity.compact,
@@ -222,13 +208,12 @@ class LLMApiSettingPage extends ConsumerWidget {
   }
 }
 
-void showLLMApiSettingDialog(BuildContext context, String title,
-    LLMAgentModel? model, Function(LLMAgentSettingModel) onSubmit) {
+void showLLMApiSettingDialog(
+    BuildContext context, String title, LLMAgentModel? model, Function(LLMAgentSettingModel) onSubmit) {
   final nameController = TextEditingController(text: model?.setting.name);
   final baseUrlController = TextEditingController(text: model?.setting.baseUrl);
   final apiKeyController = TextEditingController(text: model?.setting.apiKey);
-  final modelNameController =
-      TextEditingController(text: model?.setting.modelName);
+  final modelNameController = TextEditingController(text: model?.setting.modelName);
 
   showDialog(
     context: context,
@@ -237,8 +222,7 @@ void showLLMApiSettingDialog(BuildContext context, String title,
         child: Container(
           width: 400,
           height: 400,
-          padding: const EdgeInsets.fromLTRB(
-              kSpacingMedium, kSpacingLarge, kSpacingMedium, kSpacingMedium),
+          padding: const EdgeInsets.fromLTRB(kSpacingMedium, kSpacingLarge, kSpacingMedium, kSpacingMedium),
           child: Column(
             // mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -321,13 +305,10 @@ class LLMApiSettingItem extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-            color: Theme.of(context).colorScheme.surfaceContainerHigh,
-            width: 1),
+        border: Border.all(color: Theme.of(context).colorScheme.surfaceContainerHigh, width: 1),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-            kSpacingMedium, kSpacingSmall, kSpacingMedium, kSpacingSmall),
+        padding: const EdgeInsets.fromLTRB(kSpacingMedium, kSpacingSmall, kSpacingMedium, kSpacingSmall),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -339,10 +320,7 @@ class LLMApiSettingItem extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     model.setting.name,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -363,7 +341,8 @@ class LLMApiSettingItem extends ConsumerWidget {
                   ? model.setting.apiKey.replaceRange(
                       4,
                       model.setting.apiKey.length - 4,
-                      '*' * (model.setting.apiKey.length - 8))
+                      '*' * (model.setting.apiKey.length - 8),
+                    )
                   : model.setting.apiKey,
             ),
             const SizedBox(height: kSpacingTiny),
@@ -380,9 +359,7 @@ class LLMApiSettingItem extends ConsumerWidget {
                       icon: Icons.check_circle_outline,
                       iconColor: Colors.green,
                       onPressed: () {
-                        ref
-                            .read(lLMAgentServiceProvider.notifier)
-                            .ping(model.id);
+                        ref.read(lLMAgentServiceProvider.notifier).ping(model.id);
                       },
                     ),
                   LLMAgentState.unavailable => RectangleIconButton.small(
@@ -390,18 +367,14 @@ class LLMApiSettingItem extends ConsumerWidget {
                       icon: Icons.error_outline,
                       iconColor: Colors.red,
                       onPressed: () {
-                        ref
-                            .read(lLMAgentServiceProvider.notifier)
-                            .ping(model.id);
+                        ref.read(lLMAgentServiceProvider.notifier).ping(model.id);
                       },
                     ),
                   LLMAgentState.unknown => RectangleIconButton.small(
-                    tooltip: AppLocalizations.of(context)!.button_tooltip_ai_test,
+                      tooltip: AppLocalizations.of(context)!.button_tooltip_ai_test,
                       icon: Icons.flash_on,
                       onPressed: () {
-                        ref
-                            .read(lLMAgentServiceProvider.notifier)
-                            .ping(model.id);
+                        ref.read(lLMAgentServiceProvider.notifier).ping(model.id);
                       },
                     ),
                 },
@@ -436,9 +409,7 @@ class AddLLMApiSettingItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-            color: Theme.of(context).colorScheme.surfaceContainerHigh,
-            width: 1),
+        border: Border.all(color: Theme.of(context).colorScheme.surfaceContainerHigh, width: 1),
       ),
       child: Center(
         child: IconButton(
@@ -490,11 +461,7 @@ class SettingTabButton extends StatefulWidget {
   final String text;
   final Function() onTap;
   final bool isSelected;
-  const SettingTabButton(
-      {Key? key,
-      required this.text,
-      required this.onTap,
-      required this.isSelected})
+  const SettingTabButton({Key? key, required this.text, required this.onTap, required this.isSelected})
       : super(key: key);
 
   @override

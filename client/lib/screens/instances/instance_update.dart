@@ -21,8 +21,7 @@ class _UpdateInstancePageState extends State<UpdateInstancePage> {
   @override
   void initState() {
     super.initState();
-    updateInstanceController
-        .addListener(() => mounted ? setState(() {}) : null);
+    updateInstanceController.addListener(() => mounted ? setState(() {}) : null);
   }
 
   @override
@@ -63,8 +62,7 @@ class _UpdateInstanceState extends ConsumerState<UpdateInstance> {
   @override
   void initState() {
     super.initState();
-    updateInstanceController
-        .addListener(() => mounted ? setState(() {}) : null);
+    updateInstanceController.addListener(() => mounted ? setState(() {}) : null);
   }
 
   @override
@@ -108,9 +106,7 @@ class _UpdateInstanceState extends ConsumerState<UpdateInstance> {
           TextButton(
               onPressed: () async {
                 if (updateInstanceController.validate()) {
-                  await ref
-                      .read(instancesServicesProvider.notifier)
-                      .updateInstance(
+                  await ref.read(instancesServicesProvider.notifier).updateInstance(
                         updateInstanceController.getInstanceModel(),
                       );
 
@@ -130,13 +126,9 @@ class _UpdateInstanceState extends ConsumerState<UpdateInstance> {
               child: SizedBox(
             child: Container(
               padding: const EdgeInsets.fromLTRB(0, kSpacingSmall, 0, 0),
-              child:
-                  Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+              child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
                 DatabaseTypeCardList(
-                  connectionMetas: [
-                    connectionMetaMap[
-                        updateInstanceController.selectedDatabaseType]!
-                  ],
+                  connectionMetas: [connectionMetaMap[updateInstanceController.selectedDatabaseType]!],
                   selectedColor: selectedColor(updateInstanceController),
                 ),
                 const SizedBox(height: kSpacingMedium),
@@ -197,8 +189,7 @@ class UpdateInstanceController extends AddInstanceController {
   InstanceModel? instance;
 
   @override
-  DatabaseType get selectedDatabaseType =>
-      instance?.dbType ?? DatabaseType.mysql;
+  DatabaseType get selectedDatabaseType => instance?.dbType ?? DatabaseType.mysql;
 
   @override
   void onDatabaseTypeChange(DatabaseType type) {

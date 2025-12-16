@@ -6,8 +6,7 @@ class DataTypeIcon extends StatelessWidget {
   final DataType type;
   final double? size;
 
-  const DataTypeIcon({Key? key, required this.type, this.size})
-      : super(key: key);
+  const DataTypeIcon({Key? key, required this.type, this.size}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

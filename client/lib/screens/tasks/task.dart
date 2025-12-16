@@ -80,12 +80,10 @@ class _TaskTableState extends ConsumerState<TaskTable> {
     try {
       final success = await openFile(path);
       if (!success) {
-        setState(() => _fileErrors[taskId] =
-            AppLocalizations.of(context)!.error_file_not_found(path));
+        setState(() => _fileErrors[taskId] = AppLocalizations.of(context)!.error_file_not_found(path));
       }
     } catch (e) {
-      setState(() => _fileErrors[taskId] =
-          AppLocalizations.of(context)!.error_open_file_failed(e.toString()));
+      setState(() => _fileErrors[taskId] = AppLocalizations.of(context)!.error_open_file_failed(e.toString()));
     }
   }
 
@@ -95,17 +93,14 @@ class _TaskTableState extends ConsumerState<TaskTable> {
     try {
       final success = await openFileInFolder(path);
       if (!success) {
-        setState(() => _fileErrors[taskId] =
-            AppLocalizations.of(context)!.error_file_not_found(path));
+        setState(() => _fileErrors[taskId] = AppLocalizations.of(context)!.error_file_not_found(path));
       }
     } catch (e) {
-      setState(() => _fileErrors[taskId] =
-          AppLocalizations.of(context)!.error_open_folder_failed(e.toString()));
+      setState(() => _fileErrors[taskId] = AppLocalizations.of(context)!.error_open_folder_failed(e.toString()));
     }
   }
 
-  Widget _buildStatusChip(
-      BuildContext context, ExportDataTaskListItemModel task) {
+  Widget _buildStatusChip(BuildContext context, ExportDataTaskListItemModel task) {
     final status = task.status;
     final color = _statusColor(context, status);
     final isRunning = status == TaskStatus.running;
@@ -116,9 +111,7 @@ class _TaskTableState extends ConsumerState<TaskTable> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            width: 1),
+        border: Border.all(color: Theme.of(context).colorScheme.surfaceContainerHighest, width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -215,22 +208,19 @@ class _TaskTableState extends ConsumerState<TaskTable> {
               child: GestureDetector(
                 onTap: onFileTap,
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                   child: Row(
                     children: [
-                      Icon(Icons.file_present_rounded,
-                          size: 16, color: fileColor),
+                      Icon(Icons.file_present_rounded, size: 16, color: fileColor),
                       const SizedBox(width: 4),
                       Flexible(
                         child: Text(
                           fileName,
                           overflow: TextOverflow.ellipsis,
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: fileColor,
-                                    decoration: TextDecoration.underline,
-                                  ),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: fileColor,
+                                decoration: TextDecoration.underline,
+                              ),
                         ),
                       ),
                     ],
@@ -262,9 +252,7 @@ class _TaskTableState extends ConsumerState<TaskTable> {
             fileName: fileName,
             exportPath: exportPath,
             errorMessage: _fileErrors[task.id.value],
-            onFileTap: exportPath != null
-                ? () => _openFile(exportPath, task.id.value)
-                : null,
+            onFileTap: exportPath != null ? () => _openFile(exportPath, task.id.value) : null,
           ),
         ),
         DataCell(_buildText(task.desc)),
@@ -291,9 +279,7 @@ class _TaskTableState extends ConsumerState<TaskTable> {
               RectangleIconButton.small(
                 tooltip: AppLocalizations.of(context)!.tooltip_open_folder,
                 icon: Icons.folder_open,
-                onPressed: exportPath != null
-                    ? () => _openFileInFolder(exportPath, task.id.value)
-                    : null,
+                onPressed: exportPath != null ? () => _openFileInFolder(exportPath, task.id.value) : null,
               ),
               const SizedBox(width: kSpacingTiny),
               RectangleIconButton.small(
@@ -379,8 +365,7 @@ class _TaskTableState extends ConsumerState<TaskTable> {
                     ),
                     side: WidgetStatePropertyAll(
                       BorderSide(
-                        color:
-                            Theme.of(context).colorScheme.surfaceContainerHigh,
+                        color: Theme.of(context).colorScheme.surfaceContainerHigh,
                         width: 0.5,
                       ),
                     ),
@@ -407,8 +392,7 @@ class _TaskTableState extends ConsumerState<TaskTable> {
                     child: Text(
                       AppLocalizations.of(context)!.task_no_tasks,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                     ),
                   )

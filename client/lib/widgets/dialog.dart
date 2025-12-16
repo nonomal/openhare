@@ -51,8 +51,7 @@ void doActionDialog(
             },
             child: Text(
               AppLocalizations.of(context)!.confirm,
-              style: TextStyle(
-                  color: icon?.color ?? Theme.of(context).colorScheme.primary),
+              style: TextStyle(color: icon?.color ?? Theme.of(context).colorScheme.primary),
             ),
           ),
         ],
@@ -92,10 +91,7 @@ class CustomDialog extends StatelessWidget {
           maxWidth: maxWidth ?? 640,
           maxHeight: maxHeight ??
               min(
-                MediaQuery.of(context).size.height -
-                    tabbarHeight -
-                    bottomBarHeight -
-                    10,
+                MediaQuery.of(context).size.height - tabbarHeight - bottomBarHeight - 10,
                 800,
               ), // 高度不能超出屏幕高度，且不能覆盖顶部和底部状态栏
         ),
@@ -116,8 +112,7 @@ class CustomDialog extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   if (titleIcon != null) titleIcon!,
-                  Text(title,
-                      style: textTheme.titleLarge, textAlign: TextAlign.center),
+                  Text(title, style: textTheme.titleLarge, textAlign: TextAlign.center),
                 ],
               ),
               const SizedBox(height: kSpacingMedium),

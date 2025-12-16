@@ -21,14 +21,13 @@ class SessionAIChatNotifier extends _$SessionAIChatNotifier {
 
     ref.watch(aIChatServiceProvider);
 
-    AIChatModel? aiChatModel = ref
-        .read(aIChatServiceProvider.notifier)
-        .getAIChatById(AIChatId(value: session.sessionId.value));
+    AIChatModel? aiChatModel = ref.read(aIChatServiceProvider.notifier).getAIChatById(
+          AIChatId(value: session.sessionId.value),
+        );
 
     if (aiChatModel == null) {
       aiChatModel = AIChatModel(
-        id: AIChatId(
-            value: session.sessionId.value), // todo: 暂时用session id 替代chatId
+        id: AIChatId(value: session.sessionId.value), // todo: 暂时用session id 替代chatId
         messages: [],
         state: AIChatState.idle,
         tables: {},

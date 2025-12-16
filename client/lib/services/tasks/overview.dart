@@ -13,4 +13,3 @@ class TaskOverviewService extends _$TaskOverviewService {
     return _repo.getTaskOverview();
   }
 }
-

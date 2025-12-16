@@ -90,13 +90,11 @@ class ExportDataTasksServices extends _$ExportDataTasksServices {
   }
 
   // todo: 导出超大数据时可能会引起UI卡顿，需要优化。
-  Future<void> exportData(ExportDataParameters parameters,
-      {String? desc}) async {
+  Future<void> exportData(ExportDataParameters parameters, {String? desc}) async {
     final l10n = _getLocalizations();
 
     // 1. 正在创建任务
-    final uniqueFileName =
-        getUniqueFileName(parameters.fileDir, parameters.fileName);
+    final uniqueFileName = getUniqueFileName(parameters.fileDir, parameters.fileName);
     final finalParameters = parameters.copyWith(fileName: uniqueFileName);
 
     final now = DateTime.now();
@@ -118,13 +116,14 @@ class ExportDataTasksServices extends _$ExportDataTasksServices {
       task = task.copyWith(progressMessage: l10n.export_progress_connecting);
       _updateTask(task);
 
-      connModel = await connServices.createConn(parameters.instanceId,
-          currentSchema: parameters.schema);
+      connModel = await connServices.createConn(
+        parameters.instanceId,
+        currentSchema: parameters.schema,
+      );
       await connServices.connect(connModel.connId);
 
       // 3. 正在执行语句
-      task =
-          task.copyWith(progressMessage: l10n.export_progress_executing_query);
+      task = task.copyWith(progressMessage: l10n.export_progress_executing_query);
       _updateTask(task);
 
       // 4. 正在打开文件
@@ -140,8 +139,7 @@ class ExportDataTasksServices extends _$ExportDataTasksServices {
       File file = File(finalParameters.exportFilePath);
       sink = file.openWrite(encoding: utf8);
 
-      await for (final item
-          in connServices.queryStream(connModel.connId, parameters.query)) {
+      await for (final item in connServices.queryStream(connModel.connId, parameters.query)) {
         switch (item) {
           case QueryStreamItemHeader(:final columns, affectedRows: _):
             columnNames = columns.map((e) => e.name).toList();
@@ -150,8 +148,7 @@ class ExportDataTasksServices extends _$ExportDataTasksServices {
             await sink.flush();
 
             // 5. 开始导出数据
-            task = task.copyWith(
-                progressMessage: l10n.export_progress_exporting(0));
+            task = task.copyWith(progressMessage: l10n.export_progress_exporting(0));
             _updateTask(task);
 
           case QueryStreamItemRow(:final row):
@@ -200,8 +197,7 @@ class ExportDataTasksServices extends _$ExportDataTasksServices {
 }
 
 @Riverpod(keepAlive: true)
-class ExportDataTaskPaginationListNotifier
-    extends _$ExportDataTaskPaginationListNotifier {
+class ExportDataTaskPaginationListNotifier extends _$ExportDataTaskPaginationListNotifier {
   @override
   ExportDataTaskPaginationListModel build() {
     return _tasks();
@@ -222,12 +218,8 @@ class ExportDataTaskPaginationListNotifier
       tasks: result.tasks.map((task) {
         final exportDataModel = ExportDataModel.fromModel(task);
         final instanceId = exportDataModel.parameters?.instanceId;
-        final instanceName = instanceId != null
-            ? ref
-                .read(instancesServicesProvider.notifier)
-                .getInstanceById(instanceId)
-                ?.name
-            : null;
+        final instanceName =
+            instanceId != null ? ref.read(instancesServicesProvider.notifier).getInstanceById(instanceId)?.name : null;
         return ExportDataTaskListItemModel(
           id: exportDataModel.id,
           status: exportDataModel.status,

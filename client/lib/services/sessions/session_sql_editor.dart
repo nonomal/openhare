@@ -15,8 +15,7 @@ class SessionSQLEditorService extends _$SessionSQLEditorService {
   SessionEditorModel build(SessionId sessionId) {
     final controller = CodeLineEditingController(
       spanBuilder: ({required codeLines, required context, required style}) {
-        return getSQLHighlightTextSpan(codeLines.asString(TextLineBreak.lf),
-            defalutStyle: style);
+        return getSQLHighlightTextSpan(codeLines.asString(TextLineBreak.lf), defalutStyle: style);
       },
     );
 
@@ -31,8 +30,7 @@ class SessionSQLEditorService extends _$SessionSQLEditorService {
 }
 
 @Riverpod(keepAlive: true)
-class SelectedSessionSQLEditorNotifier
-    extends _$SelectedSessionSQLEditorNotifier {
+class SelectedSessionSQLEditorNotifier extends _$SelectedSessionSQLEditorNotifier {
   @override
   SessionSQLEditorModel build() {
     SessionModel? sessionModel = ref.watch(selectedSessionProvider);
@@ -46,9 +44,10 @@ class SelectedSessionSQLEditorNotifier
         sessionId: sessionModel.sessionId,
         currentSchema: sessionModel.currentSchema,
         metadata: sessionMeta?.when(
-            data: (data) => data.metadata,
-            error: (error, trace) => null,
-            loading: () => null),
+          data: (data) => data.metadata,
+          error: (error, trace) => null,
+          loading: () => null,
+        ),
       );
     }
 
@@ -66,8 +65,7 @@ class SessionEditorNotifier extends _$SessionEditorNotifier {
   SessionEditorModel build() {
     SessionModel? sessionModel = ref.watch(selectedSessionProvider);
     if (sessionModel == null) {
-      return ref
-          .watch(sessionSQLEditorServiceProvider(const SessionId(value: 0)));
+      return ref.watch(sessionSQLEditorServiceProvider(const SessionId(value: 0)));
     }
     return ref.watch(sessionSQLEditorServiceProvider(sessionModel.sessionId));
   }

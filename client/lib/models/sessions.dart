@@ -13,8 +13,7 @@ abstract class SessionRepo {
   Future<SessionId> newSession();
   SessionListModel getSessions();
   SessionModel? getSession(SessionId sessionId);
-  Future<void> updateSession(SessionId sessionId,
-      {InstanceModel? instance, String? currentSchema});
+  Future<void> updateSession(SessionId sessionId, {InstanceModel? instance, String? currentSchema});
   void setConnId(SessionId sessionId, ConnId connId);
   void unsetConnId(SessionId sessionId);
   Future<void> deleteSession(SessionId sessionId);
@@ -299,13 +298,11 @@ abstract class SessionAIChatModel with _$SessionAIChatModel {
   const SessionAIChatModel._();
 
   bool canSendMessage() {
-    return llmAgents.lastUsedLLMAgent != null &&
-        chatModel.state != AIChatState.waiting;
+    return llmAgents.lastUsedLLMAgent != null && chatModel.state != AIChatState.waiting;
   }
 
   bool canClearMessage() {
-    return chatModel.state != AIChatState.waiting &&
-        chatModel.messages.isNotEmpty;
+    return chatModel.state != AIChatState.waiting && chatModel.messages.isNotEmpty;
   }
 }
 

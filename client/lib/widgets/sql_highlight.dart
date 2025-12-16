@@ -33,7 +33,6 @@ TextSpan getSQLHighlightTextSpan(String text, {TextStyle? defalutStyle}) {
   return TextSpan(
       children: Lexer(text)
           .tokens()
-          .map<TextSpan>((tok) => TextSpan(
-              text: tok.content, style: getStyle(tok.id) ?? defalutStyle))
+          .map<TextSpan>((tok) => TextSpan(text: tok.content, style: getStyle(tok.id) ?? defalutStyle,))
           .toList());
 }

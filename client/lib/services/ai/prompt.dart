@@ -26,8 +26,7 @@ String genChatSystemPrompt(SessionAIChatModel model) {
   final tables = model.chatModel.tables[model.currentSchema ?? ""];
   // 通过metadata build table 信息
   final schema = MetaDataNode(MetaType.instance, "", items: model.metadata);
-  final schemaNodes =
-      schema.getChildren(MetaType.schema, model.currentSchema ?? "");
+  final schemaNodes = schema.getChildren(MetaType.schema, model.currentSchema ?? "");
 
   if (tables == null || tables.isEmpty || schemaNodes.isEmpty) {
     return prompt.replaceAll("{tables}", "");
@@ -40,8 +39,7 @@ String genChatSystemPrompt(SessionAIChatModel model) {
     return false;
   });
 
-  return prompt.replaceAll(
-      "{tables}", tableInfos.map((e) => e.toString()).join("\n"));
+  return prompt.replaceAll("{tables}", tableInfos.map((e) => e.toString()).join("\n"));
 }
 
 // 导入任务的文件命名
@@ -67,7 +65,8 @@ tips:
 """;
 
 String getExportDataFileRenamePrompt(ExportDataParameters parameters, String language) {
-  return exportDataFileRenameTemplate.replaceAll("{sql}", parameters.query)
+  return exportDataFileRenameTemplate
+      .replaceAll("{sql}", parameters.query)
       .replaceAll("{schemaName}", parameters.schema)
       .replaceAll("{currentTime}", DateTime.now().toIso8601String())
       .replaceAll("{language}", language);

@@ -38,8 +38,7 @@ class AIChatService extends _$AIChatService {
     // todo: 感觉替换的方式有点重，不太优雅。
     List<AIChatMessageModel> messages;
     // 先移除最后一条assistant消息（如果有）
-    if (model.messages.isNotEmpty &&
-        model.messages.last.role == AIRole.assistant) {
+    if (model.messages.isNotEmpty && model.messages.last.role == AIRole.assistant) {
       messages = model.messages.sublist(0, model.messages.length - 1);
     } else {
       messages = List.from(model.messages);
@@ -57,8 +56,7 @@ class AIChatService extends _$AIChatService {
   }
 
   /// 进行AI对话，请求接口，存储消息并刷新使用 provider 来动态刷新页面
-  Future<void> chat(AIChatId id, LLMAgentId agentId, String systemPrompt,
-      {String? message}) async {
+  Future<void> chat(AIChatId id, LLMAgentId agentId, String systemPrompt, {String? message}) async {
     final repo = ref.read(aiChatRepoProvider);
     final model = repo.getAIChatById(id);
     if (model == null) {
@@ -67,10 +65,10 @@ class AIChatService extends _$AIChatService {
 
     // 1.如果有则更新用户提问的消息
     if (message != null) {
-      ref.read(aiChatRepoProvider).updateMessages(id, [
-        ..._getChatMessage(id),
-        AIChatMessageModel(role: AIRole.user, content: message)
-      ]);
+      ref.read(aiChatRepoProvider).updateMessages(
+        id,
+        [..._getChatMessage(id), AIChatMessageModel(role: AIRole.user, content: message)],
+      );
     }
 
     _updateState(id, AIChatState.waiting);
@@ -85,21 +83,18 @@ class AIChatService extends _$AIChatService {
 
     try {
       // 2. 调用LLM接口
-      final chatStream =
-          agent.callStream(agentId, systemPrompt, _getChatMessage(id));
+      final chatStream = agent.callStream(agentId, systemPrompt, _getChatMessage(id));
 
       // 3. 更新消息
       await for (final event in chatStream) {
         switch (event) {
           case TextDeltaEvent(delta: final delta):
-            lastMessage =
-                lastMessage!.copyWith(content: lastMessage.content + delta);
+            lastMessage = lastMessage!.copyWith(content: lastMessage.content + delta);
             _updateLastMessage(id, lastMessage);
             break;
 
           case ThinkingDeltaEvent(delta: final delta):
-            lastMessage = lastMessage!
-                .copyWith(thinking: (lastMessage.thinking ?? "") + delta);
+            lastMessage = lastMessage!.copyWith(thinking: (lastMessage.thinking ?? "") + delta);
             _updateLastMessage(id, lastMessage);
             break;
 
@@ -124,8 +119,7 @@ class AIChatService extends _$AIChatService {
     }
   }
 
-  void retryChat(AIChatId id, LLMAgentId agentId, String systemPrompt,
-      AIChatMessageModel retryMessage) {
+  void retryChat(AIChatId id, LLMAgentId agentId, String systemPrompt, AIChatMessageModel retryMessage) {
     // 先把当前及其后面的message 删除, 然后重新chat
     final messages = _getChatMessage(id);
     final index = messages.indexOf(retryMessage);

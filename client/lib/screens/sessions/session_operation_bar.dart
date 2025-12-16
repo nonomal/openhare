@@ -24,13 +24,11 @@ class SessionOpBar extends ConsumerWidget {
   final CodeLineEditingController codeController;
   final double height;
 
-  const SessionOpBar({Key? key, required this.codeController, this.height = 36})
-      : super(key: key);
+  const SessionOpBar({Key? key, required this.codeController, this.height = 36}) : super(key: key);
 
   String getQuery() {
     var content = codeController.text.toString();
-    List<SQLChunk> querys =
-        Splitter(content, ";", skipWhitespace: true, skipComment: true).split();
+    List<SQLChunk> querys = Splitter(content, ";", skipWhitespace: true, skipComment: true).split();
     CodeLineSelection s = codeController.selection;
     String query;
     // 当界面手动选中了文本片段则仅执行该片段，当前还不支持多SQL执行.
@@ -49,8 +47,7 @@ class SessionOpBar extends ConsumerWidget {
     return query.trim();
   }
 
-  void disconnectDialog(
-      BuildContext context, WidgetRef ref, SessionOpBarModel model) {
+  void disconnectDialog(BuildContext context, WidgetRef ref, SessionOpBarModel model) {
     // 如果正在执行语句，则提示连接繁忙，请稍后执行
     if (SQLConnectState.isBusy(model.state)) {
       return doActionDialog(
@@ -60,8 +57,7 @@ class SessionOpBar extends ConsumerWidget {
         () {
           // do nothing, just close the dialog
         },
-        icon: Icon(Icons.warning_amber_rounded,
-            color: Theme.of(context).colorScheme.error),
+        icon: Icon(Icons.warning_amber_rounded, color: Theme.of(context).colorScheme.error),
       );
     }
     return doActionDialog(
@@ -69,17 +65,13 @@ class SessionOpBar extends ConsumerWidget {
       AppLocalizations.of(context)!.tip_disconnect,
       AppLocalizations.of(context)!.tip_disconnect_desc,
       () async {
-        await ref
-            .read(sessionsServicesProvider.notifier)
-            .disconnectSession(model.sessionId);
+        await ref.read(sessionsServicesProvider.notifier).disconnectSession(model.sessionId);
       },
-      icon: Icon(Icons.link_off_rounded,
-          color: Theme.of(context).colorScheme.error),
+      icon: Icon(Icons.link_off_rounded, color: Theme.of(context).colorScheme.error),
     );
   }
 
-  void connectDialog(
-      BuildContext context, WidgetRef ref, SessionOpBarModel model) {
+  void connectDialog(BuildContext context, WidgetRef ref, SessionOpBarModel model) {
     // 如果是connIsBusy，则提示连接繁忙，请稍后执行
     if (SQLConnectState.isBusy(model.state)) {
       return doActionDialog(
@@ -89,8 +81,7 @@ class SessionOpBar extends ConsumerWidget {
         () {
           // do nothing, just close the dialog
         },
-        icon: Icon(Icons.warning_amber_rounded,
-            color: Theme.of(context).colorScheme.error),
+        icon: Icon(Icons.warning_amber_rounded, color: Theme.of(context).colorScheme.error),
       );
     }
     // 如果是connIsDisconnected，则提示连接未建立，请先连接
@@ -99,26 +90,20 @@ class SessionOpBar extends ConsumerWidget {
       AppLocalizations.of(context)!.tip_connect,
       AppLocalizations.of(context)!.tip_connect_desc,
       () async {
-        await ref
-            .read(sessionsServicesProvider.notifier)
-            .connectSession(model.sessionId);
+        await ref.read(sessionsServicesProvider.notifier).connectSession(model.sessionId);
       },
-      icon: Icon(Icons.link_rounded,
-          color: Theme.of(context).colorScheme.primary),
+      icon: Icon(Icons.link_rounded, color: Theme.of(context).colorScheme.primary),
     );
   }
 
-  Widget connectWidget(
-      BuildContext context, WidgetRef ref, SessionOpBarModel model) {
+  Widget connectWidget(BuildContext context, WidgetRef ref, SessionOpBarModel model) {
     if (SQLConnectState.isDisconnected(model.state)) {
       return RectangleIconButton.medium(
         tooltip: AppLocalizations.of(context)!.button_tooltip_connect,
         icon: Icons.link_rounded,
         iconColor: Theme.of(context).primaryColor,
         onPressed: () async {
-          await ref
-              .read(sessionsServicesProvider.notifier)
-              .connectSession(model.sessionId);
+          await ref.read(sessionsServicesProvider.notifier).connectSession(model.sessionId);
         },
       );
     } else if (SQLConnectState.isConnecting(model.state)) {
@@ -136,20 +121,16 @@ class SessionOpBar extends ConsumerWidget {
     }
   }
 
-  Widget executeWidget(
-      BuildContext context, WidgetRef ref, SessionOpBarModel model) {
+  Widget executeWidget(BuildContext context, WidgetRef ref, SessionOpBarModel model) {
     return RectangleIconButton.medium(
       tooltip: AppLocalizations.of(context)!.button_tooltip_run_sql,
       icon: Icons.play_circle_outline_rounded,
-      iconColor:
-          SQLConnectState.isIdle(model.state) ? Colors.green : Colors.grey,
+      iconColor: SQLConnectState.isIdle(model.state) ? Colors.green : Colors.grey,
       onPressed: SQLConnectState.isIdle(model.state)
           ? () {
               String query = getQuery();
               if (query.isNotEmpty) {
-                ref
-                    .read(sQLResultsServicesProvider.notifier)
-                    .query(model.sessionId, query);
+                ref.read(sQLResultsServicesProvider.notifier).query(model.sessionId, query);
               }
             }
           : () {
@@ -158,21 +139,17 @@ class SessionOpBar extends ConsumerWidget {
     );
   }
 
-  Widget executeAddWidget(
-      BuildContext context, WidgetRef ref, SessionOpBarModel model) {
+  Widget executeAddWidget(BuildContext context, WidgetRef ref, SessionOpBarModel model) {
     return Stack(alignment: Alignment.center, children: [
       RectangleIconButton.medium(
         tooltip: AppLocalizations.of(context)!.button_tooltip_run_sql_new_tab,
         icon: Icons.not_started_outlined,
-        iconColor:
-            SQLConnectState.isIdle(model.state) ? Colors.green : Colors.grey,
+        iconColor: SQLConnectState.isIdle(model.state) ? Colors.green : Colors.grey,
         onPressed: SQLConnectState.isIdle(model.state)
             ? () {
                 String query = getQuery();
                 if (query.isNotEmpty) {
-                  ref
-                      .read(sQLResultsServicesProvider.notifier)
-                      .queryAddResult(model.sessionId, query);
+                  ref.read(sQLResultsServicesProvider.notifier).queryAddResult(model.sessionId, query);
                 }
               }
             : () {
@@ -182,21 +159,16 @@ class SessionOpBar extends ConsumerWidget {
     ]);
   }
 
-  Widget explainWidget(
-      BuildContext context, WidgetRef ref, SessionOpBarModel model) {
+  Widget explainWidget(BuildContext context, WidgetRef ref, SessionOpBarModel model) {
     return RectangleIconButton.medium(
       tooltip: AppLocalizations.of(context)!.button_tooltip_explain_sql,
       icon: Icons.poll_outlined,
-      iconColor: SQLConnectState.isIdle(model.state)
-          ? const Color.fromARGB(255, 241, 192, 84)
-          : Colors.grey,
+      iconColor: SQLConnectState.isIdle(model.state) ? const Color.fromARGB(255, 241, 192, 84) : Colors.grey,
       onPressed: SQLConnectState.isIdle(model.state)
           ? () {
               String query = getQuery();
               if (query.isNotEmpty) {
-                ref
-                    .read(sQLResultsServicesProvider.notifier)
-                    .queryAddResult(model.sessionId, "explain $query");
+                ref.read(sQLResultsServicesProvider.notifier).queryAddResult(model.sessionId, "explain $query");
               }
             }
           : () {
@@ -212,16 +184,12 @@ class SessionOpBar extends ConsumerWidget {
       iconColor: Colors.green,
       verticalOffset: 1,
       onPressed: () {
-        showExportDataDialog(context,
-            instanceId: model.instanceId!,
-            schema: model.currentSchema,
-            query: getQuery());
+        showExportDataDialog(context, instanceId: model.instanceId!, schema: model.currentSchema, query: getQuery());
       },
     );
   }
 
-  Widget taskOverviewWidget(
-      BuildContext context, WidgetRef ref, SessionOpBarModel model) {
+  Widget taskOverviewWidget(BuildContext context, WidgetRef ref, SessionOpBarModel model) {
     final l10n = AppLocalizations.of(context)!;
 
     final childWidget = model.runningTaskCount > 0
@@ -238,16 +206,13 @@ class SessionOpBar extends ConsumerWidget {
     );
   }
 
-  Widget saveWidget(
-      BuildContext context, WidgetRef ref, SessionOpBarModel model) {
+  Widget saveWidget(BuildContext context, WidgetRef ref, SessionOpBarModel model) {
     return RectangleIconButton.medium(
       tooltip: AppLocalizations.of(context)!.button_tooltip_save,
       icon: Icons.save,
       iconColor: Theme.of(context).colorScheme.onSurface,
       onPressed: () {
-        ref
-            .read(sessionSQLEditorServiceProvider(model.sessionId).notifier)
-            .saveCode();
+        ref.read(sessionSQLEditorServiceProvider(model.sessionId).notifier).saveCode();
       },
     );
   }
@@ -265,8 +230,7 @@ class SessionOpBar extends ConsumerWidget {
 
     if (model == null) {
       return Container(
-        color:
-            Theme.of(context).colorScheme.surfaceContainerLowest, // op bar 背景色
+        color: Theme.of(context).colorScheme.surfaceContainerLowest, // op bar 背景色
         constraints: BoxConstraints(maxHeight: height),
         child: const Spacer(),
       );
@@ -350,13 +314,10 @@ class _SchemaBarState extends ConsumerState<SchemaBar> {
               return;
             }
             final position = detail.globalPosition;
-            final RenderBox overlay =
-                Overlay.of(context).context.findRenderObject() as RenderBox;
+            final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
             final overlayPos = overlay.localToGlobal(Offset.zero);
 
-            List<String>? schemas = await ref
-                .read(instancesServicesProvider.notifier)
-                .getSchemas(widget.instanceId!);
+            List<String>? schemas = await ref.read(instancesServicesProvider.notifier).getSchemas(widget.instanceId!);
 
             // todo
             showMenu(
@@ -371,16 +332,13 @@ class _SchemaBarState extends ConsumerState<SchemaBar> {
                   return PopupMenuItem<String>(
                       height: 30,
                       onTap: () async {
-                        await ref
-                            .read(sessionConnsServicesProvider.notifier)
-                            .setCurrentSchema(widget.connId!, schema);
+                        await ref.read(sessionConnsServicesProvider.notifier).setCurrentSchema(widget.connId!, schema);
                       },
                       child: Text(schema, overflow: TextOverflow.ellipsis));
                 }).toList());
           },
           child: Container(
-              padding:
-                  const EdgeInsets.fromLTRB(0, kSpacingTiny, 0, kSpacingTiny),
+              padding: const EdgeInsets.fromLTRB(0, kSpacingTiny, 0, kSpacingTiny),
               child: Row(
                 children: [
                   HugeIcon(
@@ -414,8 +372,7 @@ class SessionDrawerBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final model = ref.watch(sessionDrawerProvider);
-    final services =
-        ref.read(sessionDrawerServicesProvider(model.sessionId).notifier);
+    final services = ref.read(sessionDrawerServicesProvider(model.sessionId).notifier);
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -423,21 +380,18 @@ class SessionDrawerBar extends ConsumerWidget {
         const Spacer(),
         if (model.isRightPageOpen) ...[
           RectangleIconButton.medium(
-              tooltip:
-                  AppLocalizations.of(context)!.button_tooltip_metadata_tree,
+              tooltip: AppLocalizations.of(context)!.button_tooltip_metadata_tree,
               icon: Icons.account_tree_outlined,
-              backgroundColor: (model.drawerPage == DrawerPage.metadataTree)
-                  ? Theme.of(context).colorScheme.primaryContainer
-                  : null,
+              backgroundColor:
+                  (model.drawerPage == DrawerPage.metadataTree) ? Theme.of(context).colorScheme.primaryContainer : null,
               onPressed: () {
                 services.goToTree();
               }),
           RectangleIconButton.medium(
               tooltip: AppLocalizations.of(context)!.button_tooltip_sql_result,
               icon: Icons.article_outlined,
-              backgroundColor: (model.drawerPage == DrawerPage.sqlResult)
-                  ? Theme.of(context).colorScheme.primaryContainer
-                  : null,
+              backgroundColor:
+                  (model.drawerPage == DrawerPage.sqlResult) ? Theme.of(context).colorScheme.primaryContainer : null,
               onPressed: () {
                 services.showSQLResult();
               }),
@@ -445,9 +399,8 @@ class SessionDrawerBar extends ConsumerWidget {
           RectangleIconButton.medium(
               tooltip: AppLocalizations.of(context)!.button_tooltip_ai_chat,
               icon: Icons.auto_awesome,
-              backgroundColor: (model.drawerPage == DrawerPage.aiChat)
-                  ? Theme.of(context).colorScheme.primaryContainer
-                  : null,
+              backgroundColor:
+                  (model.drawerPage == DrawerPage.aiChat) ? Theme.of(context).colorScheme.primaryContainer : null,
               onPressed: () {
                 services.showChat();
               }),

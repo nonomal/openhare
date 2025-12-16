@@ -20,14 +20,11 @@ class ExportDataTaskOverviewItem extends ConsumerWidget {
     required TaskModel task,
   }) : exportData = ExportDataModel.fromModel(task);
 
-  bool get canOpenFile =>
-      exportData.status == TaskStatus.completed &&
-      exportData.parameters != null;
+  bool get canOpenFile => exportData.status == TaskStatus.completed && exportData.parameters != null;
 
   String? get fileName => exportData.parameters?.fileName;
 
-  String? get filePath =>
-      canOpenFile ? exportData.parameters!.exportFilePath : null;
+  String? get filePath => canOpenFile ? exportData.parameters!.exportFilePath : null;
 
   String _statusLabel(BuildContext context, TaskStatus status) {
     final l10n = AppLocalizations.of(context)!;
@@ -98,11 +95,10 @@ class ExportDataTaskOverviewItem extends ConsumerWidget {
                           fileName ?? '-',
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: colorScheme.primary,
-                                    decoration: TextDecoration.underline,
-                                  ),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                              ),
                         ),
                       )
                     : Text(
@@ -115,29 +111,20 @@ class ExportDataTaskOverviewItem extends ConsumerWidget {
                 // 状态・时间・任务详情（状态有颜色，时间和详情灰色，用"・"分隔）
                 Row(
                   children: [
-                    exportData.status == TaskStatus.failed &&
-                            exportData.errorMessage != null
+                    exportData.status == TaskStatus.failed && exportData.errorMessage != null
                         ? Tooltip(
                             message: exportData.errorMessage!,
                             child: Text(
                               _getStatusText(context),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: _getStatusColor(
-                                        context, exportData.status),
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: _getStatusColor(context, exportData.status),
                                   ),
                             ),
                           )
                         : Text(
                             _getStatusText(context),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(
-                                  color: _getStatusColor(
-                                      context, exportData.status),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: _getStatusColor(context, exportData.status),
                                 ),
                           ),
                     Text(
@@ -155,25 +142,20 @@ class ExportDataTaskOverviewItem extends ConsumerWidget {
                           '・${exportData.progressMessage}',
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onSurfaceVariant
-                                        .withOpacity(0.6),
-                                  ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant.withOpacity(0.6),
+                              ),
                         ),
                       )
-                    else if (exportData.desc != null &&
-                        exportData.desc!.isNotEmpty)
+                    else if (exportData.desc != null && exportData.desc!.isNotEmpty)
                       Flexible(
                         child: Text(
                           '・${exportData.desc}',
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onSurfaceVariant
-                                        .withOpacity(0.6),
-                                  ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant.withOpacity(0.6),
+                              ),
                         ),
                       ),
                   ],

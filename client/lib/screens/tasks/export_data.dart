@@ -18,8 +18,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class _NoScrollbarBehavior extends ScrollBehavior {
   @override
-  Widget buildScrollbar(
-      BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
     return child;
   }
 }
@@ -52,12 +51,10 @@ class _ExportDataDialogContent extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<_ExportDataDialogContent> createState() =>
-      _ExportDataDialogContentState();
+  ConsumerState<_ExportDataDialogContent> createState() => _ExportDataDialogContentState();
 }
 
-class _ExportDataDialogContentState
-    extends ConsumerState<_ExportDataDialogContent> {
+class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogContent> {
   bool _isGenerating = false;
   String? _errorMessage;
   late final TextEditingController dirController;
@@ -71,8 +68,7 @@ class _ExportDataDialogContentState
     super.initState();
     // 填充文件名
     fileNameController = TextEditingController(
-      text:
-          'export-${DateTime.now().toIso8601String().split('.').first.replaceAll(':', '-')}.csv',
+      text: 'export-${DateTime.now().toIso8601String().split('.').first.replaceAll(':', '-')}.csv',
     );
     // 自动填充目录, 确保有权限访问
     final latestTask = ref.read(latestExportTaskProvider);
@@ -151,9 +147,7 @@ class _ExportDataDialogContentState
       final parameters = _getExportDataParameters();
 
       // 调用AI生成文件名和描述
-      final result = await ref
-          .read(lLMAgentServiceProvider.notifier)
-          .generateExportFileName(
+      final result = await ref.read(lLMAgentServiceProvider.notifier).generateExportFileName(
             lastUsedAgent.id,
             parameters,
           );
@@ -172,8 +166,7 @@ class _ExportDataDialogContentState
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = AppLocalizations.of(context)!
-              .error_generate_file_name_failed(e.toString());
+          _errorMessage = AppLocalizations.of(context)!.error_generate_file_name_failed(e.toString());
         });
       }
     } finally {
@@ -220,9 +213,7 @@ class _ExportDataDialogContentState
                       color: colorScheme.onSurfaceVariant,
                     ),
                     children: [
-                      TextSpan(
-                          text: AppLocalizations.of(context)!
-                              .export_data_exporting),
+                      TextSpan(text: AppLocalizations.of(context)!.export_data_exporting),
                       const TextSpan(text: ' '),
                       TextSpan(
                         text: widget.schema,
@@ -231,9 +222,7 @@ class _ExportDataDialogContentState
                           color: colorScheme.onSurface,
                         ),
                       ),
-                      TextSpan(
-                          text:
-                              ' ${AppLocalizations.of(context)!.export_data_schema_sql}'),
+                      TextSpan(text: ' ${AppLocalizations.of(context)!.export_data_schema_sql}'),
                     ],
                   ),
                 ),
@@ -263,8 +252,7 @@ class _ExportDataDialogContentState
     );
   }
 
-  Widget _buildFileNameSuffixIcons(
-      BuildContext context, ColorScheme colorScheme) {
+  Widget _buildFileNameSuffixIcons(BuildContext context, ColorScheme colorScheme) {
     return Container(
       padding: const EdgeInsets.only(right: kSpacingTiny),
       width: kIconButtonSizeSmall + kIconButtonSizeMedium + kSpacingTiny,
@@ -281,8 +269,7 @@ class _ExportDataDialogContentState
               ? const Loading.medium()
               : RectangleIconButton.medium(
                   icon: Icons.auto_awesome,
-                  tooltip: AppLocalizations.of(context)!
-                      .tooltip_ai_generate_file_name,
+                  tooltip: AppLocalizations.of(context)!.tooltip_ai_generate_file_name,
                   iconColor: Colors.purple[600]!,
                   onPressed: _generateFileNameWithAI,
                 ),
@@ -355,8 +342,7 @@ class _ExportDataDialogContentState
               autovalidateMode: AutovalidateMode.onUserInteraction,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return AppLocalizations.of(context)!
-                      .export_data_directory_required;
+                  return AppLocalizations.of(context)!.export_data_directory_required;
                 }
                 // 使用工具函数验证目录路径
                 final error = checkDirectoryAccessible(value.trim());
@@ -379,15 +365,13 @@ class _ExportDataDialogContentState
               },
               decoration: _buildInputDecoration(
                 colorScheme,
-                labelText:
-                    AppLocalizations.of(context)!.export_data_directory_label,
+                labelText: AppLocalizations.of(context)!.export_data_directory_label,
                 required: true,
                 suffixIcon: Padding(
                   padding: const EdgeInsets.only(right: 5),
                   child: RectangleIconButton.medium(
                     icon: Icons.folder_open,
-                    tooltip:
-                        AppLocalizations.of(context)!.tooltip_select_directory,
+                    tooltip: AppLocalizations.of(context)!.tooltip_select_directory,
                     iconColor: colorScheme.primary,
                     onPressed: _selectDirectory,
                   ),
@@ -402,8 +386,7 @@ class _ExportDataDialogContentState
               autovalidateMode: AutovalidateMode.onUserInteraction,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return AppLocalizations.of(context)!
-                      .export_data_file_name_required;
+                  return AppLocalizations.of(context)!.export_data_file_name_required;
                 }
                 return null;
               },

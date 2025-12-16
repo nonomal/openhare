@@ -36,11 +36,9 @@ class InstancesServices extends _$InstancesServices {
     return repo.isInstanceExist(name);
   }
 
-  PaginationInstanceListModel instances(String key,
-      {int? pageNumber, int? pageSize}) {
+  PaginationInstanceListModel instances(String key, {int? pageNumber, int? pageSize}) {
     final repo = ref.read(instanceRepoProvider);
-    final instances =
-        repo.search(key, pageNumber: pageNumber, pageSize: pageSize);
+    final instances = repo.search(key, pageNumber: pageNumber, pageSize: pageSize);
     final count = repo.count(key: key);
     final totalCount = repo.count();
 
@@ -57,9 +55,7 @@ class InstancesServices extends _$InstancesServices {
   Future<void> addActiveInstance(InstanceId instanceId, {String? schema}) async {
     await ref.read(instanceRepoProvider).addActiveInstance(instanceId);
     if (schema != null) {
-      await ref
-          .read(instanceRepoProvider)
-          .addInstanceActiveSchema(instanceId, schema);
+      await ref.read(instanceRepoProvider).addInstanceActiveSchema(instanceId, schema);
     }
   }
 
@@ -78,19 +74,22 @@ class InstancesServices extends _$InstancesServices {
 class InstancesNotifier extends _$InstancesNotifier {
   @override
   PaginationInstanceListModel build() {
-    return ref
-        .read(instancesServicesProvider.notifier)
-        .instances("", pageNumber: 1, pageSize: 10);
+    return ref.read(instancesServicesProvider.notifier).instances("", pageNumber: 1, pageSize: 10);
   }
 
   void changePage(String key, {int? pageNumber = 1, int? pageSize = 10}) {
-    state = ref
-        .read(instancesServicesProvider.notifier)
-        .instances(key, pageNumber: pageNumber, pageSize: pageSize);
+    state = ref.read(instancesServicesProvider.notifier).instances(
+          key,
+          pageNumber: pageNumber,
+          pageSize: pageSize,
+        );
   }
 
   void refresh() {
-    state = ref.read(instancesServicesProvider.notifier).instances(state.key,
-        pageNumber: state.currentPage, pageSize: state.pageSize);
+    state = ref.read(instancesServicesProvider.notifier).instances(
+          state.key,
+          pageNumber: state.currentPage,
+          pageSize: state.pageSize,
+        );
   }
 }

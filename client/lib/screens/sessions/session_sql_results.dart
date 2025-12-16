@@ -27,15 +27,9 @@ class SqlResultTables extends ConsumerWidget {
       maxWidth: 100,
       minWidth: 90,
       labelAlign: TextAlign.center,
-      selectedColor: Theme.of(context)
-          .colorScheme
-          .surfaceContainer, // sql result tab 的选中颜色
-      color: Theme.of(context)
-          .colorScheme
-          .surfaceContainerLowest, // sql result tab 的背景色
-      hoverColor: Theme.of(context)
-          .colorScheme
-          .surfaceContainerLow, // sql result tab 的鼠标移入色
+      selectedColor: Theme.of(context).colorScheme.surfaceContainer, // sql result tab 的选中颜色
+      color: Theme.of(context).colorScheme.surfaceContainerLowest, // sql result tab 的背景色
+      hoverColor: Theme.of(context).colorScheme.surfaceContainerLow, // sql result tab 的鼠标移入色
     );
 
     Widget tab = Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
@@ -44,11 +38,9 @@ class SqlResultTables extends ConsumerWidget {
           height: 36,
           tabStyle: style,
           onReorder: (oldIndex, newIndex) {
-            final sqlResultsServices =
-                ref.read(sQLResultsServicesProvider.notifier);
+            final sqlResultsServices = ref.read(sQLResultsServicesProvider.notifier);
 
-            sqlResultsServices.reorderSQLResult(
-                model!.sessionId, oldIndex, newIndex);
+            sqlResultsServices.reorderSQLResult(model!.sessionId, oldIndex, newIndex);
           },
           tabs: (model != null)
               ? [
@@ -57,20 +49,15 @@ class SqlResultTables extends ConsumerWidget {
                       label: "${model.results[i].resultId.value}",
                       selected: model.results[i] == model.selected,
                       onTap: () {
-                        final sqlResultsServices =
-                            ref.read(sQLResultsServicesProvider.notifier);
+                        final sqlResultsServices = ref.read(sQLResultsServicesProvider.notifier);
 
-                        sqlResultsServices
-                            .selectSQLResult(model.results[i].resultId);
+                        sqlResultsServices.selectSQLResult(model.results[i].resultId);
                       },
                       onDeleted: () {
-                        final sqlResultsServices =
-                            ref.read(sQLResultsServicesProvider.notifier);
-                        sqlResultsServices
-                            .deleteSQLResult(model.results[i].resultId);
+                        final sqlResultsServices = ref.read(sQLResultsServicesProvider.notifier);
+                        sqlResultsServices.deleteSQLResult(model.results[i].resultId);
                       },
-                      avatar: (model.results[i] != model.selected &&
-                              model.results[i].state == SQLExecuteState.init)
+                      avatar: (model.results[i] != model.selected && model.results[i].state == SQLExecuteState.init)
                           ? const Loading.small()
                           : const Icon(
                               size: kIconSizeSmall,
@@ -133,8 +120,8 @@ class SqlResultTable extends ConsumerWidget {
       return DataGridRow(cells: <DataGridCell<BaseQueryValue>>[
         for (int i = 0; i < e.columns.length; i++)
           DataGridCell<BaseQueryValue>(
-            contentBuilder: (context) => Text(e.values[i].getSummary() ?? '',
-                maxLines: 1, style: Theme.of(context).textTheme.bodySmall),
+            contentBuilder: (context) =>
+                Text(e.values[i].getSummary() ?? '', maxLines: 1, style: Theme.of(context).textTheme.bodySmall),
           ),
       ]);
     }).toList();
@@ -145,17 +132,13 @@ class SqlResultTable extends ConsumerWidget {
       builder: (context, constraints) {
         const maxWidth = 64 + kSpacingSmall;
         const maxHeight = 64 + kSpacingSmall;
-        if (constraints.maxWidth < maxWidth ||
-            constraints.maxHeight < maxHeight) {
+        if (constraints.maxWidth < maxWidth || constraints.maxHeight < maxHeight) {
           return const SizedBox.shrink();
         }
         return EmptyPage(
           child: Text(
             AppLocalizations.of(context)!.display_msg_no_data,
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(color: Theme.of(context).colorScheme.surfaceDim),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.surfaceDim),
           ),
         );
       },
@@ -166,23 +149,19 @@ class SqlResultTable extends ConsumerWidget {
     // 监听父容器大小，小于内容高度则隐藏
     return LayoutBuilder(
       builder: (context, constraints) {
-        const maxHeight =
-            kIconSizeLarge + kSpacingMedium + 20.0 + kSpacingSmall * 2;
+        const maxHeight = kIconSizeLarge + kSpacingMedium + 20.0 + kSpacingSmall * 2;
         const maxWidth = kIconSizeLarge + kSpacingLarge * 2;
-        if (constraints.maxHeight < maxHeight ||
-            constraints.maxWidth < maxWidth) {
+        if (constraints.maxHeight < maxHeight || constraints.maxWidth < maxWidth) {
           // 父容器太小，隐藏内容
           return const SizedBox.shrink();
         }
         return Padding(
-          padding: const EdgeInsets.fromLTRB(
-              kSpacingLarge, kSpacingSmall, kSpacingLarge, kSpacingSmall),
+          padding: const EdgeInsets.fromLTRB(kSpacingLarge, kSpacingSmall, kSpacingLarge, kSpacingSmall),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error,
-                    size: kIconSizeLarge, color: Colors.red),
+                const Icon(Icons.error, size: kIconSizeLarge, color: Colors.red),
                 const SizedBox(height: kSpacingMedium),
                 TooltipText(text: '${model.error}${model.query}'),
               ],
@@ -193,14 +172,12 @@ class SqlResultTable extends ConsumerWidget {
     );
   }
 
-  Widget buildWaitingBody(
-      BuildContext context, WidgetRef ref, SQLResultDetailModel model) {
+  Widget buildWaitingBody(BuildContext context, WidgetRef ref, SQLResultDetailModel model) {
     return LayoutBuilder(
       builder: (context, constraints) {
         const maxHeight = kIconButtonSizeLarge + kSpacingMedium + 40;
         const maxWidth = kIconButtonSizeLarge + 80;
-        if (constraints.maxHeight < maxHeight ||
-            constraints.maxWidth < maxWidth) {
+        if (constraints.maxHeight < maxHeight || constraints.maxWidth < maxWidth) {
           return const SizedBox.shrink();
         }
         return Container(
@@ -214,16 +191,14 @@ class SqlResultTable extends ConsumerWidget {
                 const SizedBox(height: kSpacingMedium),
                 FilledButton(
                     onPressed: () async {
-                      SessionModel? sessionModel = ref
-                          .read(sessionsServicesProvider.notifier)
-                          .getSession(model.resultId.sessionId);
+                      SessionModel? sessionModel = ref.read(sessionsServicesProvider.notifier).getSession(
+                            model.resultId.sessionId,
+                          );
 
                       if (sessionModel == null || sessionModel.connId == null) {
                         return;
                       }
-                      await ref
-                          .read(sessionConnsServicesProvider.notifier)
-                          .killQuery(sessionModel.connId!);
+                      await ref.read(sessionConnsServicesProvider.notifier).killQuery(sessionModel.connId!);
                     },
                     child: Text(AppLocalizations.of(context)!.cancel))
               ],
@@ -254,14 +229,9 @@ class SqlResultTable extends ConsumerWidget {
         horizontalScrollGroup: controller.horizontalScrollGroup,
         verticalController: controller.verticalController,
         onCellTap: (postion) {
-          ref
-              .read(sessionDrawerServicesProvider(model.resultId.sessionId)
-                  .notifier)
-              .showSQLResult(
-                result: model
-                    .data!.rows[postion.rowIndex].values[postion.columnIndex],
-                column: model
-                    .data!.rows[postion.rowIndex].columns[postion.columnIndex],
+          ref.read(sessionDrawerServicesProvider(model.resultId.sessionId).notifier).showSQLResult(
+                result: model.data!.rows[postion.rowIndex].values[postion.columnIndex],
+                column: model.data!.rows[postion.rowIndex].columns[postion.columnIndex],
               );
         },
       );

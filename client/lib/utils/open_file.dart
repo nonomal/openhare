@@ -2,9 +2,9 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 /// 使用系统默认程序打开文件
-/// 
+///
 /// [path] 文件路径
-/// 
+///
 /// 返回 `true` 表示成功，`false` 表示文件不存在或操作失败
 /// 抛出异常表示不支持的操作系统或其他错误
 Future<bool> openFile(String path) async {
@@ -31,9 +31,9 @@ Future<bool> openFile(String path) async {
 }
 
 /// 在文件管理器中打开文件所在文件夹并选中文件
-/// 
+///
 /// [filePath] 文件路径
-/// 
+///
 /// 返回 `true` 表示成功，`false` 表示文件不存在或操作失败
 /// 抛出异常表示不支持的操作系统或其他错误
 Future<bool> openFileInFolder(String filePath) async {
@@ -69,4 +69,3 @@ Future<bool> openFileInFolder(String filePath) async {
     throw UnsupportedError('不支持的操作系统: ${Platform.operatingSystem}');
   }
 }
-

@@ -12,8 +12,7 @@ import 'package:client/l10n/app_localizations.dart';
 class SessionTabs extends ConsumerWidget {
   const SessionTabs({Key? key}) : super(key: key);
 
-  void closeSessionDialog(BuildContext context, WidgetRef ref,
-      SessionDetailListModel model, int index) {
+  void closeSessionDialog(BuildContext context, WidgetRef ref, SessionDetailListModel model, int index) {
     // 如果正在执行语句，则提示连接繁忙，请稍后执行
     final state = model.sessions[index].connState;
     if (SQLConnectState.isBusy(state) || SQLConnectState.isConnected(state)) {
@@ -22,12 +21,9 @@ class SessionTabs extends ConsumerWidget {
         AppLocalizations.of(context)!.tip_close_session,
         AppLocalizations.of(context)!.tip_close_session_desc,
         () {
-          ref
-              .read(sessionsServicesProvider.notifier)
-              .deleteSessionByIndex(index);
+          ref.read(sessionsServicesProvider.notifier).deleteSessionByIndex(index);
         },
-        icon: Icon(Icons.warning_amber_rounded,
-            color: Theme.of(context).colorScheme.error),
+        icon: Icon(Icons.warning_amber_rounded, color: Theme.of(context).colorScheme.error),
       );
     } else {
       ref.read(sessionsServicesProvider.notifier).deleteSessionByIndex(index);
@@ -45,24 +41,16 @@ class SessionTabs extends ConsumerWidget {
             child: CommonTabBar(
               tabStyle: CommonTabStyle(
                 minWidth: 90,
-                color: Theme.of(context)
-                    .colorScheme
-                    .surfaceContainerLow, // session tab 背景色
-                selectedColor: Theme.of(context)
-                    .colorScheme
-                    .surfaceContainerHigh, // session tab 选择的颜色
-                hoverColor: Theme.of(context)
-                    .colorScheme
-                    .surfaceContainer, // session tab 鼠标移入的颜色
+                color: Theme.of(context).colorScheme.surfaceContainerLow, // session tab 背景色
+                selectedColor: Theme.of(context).colorScheme.surfaceContainerHigh, // session tab 选择的颜色
+                hoverColor: Theme.of(context).colorScheme.surfaceContainer, // session tab 鼠标移入的颜色
                 borderRadius: const BorderRadius.all(Radius.circular(10)),
               ),
               addTab: () {
                 ref.read(sessionsServicesProvider.notifier).newSession();
               },
               onReorder: (oldIndex, newIndex) {
-                ref
-                    .read(sessionsServicesProvider.notifier)
-                    .reorderSession(oldIndex, newIndex);
+                ref.read(sessionsServicesProvider.notifier).reorderSession(oldIndex, newIndex);
               },
               tabs: [
                 for (var i = 0; i < model.sessions.length; i++)
@@ -70,25 +58,18 @@ class SessionTabs extends ConsumerWidget {
                       ? CommonTabWrap(
                           label: AppLocalizations.of(context)!.new_tab,
                           onTap: () {
-                            ref
-                                .read(sessionsServicesProvider.notifier)
-                                .selectSessionByIndex(i);
+                            ref.read(sessionsServicesProvider.notifier).selectSessionByIndex(i);
                           },
                           onDeleted: () {
                             closeSessionDialog(context, ref, model, i);
                           },
-                          selected: model.sessions[i].sessionId ==
-                              model.selectedSession?.sessionId,
+                          selected: model.sessions[i].sessionId == model.selectedSession?.sessionId,
                         )
                       : CommonTabWrap(
-                          avatar: (model.sessions[i].sessionId !=
-                                      model.selectedSession?.sessionId &&
-                                  SQLConnectState.isBusy(
-                                      model.sessions[i].connState))
+                          avatar: (model.sessions[i].sessionId != model.selectedSession?.sessionId &&
+                                  SQLConnectState.isBusy(model.sessions[i].connState))
                               ? const Loading.small()
-                              : Image.asset(
-                                  connectionMetaMap[model.sessions[i].dbType!]!
-                                      .logoAssertPath),
+                              : Image.asset(connectionMetaMap[model.sessions[i].dbType!]!.logoAssertPath),
                           label: model.sessions[i].instanceName!,
                           items: <PopupMenuEntry>[
                             PopupMenuItem<String>(
@@ -100,15 +81,12 @@ class SessionTabs extends ConsumerWidget {
                             ),
                           ],
                           onTap: () {
-                            ref
-                                .read(sessionsServicesProvider.notifier)
-                                .selectSessionByIndex(i);
+                            ref.read(sessionsServicesProvider.notifier).selectSessionByIndex(i);
                           },
                           onDeleted: () {
                             closeSessionDialog(context, ref, model, i);
                           },
-                          selected: model.sessions[i].sessionId ==
-                              model.selectedSession?.sessionId,
+                          selected: model.sessions[i].sessionId == model.selectedSession?.sessionId,
                         )
               ],
             ),

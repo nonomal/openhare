@@ -20,77 +20,71 @@ import 'package:client/l10n/app_localizations.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:client/screens/tasks/task.dart';
 
-final GlobalKey<NavigatorState> _rootNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'root');
-final GlobalKey<NavigatorState> _shellNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'shell');
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
+final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'shell');
 
 class App extends HookConsumerWidget {
   App({super.key});
 
   final GoRouter _router = GoRouter(
-      navigatorKey: _rootNavigatorKey,
-      initialLocation: '/sessions',
-      debugLogDiagnostics: true,
-      routes: [
-        GoRoute(
-          path: "/sessions",
-          pageBuilder: (context, state) =>
-              const NoTransitionPage<void>(child: SessionsPage()),
-        ),
-        GoRoute(
-          path: "/tasks",
-          pageBuilder: (context, state) =>
-              const NoTransitionPage<void>(child: TaskPage()),
-        ),
-        GoRoute(
-          path: '/settings',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage<void>(child: SettingsPage()),
-        ),
-        // About 页面
-        GoRoute(
-          path: '/about',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage<void>(child: AboutPage()),
-        ),
-        ShellRoute(
-            navigatorKey: _shellNavigatorKey,
-            pageBuilder:
-                (BuildContext context, GoRouterState state, Widget child) {
-              return NoTransitionPage<void>(child: child);
+    navigatorKey: _rootNavigatorKey,
+    initialLocation: '/sessions',
+    debugLogDiagnostics: true,
+    routes: [
+      GoRoute(
+        path: "/sessions",
+        pageBuilder: (context, state) => const NoTransitionPage<void>(child: SessionsPage()),
+      ),
+      GoRoute(
+        path: "/tasks",
+        pageBuilder: (context, state) => const NoTransitionPage<void>(child: TaskPage()),
+      ),
+      GoRoute(
+        path: '/settings',
+        pageBuilder: (context, state) => const NoTransitionPage<void>(child: SettingsPage()),
+      ),
+      // About 页面
+      GoRoute(
+        path: '/about',
+        pageBuilder: (context, state) => const NoTransitionPage<void>(child: AboutPage()),
+      ),
+      ShellRoute(
+        navigatorKey: _shellNavigatorKey,
+        pageBuilder: (BuildContext context, GoRouterState state, Widget child) {
+          return NoTransitionPage<void>(child: child);
+        },
+        routes: [
+          GoRoute(
+            path: "/instances",
+            redirect: (context, state) {
+              return lastInstancePage;
             },
-            routes: [
-              GoRoute(
-                path: "/instances",
-                redirect: (context, state) {
-                  return lastInstancePage;
-                },
-              ),
-              GoRoute(
-                path: '/instances/list',
-                pageBuilder: (context, state) {
-                  lastInstancePage = '/instances/list';
-                  return const NoTransitionPage<void>(child: InstancesPage());
-                },
-              ),
-              GoRoute(
-                path: '/instances/add',
-                pageBuilder: (context, state) {
-                  lastInstancePage = '/instances/add';
-                  return const NoTransitionPage<void>(child: AddInstancePage());
-                },
-              ),
-              GoRoute(
-                path: '/instances/update',
-                pageBuilder: (context, state) {
-                  lastInstancePage = '/instances/update';
-                  return const NoTransitionPage<void>(
-                      child: UpdateInstancePage());
-                },
-              ),
-            ]),
-      ]);
+          ),
+          GoRoute(
+            path: '/instances/list',
+            pageBuilder: (context, state) {
+              lastInstancePage = '/instances/list';
+              return const NoTransitionPage<void>(child: InstancesPage());
+            },
+          ),
+          GoRoute(
+            path: '/instances/add',
+            pageBuilder: (context, state) {
+              lastInstancePage = '/instances/add';
+              return const NoTransitionPage<void>(child: AddInstancePage());
+            },
+          ),
+          GoRoute(
+            path: '/instances/update',
+            pageBuilder: (context, state) {
+              lastInstancePage = '/instances/update';
+              return const NoTransitionPage<void>(child: UpdateInstancePage());
+            },
+          ),
+        ],
+      ),
+    ],
+  );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -136,9 +130,7 @@ class _ScaffoldWithNavRailState extends State<ScaffoldWithNavRail> {
         MoveWindows(
           child: NavigationRail(
             minWidth: navigationRailWidth,
-            backgroundColor: Theme.of(context)
-                .colorScheme
-                .surfaceContainerLow, // navigation color
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow, // navigation color
             useIndicator: true,
             selectedIndex: _calculateSelectedIndex(context),
             onDestinationSelected: (value) {
@@ -268,9 +260,7 @@ class _WindowListener with WindowListener {
   void onWindowClose() async {
     SessionListModel sessions = ref.read(sessionsServicesProvider);
     for (var session in sessions.sessions) {
-      ref
-          .read(sessionSQLEditorServiceProvider(session.sessionId).notifier)
-          .saveCode();
+      ref.read(sessionSQLEditorServiceProvider(session.sessionId).notifier).saveCode();
     }
     await windowManager.destroy();
   }

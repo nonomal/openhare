@@ -10,16 +10,12 @@ extension DateTimeFormat on DateTime {
     final timeStr = '${local.hour.toString().padLeft(2, '0')}:'
         '${local.minute.toString().padLeft(2, '0')}';
 
-    if (local.year == nowLocal.year &&
-        local.month == nowLocal.month &&
-        local.day == nowLocal.day) {
+    if (local.year == nowLocal.year && local.month == nowLocal.month && local.day == nowLocal.day) {
       return '${l10n.date_today} $timeStr';
     }
 
     final yesterday = nowLocal.subtract(const Duration(days: 1));
-    if (local.year == yesterday.year &&
-        local.month == yesterday.month &&
-        local.day == yesterday.day) {
+    if (local.year == yesterday.year && local.month == yesterday.month && local.day == yesterday.day) {
       return '${l10n.date_yesterday} $timeStr';
     }
 
@@ -44,9 +40,7 @@ extension DateTimeFormat on DateTime {
 
   String formatFullDateTime([BuildContext? context]) {
     final local = toLocal();
-    final locale = context != null
-        ? Localizations.localeOf(context).toString()
-        : 'en';
+    final locale = context != null ? Localizations.localeOf(context).toString() : 'en';
     return DateFormat.yMMMMd(locale).add_Hm().format(local);
   }
 }
@@ -81,4 +75,3 @@ extension TimeFormat on Duration {
     return "$hoursFormat$minutesFormat$secondsFormat";
   }
 }
-

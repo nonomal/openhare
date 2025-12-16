@@ -15,18 +15,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class SessionDrawerSqlResult extends ConsumerWidget {
   const SessionDrawerSqlResult({Key? key}) : super(key: key);
 
-  Widget buildDisplayField(
-      BuildContext context, SessionDrawerModel sessionDrawer) {
+  Widget buildDisplayField(BuildContext context, SessionDrawerModel sessionDrawer) {
     BaseQueryValue? result = sessionDrawer.sqlResult;
     if (result == null) {
       return EmptyPage(
         color: Theme.of(context).colorScheme.surfaceContainerLowest,
         child: Text(
           AppLocalizations.of(context)!.display_msg_no_result,
-          style: Theme.of(context)
-              .textTheme
-              .bodySmall
-              ?.copyWith(color: Theme.of(context).colorScheme.surfaceDim),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.surfaceDim),
         ),
       );
     }
@@ -38,9 +34,7 @@ class SessionDrawerSqlResult extends ConsumerWidget {
     if (dataType == DataType.blob) {
       List<int> bytes = result.getBytes();
       FileType fileType = getFileType(bytes);
-      if (fileType == FileType.gif ||
-          fileType == FileType.png ||
-          fileType == FileType.jpeg) {
+      if (fileType == FileType.gif || fileType == FileType.png || fileType == FileType.jpeg) {
         return Align(
           alignment: Alignment.topLeft,
           child: Image.memory(Uint8List.fromList(bytes)),
@@ -91,9 +85,9 @@ class ValueDisplayField extends StatelessWidget {
       style: CodeEditorStyle(
         codeTheme: language != null
             ? CodeHighlightTheme(
-                languages:
-                    Map.from({language: ValueDisplayField.languages[language]}),
-                theme: atomOneLightTheme)
+                languages: Map.from({language: ValueDisplayField.languages[language]}),
+                theme: atomOneLightTheme,
+              )
             : null,
       ),
       controller: controller,

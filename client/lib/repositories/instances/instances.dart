@@ -38,8 +38,7 @@ class InstanceStorage {
   String get stCustom => jsonEncode(custom);
 
   set stCustom(String value) {
-    custom =
-        jsonDecode(value).map((key, value) => MapEntry(key, value.toString()));
+    custom = jsonDecode(value).map((key, value) => MapEntry(key, value.toString()));
   }
 
   List<String> initQuerys;
@@ -86,8 +85,7 @@ class InstanceStorage {
   })  : activeSchemas = activeSchemas ?? ActiveSet<String>(List.empty()),
         dbType = DatabaseType.values[stDbType],
         createdAt = createdAt ?? DateTime.now(),
-        latestOpenAt =
-            latestOpenAt ?? DateTime(1970, 1, 1); //latestOpenAt 默认值未很早之前的时间
+        latestOpenAt = latestOpenAt ?? DateTime(1970, 1, 1); //latestOpenAt 默认值未很早之前的时间
 
   InstanceStorage.fromModel(InstanceModel model)
       : id = model.id.value,
@@ -156,8 +154,7 @@ class InstanceRepoImpl extends InstanceRepo {
   @override
 // todo: aync
   InstanceModel? getInstanceByName(String name) {
-    final build =
-        _instanceBox.query(InstanceStorage_.name.equals(name)).build();
+    final build = _instanceBox.query(InstanceStorage_.name.equals(name)).build();
     return build.findFirst()?.toModel();
   }
 
@@ -187,8 +184,7 @@ class InstanceRepoImpl extends InstanceRepo {
     if (key == null) {
       return _instanceBox.count();
     }
-    final build =
-        _instanceBox.query(InstanceStorage_.name.contains(key)).build();
+    final build = _instanceBox.query(InstanceStorage_.name.contains(key)).build();
     return build.count();
   }
 

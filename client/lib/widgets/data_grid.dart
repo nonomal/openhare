@@ -8,8 +8,7 @@ class DataGridController extends ChangeNotifier {
 
   Postion? selectedCellPostion;
 
-  DataGridController(
-      {required this.columns, required this.rows, this.selectedCellPostion});
+  DataGridController({required this.columns, required this.rows, this.selectedCellPostion});
 
   List<double> get columnWidths => columns.map((e) => e.size.width).toList();
 
@@ -41,9 +40,7 @@ class Postion {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is Postion &&
-        other.rowIndex == rowIndex &&
-        other.columnIndex == columnIndex;
+    return other is Postion && other.rowIndex == rowIndex && other.columnIndex == columnIndex;
   }
 
   @override
@@ -95,14 +92,16 @@ class DataGridCell<T> {
 class DataGrid extends StatefulWidget {
   /// 数据表格控制器
   final DataGridController controller;
+
   /// 表头的行高
   final double headerHeight;
+
   /// 数据行的行高
   final double rowHeight;
 
   /// 水平滚动控制器组，用于同步表头和数据体的水平滚动
   final LinkedScrollControllerGroup? horizontalScrollGroup;
-  
+
   /// 垂直滚动控制器，用于数据行的垂直滚动
   final ScrollController? verticalController;
 
@@ -157,8 +156,7 @@ class _DataGridState extends State<DataGrid> {
 
   /// 计算总宽度 - 确保不小于父组件宽度
   double _calculateTotalWidth(double parentWidth) {
-    final contentWidth =
-        widget.controller.columnWidths.fold(0.0, (sum, width) => sum + width);
+    final contentWidth = widget.controller.columnWidths.fold(0.0, (sum, width) => sum + width);
     return (contentWidth + 12.0).clamp(parentWidth, double.infinity);
   }
 
@@ -187,9 +185,7 @@ class _DataGridState extends State<DataGrid> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildHeader(context, constraints.maxWidth),
-                  Expanded(
-                      child: _buildBody(context, constraints.maxWidth,
-                          constraints.maxHeight)),
+                  Expanded(child: _buildBody(context, constraints.maxWidth, constraints.maxHeight)),
                 ],
               );
             },
@@ -221,8 +217,7 @@ class _DataGridState extends State<DataGrid> {
   }
 
   /// 构建表头单元格
-  Widget _buildHeaderCell(
-      BuildContext context, DataGridColumn column, int index) {
+  Widget _buildHeaderCell(BuildContext context, DataGridColumn column, int index) {
     final width = widget.controller.columnWidths[index];
 
     return DataGridCellWidget(
@@ -262,20 +257,17 @@ class _DataGridState extends State<DataGrid> {
   }
 
   /// 构建数据主体
-  Widget _buildBody(
-      BuildContext context, double parentWidth, double parentHeight) {
+  Widget _buildBody(BuildContext context, double parentWidth, double parentHeight) {
     return Stack(
       children: [
         Scrollbar(
           controller: _bodyHorizontalController,
           thumbVisibility: false,
-          notificationPredicate: (notification) =>
-              notification.metrics.axis == Axis.horizontal,
+          notificationPredicate: (notification) => notification.metrics.axis == Axis.horizontal,
           child: Scrollbar(
             controller: _verticalController,
             thumbVisibility: false,
-            notificationPredicate: (notification) =>
-                notification.metrics.axis == Axis.vertical,
+            notificationPredicate: (notification) => notification.metrics.axis == Axis.vertical,
             child: SingleChildScrollView(
               controller: _verticalController,
               scrollDirection: Axis.vertical,
@@ -319,16 +311,13 @@ class _DataGridState extends State<DataGrid> {
   Widget _buildCell(BuildContext context, Postion postion) {
     final colorScheme = Theme.of(context).colorScheme;
     final width = widget.controller.columnWidths[postion.columnIndex];
-    final cell =
-        widget.controller.rows[postion.rowIndex].cells[postion.columnIndex];
+    final cell = widget.controller.rows[postion.rowIndex].cells[postion.columnIndex];
 
     return DataGridCellWidget(
-      selected: (widget.controller.selectedCellPostion != null)
-          ? (widget.controller.selectedCellPostion == postion)
-          : false,
+      selected:
+          (widget.controller.selectedCellPostion != null) ? (widget.controller.selectedCellPostion == postion) : false,
       backgroundColor: (widget.controller.selectedCellPostion != null &&
-              postion.rowIndex ==
-                  widget.controller.selectedCellPostion!.rowIndex)
+              postion.rowIndex == widget.controller.selectedCellPostion!.rowIndex)
           ? colorScheme.surfaceContainerLow
           : null,
       child: SizedBox(
@@ -379,8 +368,7 @@ class DataGridCellWidget extends StatelessWidget {
     return RepaintBoundary(
       child: CustomPaint(
         painter: _DataGridCellPainter(
-          borderColor:
-              borderColor ?? Theme.of(context).colorScheme.surfaceContainerHigh,
+          borderColor: borderColor ?? Theme.of(context).colorScheme.surfaceContainerHigh,
           borderWidth: borderWidth ?? 1,
           backgroundColor: backgroundColor,
           selected: selected ?? false,
@@ -426,8 +414,7 @@ class _DataGridCellPainter extends CustomPainter {
         ..style = PaintingStyle.fill;
 
       // 先绘制背景色，避开边框区域，主要是右侧和下侧的边框.
-      final backgroundRect = Rect.fromLTWH(
-          0, 0, size.width - borderWidth, size.height - borderWidth);
+      final backgroundRect = Rect.fromLTWH(0, 0, size.width - borderWidth, size.height - borderWidth);
       canvas.drawRect(backgroundRect, backgroundPaint);
     }
 
@@ -439,12 +426,10 @@ class _DataGridCellPainter extends CustomPainter {
       ..isAntiAlias = false; // 关闭抗锯齿
 
     // 绘制右边框
-    canvas.drawLine(
-        Offset(size.width, 0), Offset(size.width, size.height), paint);
+    canvas.drawLine(Offset(size.width, 0), Offset(size.width, size.height), paint);
 
     // 绘制下边框
-    canvas.drawLine(
-        Offset(0, size.height), Offset(size.width, size.height), paint);
+    canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), paint);
 
     if (selected) {
       // 绘制选中状态的内边框
@@ -454,8 +439,12 @@ class _DataGridCellPainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..isAntiAlias = false;
 
-      final selectedRect = Rect.fromLTWH(borderWidth, borderWidth,
-          size.width - borderWidth * 2, size.height - borderWidth * 2);
+      final selectedRect = Rect.fromLTWH(
+        borderWidth,
+        borderWidth,
+        size.width - borderWidth * 2,
+        size.height - borderWidth * 2,
+      );
       canvas.drawRect(selectedRect, selectedPaint);
     }
   }

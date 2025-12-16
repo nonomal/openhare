@@ -30,24 +30,20 @@ class SessionDrawerMetadata extends ConsumerWidget {
         RectangleIconButton.medium(
           icon: Icons.refresh,
           onPressed: () {
-            ref
-                .read(selectedSessionMetadataProvider.notifier)
-                .refreshMetadata();
+            ref.read(selectedSessionMetadataProvider.notifier).refreshMetadata();
           },
         )
       ],
     );
   }
 
-  Widget bodyPage(
-      TreeController<DataNode> controller, ScrollController scrollController) {
+  Widget bodyPage(TreeController<DataNode> controller, ScrollController scrollController) {
     return DataTree(controller: controller, scrollController: scrollController);
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    AsyncValue<SessionMetadataTreeModel> model =
-        ref.watch(selectedSessionMetadataProvider);
+    AsyncValue<SessionMetadataTreeModel> model = ref.watch(selectedSessionMetadataProvider);
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -55,10 +51,8 @@ class SessionDrawerMetadata extends ConsumerWidget {
       children: [
         Expanded(
             child: model.when(
-          data: (value) => bodyPage(
-              value.metadataTreeCtrl,
-              SessionController.sessionController(value.sessionId)
-                  .metadataTreeScrollController),
+          data: (value) => bodyPage(value.metadataTreeCtrl,
+              SessionController.sessionController(value.sessionId).metadataTreeScrollController),
           error: (error, trace) => errorPage(context, ref, error.toString()),
           loading: () => loadingPage(),
         )),

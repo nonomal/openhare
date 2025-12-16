@@ -51,8 +51,7 @@ class _InstanceTableState extends ConsumerState<InstanceTable> {
       DataCell(Text(instance.connectValue.host)),
       DataCell(Text("${instance.connectValue.port}")),
       DataCell(Text(instance.connectValue.user)),
-      DataCell(
-          Text(instance.connectValue.desc, overflow: TextOverflow.ellipsis)),
+      DataCell(Text(instance.connectValue.desc, overflow: TextOverflow.ellipsis)),
       DataCell(Row(
         children: [
           RectangleIconButton.small(
@@ -65,9 +64,7 @@ class _InstanceTableState extends ConsumerState<InstanceTable> {
           RectangleIconButton.small(
             icon: Icons.delete,
             onPressed: () async {
-              await ref
-                  .read(instancesServicesProvider.notifier)
-                  .deleteInstance(instance.id);
+              await ref.read(instancesServicesProvider.notifier).deleteInstance(instance.id);
 
               ref.read(instancesProvider.notifier).refresh();
             },
@@ -155,9 +152,10 @@ class _InstanceTableState extends ConsumerState<InstanceTable> {
                   ),
                   onChanged: (value) {
                     ref.read(instancesProvider.notifier).changePage(
-                        value,
-                        pageNumber: model.currentPage,
-                        pageSize: model.pageSize);
+                          value,
+                          pageNumber: model.currentPage,
+                          pageSize: model.pageSize,
+                        );
                   },
                   trailing: const [Icon(Icons.search)],
                 ),
@@ -195,9 +193,10 @@ class _InstanceTableState extends ConsumerState<InstanceTable> {
             pageNumber: model.currentPage,
             onChange: (pageNumber) {
               ref.read(instancesProvider.notifier).changePage(
-                  instanceSearchTextController.text,
-                  pageNumber: pageNumber,
-                  pageSize: model.pageSize);
+                    instanceSearchTextController.text,
+                    pageNumber: pageNumber,
+                    pageSize: model.pageSize,
+                  );
             },
           ),
         ],

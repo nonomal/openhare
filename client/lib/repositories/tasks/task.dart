@@ -138,37 +138,29 @@ class TaskRepoImpl implements TaskRepo {
 
     if (status != null) {
       final statusCondition = TaskStorage_.stStatus.equals(status.index);
-      condition =
-          condition == null ? statusCondition : condition.and(statusCondition);
+      condition = condition == null ? statusCondition : condition.and(statusCondition);
     }
 
     if (completedAtStart != null) {
       // 对于可空的 completedAt 字段，需要同时检查不为 null 且大于等于起始时间
       // ObjectBox 使用纳秒时间戳，需要将 DateTime 转换为纳秒
       final startNanos = completedAtStart.microsecondsSinceEpoch * 1000;
-      final startCondition = TaskStorage_.completedAt
-          .notNull()
-          .and(TaskStorage_.completedAt.greaterOrEqual(startNanos));
-      condition =
-          condition == null ? startCondition : condition.and(startCondition);
+      final startCondition =
+          TaskStorage_.completedAt.notNull().and(TaskStorage_.completedAt.greaterOrEqual(startNanos));
+      condition = condition == null ? startCondition : condition.and(startCondition);
     }
 
     if (completedAtEnd != null) {
       // 对于可空的 completedAt 字段，需要同时检查不为 null 且小于等于结束时间
       // ObjectBox 使用纳秒时间戳，需要将 DateTime 转换为纳秒
       final endNanos = completedAtEnd.microsecondsSinceEpoch * 1000;
-      final endCondition = TaskStorage_.completedAt
-          .notNull()
-          .and(TaskStorage_.completedAt.lessOrEqual(endNanos));
-      condition =
-          condition == null ? endCondition : condition.and(endCondition);
+      final endCondition = TaskStorage_.completedAt.notNull().and(TaskStorage_.completedAt.lessOrEqual(endNanos));
+      condition = condition == null ? endCondition : condition.and(endCondition);
     }
 
     if (sanitizedKey != null && sanitizedKey.isNotEmpty) {
-      final keyCondition =
-          TaskStorage_.parameters.contains(sanitizedKey, caseSensitive: false);
-      condition =
-          condition == null ? keyCondition : condition.and(keyCondition);
+      final keyCondition = TaskStorage_.parameters.contains(sanitizedKey, caseSensitive: false);
+      condition = condition == null ? keyCondition : condition.and(keyCondition);
     }
 
     final countQuery = _taskBox.query(condition).build();
@@ -180,10 +172,7 @@ class TaskRepoImpl implements TaskRepo {
     final size = (pageSize != null && pageSize > 0) ? pageSize : 10;
     final offset = (currentPage - 1) * size;
 
-    final dataQuery = _taskBox
-        .query(condition)
-        .order(TaskStorage_.createdAt, flags: Order.descending)
-        .build();
+    final dataQuery = _taskBox.query(condition).order(TaskStorage_.createdAt, flags: Order.descending).build();
     dataQuery.limit = size;
     dataQuery.offset = offset;
 
@@ -200,17 +189,13 @@ class TaskRepoImpl implements TaskRepo {
         .order(TaskStorage_.createdAt, flags: Order.descending)
         .build();
     runningQuery.limit = 5;
-    final runningTasks =
-        runningQuery.find().map((e) => e.toModel()).toList();
+    final runningTasks = runningQuery.find().map((e) => e.toModel()).toList();
     runningQuery.close();
 
     // 获取最近的任务 top5，按创建时间倒序（排除正在运行的任务）
-    final recentStatusCondition = TaskStorage_.stStatus
-        .notEquals(TaskStatus.running.index);
-    final recentQuery = _taskBox
-        .query(recentStatusCondition)
-        .order(TaskStorage_.createdAt, flags: Order.descending)
-        .build();
+    final recentStatusCondition = TaskStorage_.stStatus.notEquals(TaskStatus.running.index);
+    final recentQuery =
+        _taskBox.query(recentStatusCondition).order(TaskStorage_.createdAt, flags: Order.descending).build();
     recentQuery.limit = 5;
     final recentTasks = recentQuery.find().map((e) => e.toModel()).toList();
     recentQuery.close();

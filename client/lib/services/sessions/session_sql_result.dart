@@ -52,21 +52,17 @@ class SQLResultsServices extends _$SQLResultsServices {
     SQLResultController.removeSQLResultController(resultId);
     repo.updateSQLResult(
       resultId,
-      SQLResultDetailModel(
-          resultId: resultId, query: query, state: SQLExecuteState.init),
+      SQLResultDetailModel(resultId: resultId, query: query, state: SQLExecuteState.init),
     );
     ref.invalidateSelf();
 
     // todo
-    final sessionModel = ref
-        .read(sessionsServicesProvider.notifier)
-        .getSession(resultId.sessionId);
+    final sessionModel = ref.read(sessionsServicesProvider.notifier).getSession(resultId.sessionId);
 
     try {
       DateTime start = DateTime.now();
       final connServices = ref.read(sessionConnsServicesProvider.notifier);
-      BaseQueryResult? queryResult =
-          await connServices.query(sessionModel!.connId!, query);
+      BaseQueryResult? queryResult = await connServices.query(sessionModel!.connId!, query);
       DateTime end = DateTime.now();
       // sleep 100ms, 不然当界面刷新太快时，无法感知结果是没变还是没执行.
       await Future.delayed(const Duration(milliseconds: 100));
@@ -135,15 +131,12 @@ class SelectedSQLResultNotifier extends _$SelectedSQLResultNotifier {
     if (sessionModel == null) {
       return null;
     }
-    SQLResultModel? sqlResultModel =
-        ref.watch(sQLResultsServicesProvider.select((m) {
+    SQLResultModel? sqlResultModel = ref.watch(sQLResultsServicesProvider.select((m) {
       return m.cache[sessionModel.sessionId]?.selected;
     }));
     if (sqlResultModel == null) {
       return null;
     }
-    return ref
-        .read(sQLResultsServicesProvider.notifier)
-        .getSQLResult(sqlResultModel.resultId);
+    return ref.read(sQLResultsServicesProvider.notifier).getSQLResult(sqlResultModel.resultId);
   }
 }

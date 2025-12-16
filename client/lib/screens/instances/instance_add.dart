@@ -194,9 +194,7 @@ class DatabaseTypeCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: selected
-            ? Theme.of(context)
-                .colorScheme
-                .surfaceContainer // db type card selected color
+            ? Theme.of(context).colorScheme.surfaceContainer // db type card selected color
             : null,
       ),
       child: InkWell(
@@ -213,8 +211,7 @@ class DatabaseTypeCard extends StatelessWidget {
               child: Image.asset(logoPath),
             ),
             Padding(
-              padding:
-                  const EdgeInsets.fromLTRB(0, kSpacingTiny, 0, kSpacingTiny),
+              padding: const EdgeInsets.fromLTRB(0, kSpacingTiny, 0, kSpacingTiny),
               child: Text(name, style: Theme.of(context).textTheme.bodyMedium),
             ),
             if (selected)
@@ -249,8 +246,7 @@ class DatabaseTypeCardList extends StatelessWidget {
   })  : _selectedDatabaseType = selectedDatabaseType,
         super(key: key);
 
-  DatabaseType? get selectedDatabaseType =>
-      _selectedDatabaseType ?? connectionMetas.first.type;
+  DatabaseType? get selectedDatabaseType => _selectedDatabaseType ?? connectionMetas.first.type;
 
   @override
   Widget build(BuildContext context) {
@@ -328,8 +324,7 @@ class DescFormField extends StatelessWidget {
   final TextEditingController controller;
   final GlobalKey<FormFieldState>? state;
 
-  const DescFormField({Key? key, required this.controller, this.state})
-      : super(key: key);
+  const DescFormField({Key? key, required this.controller, this.state}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -365,8 +360,7 @@ class AddInstanceForm extends StatelessWidget {
       required this.codeController})
       : super(key: key);
 
-  FormFieldValidator validatorFn(
-      BuildContext context, FormInfo info, FormFieldValidator validate) {
+  FormFieldValidator validatorFn(BuildContext context, FormInfo info, FormFieldValidator validate) {
     return (value) {
       final result = validate(value);
       if (result == null) {
@@ -404,11 +398,8 @@ class AddInstanceForm extends StatelessWidget {
   }
 
   List<String> get groups {
-    final groups = infos.values
-        .groupListsBy((info) => info.meta.group)
-        .keys
-        .whereNot((e) => e == settingMetaGroupBase)
-        .toList();
+    final groups =
+        infos.values.groupListsBy((info) => info.meta.group).keys.whereNot((e) => e == settingMetaGroupBase).toList();
     groups.add("initize");
     return groups;
   }
@@ -436,8 +427,7 @@ class AddInstanceForm extends StatelessWidget {
               label: AppLocalizations.of(context)!.db_instance_host,
               controller: addr.ctrl,
               state: addr.state,
-              validator:
-                  validatorFn(context, addr, validatorValueRequired(context)),
+              validator: validatorFn(context, addr, validatorValueRequired(context)),
             ),
           ),
           const SizedBox(
@@ -449,8 +439,7 @@ class AddInstanceForm extends StatelessWidget {
               label: AppLocalizations.of(context)!.db_instance_port,
               controller: port.ctrl,
               state: port.state,
-              validator:
-                  validatorFn(context, port, validatorValueRequired(context)),
+              validator: validatorFn(context, port, validatorValueRequired(context)),
             ),
           )
         ],
@@ -475,8 +464,7 @@ class AddInstanceForm extends StatelessWidget {
       controller: password.ctrl,
       state: password.state,
       obscureText: true,
-      validator:
-          validatorFn(context, password, validatorValueRequired(context)),
+      validator: validatorFn(context, password, validatorValueRequired(context)),
     );
   }
 
@@ -495,26 +483,20 @@ class AddInstanceForm extends StatelessWidget {
           child: CodeEditor(
             borderRadius: BorderRadius.circular(10),
             style: CodeEditorStyle(
-              backgroundColor: Theme.of(context)
-                  .colorScheme
-                  .surfaceContainerLow, // SQL 编辑器背景色
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow, // SQL 编辑器背景色
               textStyle: GoogleFonts.robotoMono(
                 textStyle: Theme.of(context).textTheme.bodyMedium,
                 color: Theme.of(context).colorScheme.onSurface,
               ), // SQL 编辑器文字颜色
             ),
-            indicatorBuilder:
-                (context, editingController, chunkController, notifier) {
+            indicatorBuilder: (context, editingController, chunkController, notifier) {
               return Row(
                 children: [
                   DefaultCodeLineNumber(
                     controller: editingController,
                     notifier: notifier,
                   ),
-                  DefaultCodeChunkIndicator(
-                      width: 20,
-                      controller: chunkController,
-                      notifier: notifier),
+                  DefaultCodeChunkIndicator(width: 20, controller: chunkController, notifier: notifier),
                 ],
               );
             },
@@ -560,8 +542,7 @@ class AddInstanceForm extends StatelessWidget {
             children: [
               Container(
                 alignment: Alignment.centerLeft,
-                padding:
-                    const EdgeInsets.fromLTRB(0, kSpacingTiny, 0, kSpacingTiny),
+                padding: const EdgeInsets.fromLTRB(0, kSpacingTiny, 0, kSpacingTiny),
                 child: Text(
                   AppLocalizations.of(context)!.db_base_config,
                   textAlign: TextAlign.left,
@@ -600,18 +581,16 @@ class AddInstanceForm extends StatelessWidget {
                       },
                       style: TextButton.styleFrom(
                         backgroundColor: group == selectedGroup
-                            ? Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHigh // custom config tab selected color
+                            ? Theme.of(context).colorScheme.surfaceContainerHigh // custom config tab selected color
                             : null,
                       ),
                       child: Text(
                         group,
                         textAlign: TextAlign.left,
-                        style: Theme.of(context).textTheme.titleMedium!.merge(
-                            TextStyle(
-                                color:
-                                    !isGroupValid(group) ? Colors.red : null)),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium!
+                            .merge(TextStyle(color: !isGroupValid(group) ? Colors.red : null)),
                       ),
                     ),
                 ],
@@ -621,8 +600,7 @@ class AddInstanceForm extends StatelessWidget {
                 child: IndexedStack(
                   index: selectedGroupIndex,
                   children: [
-                    for (final group in groups)
-                      buildCustomField(context, group),
+                    for (final group in groups) buildCustomField(context, group),
                   ],
                 ),
               )
@@ -639,12 +617,12 @@ class AddInstanceBottomBar extends StatelessWidget {
   final String? databaseConnectError;
   final bool isDatabasePingDoing;
 
-  const AddInstanceBottomBar(
-      {Key? key,
-      this.databaseConnectError,
-      required this.isDatabasePingDoing,
-      this.isDatabaseConnectable})
-      : super(key: key);
+  const AddInstanceBottomBar({
+    Key? key,
+    this.databaseConnectError,
+    required this.isDatabasePingDoing,
+    this.isDatabaseConnectable,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -677,8 +655,7 @@ class AddInstanceBottomBar extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Padding(
-          padding:
-              const EdgeInsets.fromLTRB(kSpacingSmall, 0, kSpacingSmall, 0),
+          padding: const EdgeInsets.fromLTRB(kSpacingSmall, 0, kSpacingSmall, 0),
           child: status,
         ),
         Expanded(child: msg)
@@ -694,17 +671,15 @@ class FormInfo {
   GlobalKey<FormFieldState> state = GlobalKey<FormFieldState>();
   bool isValid = true;
 
-  FormInfo(this.dbType, this.meta)
-      : ctrl = TextEditingController(text: meta.defaultValue);
+  FormInfo(this.dbType, this.meta) : ctrl = TextEditingController(text: meta.defaultValue);
 }
 
 class AddInstanceController extends ChangeNotifier {
   final Map<DatabaseType, Map<String, FormInfo>> infos = {};
 
-  final CodeLineEditingController code = CodeLineEditingController(
-      spanBuilder: ({required codeLines, required context, required style}) {
-    return getSQLHighlightTextSpan(codeLines.asString(TextLineBreak.lf),
-        defalutStyle: style);
+  final CodeLineEditingController code =
+      CodeLineEditingController(spanBuilder: ({required codeLines, required context, required style}) {
+    return getSQLHighlightTextSpan(codeLines.asString(TextLineBreak.lf), defalutStyle: style);
   });
 
   DatabaseType selectedDatabaseType = DatabaseType.mysql;
@@ -725,15 +700,12 @@ class AddInstanceController extends ChangeNotifier {
   }
 
   void onDatabaseTypeChange(DatabaseType type) {
-    final isPortChanged =
-        (infos[selectedDatabaseType]![settingMetaNamePort]!.ctrl.text !=
-            defaultPort);
+    final isPortChanged = (infos[selectedDatabaseType]![settingMetaNamePort]!.ctrl.text != defaultPort);
     final name = infos[selectedDatabaseType]![settingMetaNameName]!.ctrl.text;
     final desc = infos[selectedDatabaseType]![settingMetaNameDesc]!.ctrl.text;
     final addr = infos[selectedDatabaseType]![settingMetaNameAddr]!.ctrl.text;
     final user = infos[selectedDatabaseType]![settingMetaNameUser]!.ctrl.text;
-    final password =
-        infos[selectedDatabaseType]![settingMetaNamePassword]!.ctrl.text;
+    final password = infos[selectedDatabaseType]![settingMetaNamePassword]!.ctrl.text;
 
     selectedDatabaseType = type;
     _selectedGroup = null;
@@ -764,10 +736,7 @@ class AddInstanceController extends ChangeNotifier {
   }
 
   String get defaultPort {
-    return infos[selectedDatabaseType]![settingMetaNamePort]!
-            .meta
-            .defaultValue ??
-        "";
+    return infos[selectedDatabaseType]![settingMetaNamePort]!.meta.defaultValue ?? "";
   }
 
   set port(String port) {
@@ -869,11 +838,8 @@ class AddInstanceController extends ChangeNotifier {
           custom[(info.meta as CustomMeta).name] = info.ctrl.text;
       }
     }
-    List<String> querys = Splitter(code.text.trim(), ";")
-        .split()
-        .map((e) => e.content.trim())
-        .whereNot((e) => e.trim() == "")
-        .toList();
+    List<String> querys =
+        Splitter(code.text.trim(), ";").split().map((e) => e.content.trim()).whereNot((e) => e.trim() == "").toList();
     return ConnectValue(
       name: name,
       host: addr,
@@ -892,8 +858,7 @@ class AddInstanceController extends ChangeNotifier {
     try {
       isDatabasePingDoing = true;
       notifyListeners();
-      conn = await ConnectionFactory.open(
-          type: selectedDatabaseType, meta: connectValue);
+      conn = await ConnectionFactory.open(type: selectedDatabaseType, meta: connectValue);
       isDatabaseConnectable = true;
       databaseConnectError = null;
       conn.close();

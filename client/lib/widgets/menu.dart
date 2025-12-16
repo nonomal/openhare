@@ -147,9 +147,7 @@ class _OverlayMenuState extends State<OverlayMenu> {
                 menuHeight += widget.footer!.height;
               }
               // 限制菜单高度
-              menuHeight = (menuHeight > widget.maxHeight)
-                  ? widget.maxHeight
-                  : menuHeight;
+              menuHeight = (menuHeight > widget.maxHeight) ? widget.maxHeight : menuHeight;
 
               if (widget.isAbove) {
                 top = position.dy - menuHeight - widget.spacing;
@@ -219,9 +217,8 @@ class _OverlayMenuItemState extends State<OverlayMenuItem> {
 
   @override
   Widget build(BuildContext context) {
-    final hoverColor = widget.hoverColor ??
-        Theme.of(context).colorScheme.surfaceContainer;
-    
+    final hoverColor = widget.hoverColor ?? Theme.of(context).colorScheme.surfaceContainer;
+
     return MouseRegion(
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
@@ -239,8 +236,7 @@ class _OverlayMenuItemState extends State<OverlayMenuItem> {
 class OverlayMenuHeader extends StatelessWidget {
   final double height;
   final Widget child;
-  const OverlayMenuHeader({Key? key, required this.height, required this.child})
-      : super(key: key);
+  const OverlayMenuHeader({Key? key, required this.height, required this.child}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -284,8 +280,7 @@ class _OverlayMenuFooterState extends State<OverlayMenuFooter> {
       bottomLeft: Radius.circular(12),
       bottomRight: Radius.circular(12),
     );
-    final hoverColor =
-        widget.hoverColor ?? colorScheme.surfaceContainerLow;
+    final hoverColor = widget.hoverColor ?? colorScheme.surfaceContainerLow;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovering = true),

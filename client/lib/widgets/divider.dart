@@ -74,8 +74,7 @@ class PixelVerticalDivider extends StatelessWidget {
       width: thickness,
       margin: EdgeInsets.only(top: indent, bottom: endIndent),
       child: CustomPaint(
-        painter: PixelLinePainter(
-            color: color, thickness: thickness, orientation: Axis.vertical),
+        painter: PixelLinePainter(color: color, thickness: thickness, orientation: Axis.vertical),
         size: Size(thickness, double.infinity),
       ),
     );
@@ -125,8 +124,6 @@ class PixelLinePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return oldDelegate is PixelLinePainter &&
-        (oldDelegate.color != color ||
-            oldDelegate.thickness != thickness ||
-            oldDelegate.orientation != orientation);
+        (oldDelegate.color != color || oldDelegate.thickness != thickness || oldDelegate.orientation != orientation);
   }
 }

@@ -50,12 +50,10 @@ class SessionStatusTab extends ConsumerWidget {
                             child: switch (model.connState) {
                           SQLConnectState.connected ||
                           SQLConnectState.executing =>
-                            const Icon(Icons.check_circle,
-                                size: kIconSizeSmall, color: Colors.green),
+                            const Icon(Icons.check_circle, size: kIconSizeSmall, color: Colors.green),
                           SQLConnectState.failed ||
                           SQLConnectState.unHealth =>
-                            const Icon(Icons.error,
-                                size: kIconSizeSmall, color: Colors.red),
+                            const Icon(Icons.error, size: kIconSizeSmall, color: Colors.red),
                           _ => const Text("-"),
                         } // 根据model.state展示不同的图标
                             ),
@@ -85,11 +83,11 @@ class SessionStatusTab extends ConsumerWidget {
             // sql query
             divider(context),
             ValueStatusWidget(
-                width: 300,
-                label: AppLocalizations.of(context)!.query,
-                value: shortQueryDisplay,
-                tooltip: model.query ??
-                    AppLocalizations.of(context)!.no_query_executed),
+              width: 300,
+              label: AppLocalizations.of(context)!.query,
+              value: shortQueryDisplay,
+              tooltip: model.query ?? AppLocalizations.of(context)!.no_query_executed,
+            ),
           ],
           const Spacer(),
         ],

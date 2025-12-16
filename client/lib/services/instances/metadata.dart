@@ -8,8 +8,7 @@ part 'metadata.g.dart';
 class InstanceMetadataServices extends _$InstanceMetadataServices {
   @override
   Future<InstanceMetadataModel> build(InstanceId instanceId) {
-    final metadataModel =
-        ref.watch(instanceRepoProvider).getMetadata(instanceId);
+    final metadataModel = ref.watch(instanceRepoProvider).getMetadata(instanceId);
     return metadataModel;
   }
 

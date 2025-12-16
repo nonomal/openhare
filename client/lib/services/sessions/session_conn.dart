@@ -18,12 +18,9 @@ class SessionConnsServices extends _$SessionConnsServices {
     return ref.read(sessionConnRepoProvider).getConn(connId);
   }
 
-  Future<SessionConnModel> createConn(InstanceId instanceId,
-      {String? currentSchema}) async {
+  Future<SessionConnModel> createConn(InstanceId instanceId, {String? currentSchema}) async {
     final instance = ref.read(instanceRepoProvider).getInstanceById(instanceId);
-    return ref
-        .read(sessionConnRepoProvider)
-        .createConn(instance!, currentSchema: currentSchema);
+    return ref.read(sessionConnRepoProvider).createConn(instance!, currentSchema: currentSchema);
   }
 
   Future<void> removeConn(ConnId connId) async {

@@ -46,12 +46,9 @@ class SessionsServices extends _$SessionsServices {
       selectedSessionId = state.selectedSession!.sessionId;
     }
 
-    await ref
-        .read(instancesServicesProvider.notifier)
-        .addActiveInstance(instance.id, schema: schema);
+    await ref.read(instancesServicesProvider.notifier).addActiveInstance(instance.id, schema: schema);
 
-    await ref.read(sessionRepoProvider).updateSession(selectedSessionId,
-        instance: instance, currentSchema: schema);
+    await ref.read(sessionRepoProvider).updateSession(selectedSessionId, instance: instance, currentSchema: schema);
 
     ref.invalidateSelf();
 
@@ -83,9 +80,7 @@ class SessionsServices extends _$SessionsServices {
     ref.read(sqlResultsRepoProvider).deleteSQLResults(session.sessionId);
 
     // 4. delete ai chat
-    ref
-        .read(aIChatServiceProvider.notifier)
-        .delete(AIChatId(value: session.sessionId.value));
+    ref.read(aIChatServiceProvider.notifier).delete(AIChatId(value: session.sessionId.value));
 
     // 5. delete provider status
     ref.invalidate(sessionSQLEditorServiceProvider(session.sessionId));
@@ -114,15 +109,10 @@ class SessionsServices extends _$SessionsServices {
     }
 
     // connect conn
-    await connsServices.connect(connId,
-        onSchemaChangedCallback: (schema) async {
-      await ref
-          .read(sessionRepoProvider)
-          .updateSession(sessionId, currentSchema: schema);
+    await connsServices.connect(connId, onSchemaChangedCallback: (schema) async {
+      await ref.read(sessionRepoProvider).updateSession(sessionId, currentSchema: schema);
 
-      await ref
-          .read(instancesServicesProvider.notifier)
-          .addActiveInstance(session.instanceId!, schema: schema);
+      await ref.read(instancesServicesProvider.notifier).addActiveInstance(session.instanceId!, schema: schema);
 
       ref.invalidateSelf();
     });
@@ -168,17 +158,14 @@ class SessionsDetailNotifier extends _$SessionsDetailNotifier {
   SessionDetailListModel build() {
     SessionListModel sessions = ref.watch(sessionsServicesProvider);
     SessionConnListModel conns = ref.watch(sessionConnsServicesProvider);
-    InstancesServices instanceServices =
-        ref.read(instancesServicesProvider.notifier);
+    InstancesServices instanceServices = ref.read(instancesServicesProvider.notifier);
 
     // selected instance
     SessionDetailModel? selectedSession;
     if (sessions.selectedSession != null) {
-      InstanceModel? selectedInstance =
-          sessions.selectedSession!.instanceId == null
-              ? null
-              : instanceServices
-                  .getInstanceById(sessions.selectedSession!.instanceId!);
+      InstanceModel? selectedInstance = sessions.selectedSession!.instanceId == null
+          ? null
+          : instanceServices.getInstanceById(sessions.selectedSession!.instanceId!);
       selectedSession = SessionDetailModel(
         sessionId: sessions.selectedSession!.sessionId,
         instanceId: sessions.selectedSession!.instanceId,
@@ -192,9 +179,8 @@ class SessionsDetailNotifier extends _$SessionsDetailNotifier {
     }
     return SessionDetailListModel(
       sessions: sessions.sessions.map((session) {
-        InstanceModel? instance = session.instanceId == null
-            ? null
-            : instanceServices.getInstanceById(session.instanceId!);
+        InstanceModel? instance =
+            session.instanceId == null ? null : instanceServices.getInstanceById(session.instanceId!);
         return SessionDetailModel(
           sessionId: session.sessionId,
           instanceId: session.instanceId,
@@ -225,14 +211,12 @@ class SelectedSessionDetailNotifier extends _$SelectedSessionDetailNotifier {
 class SessionOpBarNotifier extends _$SessionOpBarNotifier {
   @override
   SessionOpBarModel? build() {
-    SessionDetailModel? session =
-        ref.watch(selectedSessionDetailProvider);
+    SessionDetailModel? session = ref.watch(selectedSessionDetailProvider);
     if (session == null) {
       return null;
     }
 
-    SessionDrawerModel? sessionDrawer =
-        ref.watch(sessionDrawerProvider);
+    SessionDrawerModel? sessionDrawer = ref.watch(sessionDrawerProvider);
     if (sessionDrawer == null) {
       return null;
     }
@@ -257,14 +241,12 @@ class SessionOpBarNotifier extends _$SessionOpBarNotifier {
 class SelectedSessionStatusNotifier extends _$SelectedSessionStatusNotifier {
   @override
   SessionStatusModel? build() {
-    SessionDetailModel? session =
-        ref.watch(selectedSessionDetailProvider);
+    SessionDetailModel? session = ref.watch(selectedSessionDetailProvider);
     if (session == null) {
       return null;
     }
 
-    SQLResultDetailModel? sqlResultModel =
-        ref.watch(selectedSQLResultProvider);
+    SQLResultDetailModel? sqlResultModel = ref.watch(selectedSQLResultProvider);
 
     return SessionStatusModel(
       sessionId: session.sessionId,

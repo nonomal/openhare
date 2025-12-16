@@ -106,8 +106,7 @@ abstract class ExportDataParameters with _$ExportDataParameters {
     return p.join(fileDir, fileName);
   }
 
-  factory ExportDataParameters.fromJson(Map<String, dynamic> json) =>
-      _$ExportDataParametersFromJson(json);
+  factory ExportDataParameters.fromJson(Map<String, dynamic> json) => _$ExportDataParametersFromJson(json);
 }
 
 // todo: TaskModel 与 ExportDataModel 有大量重复字段，后续看有啥好的方式优化
@@ -195,8 +194,7 @@ abstract class ExportDataTaskListItemModel with _$ExportDataTaskListItemModel {
 }
 
 @freezed
-abstract class ExportDataTaskPaginationListModel
-    with _$ExportDataTaskPaginationListModel {
+abstract class ExportDataTaskPaginationListModel with _$ExportDataTaskPaginationListModel {
   const factory ExportDataTaskPaginationListModel({
     required List<ExportDataTaskListItemModel> tasks,
     required int count,

@@ -25,11 +25,11 @@ class ObjectBox {
     // Future<Store> openStore() {...} is defined in the generated objectbox.g.dart
     print("load store from: ${p.join(docsDir.path, "openhare")}");
     final store = await openStore(
-        directory: p.join(docsDir.path, "openhare"),
-        macosApplicationGroup: "openhare.store");
+      directory: p.join(docsDir.path, "openhare"),
+      macosApplicationGroup: "openhare.store",
+    );
     return ObjectBox(store);
   }
-
 }
 
 @Riverpod(keepAlive: true)

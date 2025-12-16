@@ -126,6 +126,5 @@ abstract class ExportFileNameResult with _$ExportFileNameResult {
     String? desc,
   }) = _ExportFileNameResult;
 
-  factory ExportFileNameResult.fromJson(Map<String, dynamic> json) =>
-      _$ExportFileNameResultFromJson(json);
+  factory ExportFileNameResult.fromJson(Map<String, dynamic> json) => _$ExportFileNameResultFromJson(json);
 }

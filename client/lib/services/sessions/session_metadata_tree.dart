@@ -9,17 +9,14 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'session_metadata_tree.g.dart';
 
 @Riverpod(keepAlive: true)
-class SelectedSessionMetadataNotifier
-    extends _$SelectedSessionMetadataNotifier {
+class SelectedSessionMetadataNotifier extends _$SelectedSessionMetadataNotifier {
   @override
   Future<SessionMetadataTreeModel> build() async {
     SessionModel? sessionModel = ref.watch(selectedSessionProvider);
     if (sessionModel == null || sessionModel.instanceId == null) {
       throw Exception("Session not found");
     }
-    final metadataModel = await ref
-        .watch(instanceRepoProvider)
-        .getMetadata(sessionModel.instanceId!);
+    final metadataModel = await ref.watch(instanceRepoProvider).getMetadata(sessionModel.instanceId!);
 
     List<MetaDataNode> items = metadataModel.metadata;
     RootNode root = RootNode();
@@ -58,9 +55,7 @@ class SelectedSessionMetadataNotifier
     if (sessionModel == null || sessionModel.instanceId == null) {
       throw Exception("Session not found");
     }
-    await ref
-        .read(instanceRepoProvider)
-        .refreshMetadata(sessionModel.instanceId!);
+    await ref.read(instanceRepoProvider).refreshMetadata(sessionModel.instanceId!);
     ref.invalidateSelf();
   }
 }

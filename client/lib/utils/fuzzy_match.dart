@@ -51,8 +51,7 @@ class FuzzyMatchResult {
         matchPositions = null;
 
   @override
-  String toString() =>
-      'FuzzyMatchResult(matched: $matched, type: $matchType, score: $score)';
+  String toString() => 'FuzzyMatchResult(matched: $matched, type: $matchType, score: $score)';
 }
 
 /// 模糊字符串匹配的工具类。将多种匹配策略组合成单个高效实现。
@@ -222,8 +221,7 @@ class FuzzyMatch {
 
     // 计算四个评分因子的得分
     final double prefixBonus = _calculatePrefixBonus(input, target, positions);
-    final double positionScore =
-        _calculatePositionPreference(positions, target.length);
+    final double positionScore = _calculatePositionPreference(positions, target.length);
     final double continuityScore = _calculateContinuityScore(positions);
     final double lengthCoverage = input.length / target.length;
 
@@ -250,13 +248,9 @@ class FuzzyMatch {
   ///
   /// 如果输入是目标字符串的前缀，返回高分。
   /// 前缀匹配比普通匹配更重要。
-  static double _calculatePrefixBonus(
-      String input, String target, List<int> positions) {
+  static double _calculatePrefixBonus(String input, String target, List<int> positions) {
     // 检查是否是完美前缀匹配：匹配位置连续从开头开始且匹配全部输入
-    if (positions.length == input.length &&
-        positions.isNotEmpty &&
-        positions[0] == 0 &&
-        _isConsecutive(positions)) {
+    if (positions.length == input.length && positions.isNotEmpty && positions[0] == 0 && _isConsecutive(positions)) {
       return 1.0; // 完美前缀匹配
     }
 
@@ -287,14 +281,12 @@ class FuzzyMatch {
     // 计算所有相邻匹配位置间的间隙总和
     int totalCharacterGaps = 0;
     for (int i = 1; i < positions.length; i++) {
-      final int charactersBetweenMatches =
-          positions[i] - positions[i - 1] - 1; // -1是因为连续位置间应相差1
+      final int charactersBetweenMatches = positions[i] - positions[i - 1] - 1; // -1是因为连续位置间应相差1
       totalCharacterGaps += charactersBetweenMatches;
     }
 
     // 间隙越小得分越高，使用指数衰减函数
-    final double continuityScore =
-        1.0 / (1.0 + totalCharacterGaps * _gapDecayFactor);
+    final double continuityScore = 1.0 / (1.0 + totalCharacterGaps * _gapDecayFactor);
 
     return continuityScore.clamp(0.0, 1.0);
   }
@@ -315,8 +307,7 @@ class FuzzyMatch {
   ///    最终得分 = 起始得分 × 0.7 + 平均得分 × 0.3
   ///
   /// 这种设计确保了匹配越早开始且位置越集中，得分越高。
-  static double _calculatePositionPreference(
-      List<int> positions, int targetLength) {
+  static double _calculatePositionPreference(List<int> positions, int targetLength) {
     // 边界情况：目标为空或无匹配位置
     if (targetLength == 0 || positions.isEmpty) return 0.0;
 
@@ -331,16 +322,13 @@ class FuzzyMatch {
     final double averageMatchPosition = sumOfPositions / positions.length;
 
     // 计算起始位置得分：越靠前得分越高
-    final double startScore =
-        1.0 / (1.0 + startPosition * _startPositionDecayFactor);
+    final double startScore = 1.0 / (1.0 + startPosition * _startPositionDecayFactor);
 
     // 计算平均位置得分：衰减速度稍慢
-    final double averageScore =
-        1.0 / (1.0 + averageMatchPosition * _averagePositionDecayFactor);
+    final double averageScore = 1.0 / (1.0 + averageMatchPosition * _averagePositionDecayFactor);
 
     // 组合两个得分，起始位置权重更高
-    final double combinedScore = startScore * _startPositionWeight +
-        averageScore * _averagePositionWeight;
+    final double combinedScore = startScore * _startPositionWeight + averageScore * _averagePositionWeight;
 
     return combinedScore.clamp(0.0, 1.0);
   }

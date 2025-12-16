@@ -64,9 +64,7 @@ class SessionRepoImpl extends SessionRepo {
   SessionModel _toModel(SessionStorage session) {
     return SessionModel(
       sessionId: SessionId(value: session.id),
-      instanceId: session.instance.hasValue
-          ? InstanceId(value: session.instance.targetId)
-          : null,
+      instanceId: session.instance.hasValue ? InstanceId(value: session.instance.targetId) : null,
       currentSchema: session.currentSchema,
       connId: _connIdMap[session.id],
     );
@@ -80,8 +78,7 @@ class SessionRepoImpl extends SessionRepo {
   }
 
   @override
-  Future<void> updateSession(SessionId sessionId,
-      {InstanceModel? instance, String? currentSchema}) async {
+  Future<void> updateSession(SessionId sessionId, {InstanceModel? instance, String? currentSchema}) async {
     final session = await _sessionBox.getAsync(sessionId.value);
     if (session == null) {
       return;

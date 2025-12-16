@@ -119,9 +119,7 @@ class SessionConn {
     _onStateChangedCallback?.call();
   }
 
-  Future<void> connect(
-      {Function()? onStateChangedCallback,
-      Function(String)? onSchemaChangedCallback}) async {
+  Future<void> connect({Function()? onStateChangedCallback, Function(String)? onSchemaChangedCallback}) async {
     try {
       _onStateChangedCallback = onStateChangedCallback;
       if (conn2 != null) {

@@ -42,8 +42,7 @@ class SessionController {
     }
     final controller = SessionController(
       multiSplitViewCtrl: SplitViewController(Area(), Area(size: 500, min: 40)),
-      metaDataSplitViewCtrl:
-          SplitViewController(Area(), Area(size: 400, min: 360)),
+      metaDataSplitViewCtrl: SplitViewController(Area(), Area(size: 400, min: 360)),
       // sql editor
       sqlEditorScrollController: CodeScrollController(
         verticalScroller: KeepOffestScrollController(),
@@ -96,8 +95,7 @@ class SQLResultController {
   static Map<ResultId, SQLResultController> cache = {};
 
   // 使用init回调，如果存在则跳过初始化
-  static SQLResultController sqlResultController(
-      ResultId resultId, DataGridController Function() init) {
+  static SQLResultController sqlResultController(ResultId resultId, DataGridController Function() init) {
     if (cache.containsKey(resultId)) {
       return cache[resultId]!;
     }

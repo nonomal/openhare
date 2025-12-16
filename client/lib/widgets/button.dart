@@ -82,9 +82,7 @@ class _RectangleIconButtonState extends State<RectangleIconButton> {
   @override
   Widget build(BuildContext context) {
     final button = MouseRegion(
-        cursor: widget.onPressed != null
-            ? SystemMouseCursors.click
-            : SystemMouseCursors.basic,
+        cursor: widget.onPressed != null ? SystemMouseCursors.click : SystemMouseCursors.basic,
         onEnter: (value) {
           if (widget.onPressed != null && !_isHovering) {
             setState(() {
@@ -115,9 +113,7 @@ class _RectangleIconButtonState extends State<RectangleIconButton> {
                 borderRadius: BorderRadius.circular(widget.size * 0.2),
                 color: _isHovering
                     ? widget.hoverBackgroundColor ??
-                        Theme.of(context)
-                            .colorScheme
-                            .primaryContainer // icon button 鼠标悬浮的颜色
+                        Theme.of(context).colorScheme.primaryContainer // icon button 鼠标悬浮的颜色
                     : widget.backgroundColor, // icon button 背景色
               ),
               child: Icon(
@@ -144,9 +140,7 @@ class LinkButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final double? maxWidth;
 
-  const LinkButton(
-      {Key? key, required this.text, this.onPressed, this.maxWidth})
-      : super(key: key);
+  const LinkButton({Key? key, required this.text, this.onPressed, this.maxWidth}) : super(key: key);
 
   @override
   State<LinkButton> createState() => _LinkButtonState();
@@ -158,8 +152,7 @@ class _LinkButtonState extends State<LinkButton> {
   @override
   Widget build(BuildContext context) {
     final Color normalColor = Theme.of(context).colorScheme.primary;
-    final Color hoverColor =
-        Theme.of(context).colorScheme.primary.withOpacity(0.7);
+    final Color hoverColor = Theme.of(context).colorScheme.primary.withOpacity(0.7);
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovering = true),
@@ -170,8 +163,7 @@ class _LinkButtonState extends State<LinkButton> {
           constraints: BoxConstraints(
             maxWidth: widget.maxWidth ?? 200,
           ),
-          padding:
-              const EdgeInsets.fromLTRB(kSpacingSmall, 0, kSpacingSmall, 0),
+          padding: const EdgeInsets.fromLTRB(kSpacingSmall, 0, kSpacingSmall, 0),
           // 只有当TextOverflow.ellipsis实际发生时才显示tooltip
           child: TooltipText(
             text: widget.text,

@@ -49,8 +49,7 @@ class SessionDrawerNotifier extends _$SessionDrawerNotifier {
   SessionDrawerModel build() {
     SessionModel? sessionModel = ref.watch(selectedSessionProvider);
     if (sessionModel == null) {
-      return ref
-          .watch(sessionDrawerServicesProvider(const SessionId(value: 0)));
+      return ref.watch(sessionDrawerServicesProvider(const SessionId(value: 0)));
     }
     return ref.watch(sessionDrawerServicesProvider(sessionModel.sessionId));
   }
