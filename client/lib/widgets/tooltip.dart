@@ -3,7 +3,12 @@ import 'package:flutter/material.dart';
 class TooltipText extends StatelessWidget {
   final String text;
   final TextStyle? style;
-  const TooltipText({Key? key, required this.text, this.style}) : super(key: key);
+
+  const TooltipText({
+    super.key,
+    required this.text,
+    this.style,
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -7,9 +7,13 @@ class TablePaginatedBar extends StatefulWidget {
   final int pageNumber;
   final void Function(int pageNumber) onChange;
 
-  const TablePaginatedBar(
-      {Key? key, required this.count, required this.pageSize, required this.pageNumber, required this.onChange})
-      : super(key: key);
+  const TablePaginatedBar({
+    super.key,
+    required this.count,
+    required this.pageSize,
+    required this.pageNumber,
+    required this.onChange,
+  });
 
   @override
   State<TablePaginatedBar> createState() => _PaginatedBarState();

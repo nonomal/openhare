@@ -200,13 +200,14 @@ class DataValueNode extends RootNode {
     return TooltipText(
       text: name,
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: isOpen ? Theme.of(context).colorScheme.onPrimaryContainer : Theme.of(context).colorScheme.onSurface,),
+            color: isOpen ? Theme.of(context).colorScheme.onPrimaryContainer : Theme.of(context).colorScheme.onSurface,
+          ),
     );
   }
 }
 
 class SchemaValueNode extends DataValueNode {
-  SchemaValueNode(String name) : super(name);
+  SchemaValueNode(super.name);
 
   @override
   Widget openIcons(BuildContext context) {
@@ -228,7 +229,7 @@ class SchemaValueNode extends DataValueNode {
 }
 
 class TableValueNode extends DataValueNode {
-  TableValueNode(String name) : super(name);
+  TableValueNode(super.name);
 
   @override
   Widget openIcons(BuildContext context) {
@@ -251,7 +252,8 @@ class TableValueNode extends DataValueNode {
 
 class ColumnValueNode extends DataValueNode {
   DataType type;
-  ColumnValueNode(String name, this.type) : super(name);
+
+  ColumnValueNode(super.name, this.type);
 
   @override
   Widget openIcons(BuildContext context) {
@@ -269,10 +271,10 @@ class DataTree extends StatefulWidget {
   final ScrollController? scrollController;
 
   const DataTree({
-    Key? key,
+    super.key,
     required this.controller,
     this.scrollController,
-  }) : super(key: key);
+  });
 
   @override
   State<DataTree> createState() => _DataTreeState();

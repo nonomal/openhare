@@ -21,13 +21,13 @@ class SplitView extends StatelessWidget {
   final Color? color;
 
   const SplitView({
-    Key? key,
+    super.key,
     this.axis = MultiSplitView.defaultAxis,
     required this.first,
     required this.second,
     required this.controller,
     this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

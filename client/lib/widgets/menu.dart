@@ -16,7 +16,7 @@ class OverlayMenu extends StatefulWidget {
   final bool closeOnSelectItem;
 
   const OverlayMenu({
-    Key? key,
+    super.key,
     this.maxHeight = 400,
     this.maxWidth = 220,
     required this.tabs,
@@ -26,7 +26,7 @@ class OverlayMenu extends StatefulWidget {
     this.isAbove = false,
     this.spacing = 0,
     this.closeOnSelectItem = true,
-  }) : super(key: key);
+  });
 
   @override
   State<OverlayMenu> createState() => _OverlayMenuState();
@@ -201,12 +201,12 @@ class OverlayMenuItem extends StatefulWidget {
   final Color? hoverColor;
 
   const OverlayMenuItem({
-    Key? key,
+    super.key,
     required this.height,
     required this.child,
     this.onTabSelected,
     this.hoverColor,
-  }) : super(key: key);
+  });
 
   @override
   State<OverlayMenuItem> createState() => _OverlayMenuItemState();
@@ -236,7 +236,12 @@ class _OverlayMenuItemState extends State<OverlayMenuItem> {
 class OverlayMenuHeader extends StatelessWidget {
   final double height;
   final Widget child;
-  const OverlayMenuHeader({Key? key, required this.height, required this.child}) : super(key: key);
+
+  const OverlayMenuHeader({
+    super.key,
+    required this.height,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -254,12 +259,12 @@ class OverlayMenuFooter extends StatefulWidget {
   final Color? hoverColor;
 
   const OverlayMenuFooter({
-    Key? key,
+    super.key,
     required this.height,
     required this.child,
     this.onTap,
     this.hoverColor,
-  }) : super(key: key);
+  });
 
   @override
   State<OverlayMenuFooter> createState() => _OverlayMenuFooterState();

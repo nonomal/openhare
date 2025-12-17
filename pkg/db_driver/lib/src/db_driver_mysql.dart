@@ -127,7 +127,7 @@ class MysqlQueryColumn extends BaseQueryColumn {
 class MySQLConnection extends BaseConnection {
   final ConnWrapper _conn;
   late String? _sessionId;
-  late String _dsn;
+  final String _dsn;
 
   MySQLConnection(this._conn, this._dsn);
 

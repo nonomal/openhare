@@ -14,9 +14,15 @@ class CommonTabBar extends StatefulWidget {
   final Color? color;
   final CommonTabStyle? tabStyle;
 
-  const CommonTabBar(
-      {Key? key, this.height, required this.tabs, required this.onReorder, this.addTab, this.color, this.tabStyle})
-      : super(key: key);
+  const CommonTabBar({
+    super.key,
+    this.height,
+    required this.tabs,
+    required this.onReorder,
+    this.addTab,
+    this.color,
+    this.tabStyle,
+  });
 
   @override
   State<CommonTabBar> createState() => _CommonTabBarState();
@@ -204,7 +210,7 @@ class CommonTab extends StatefulWidget {
   final VoidCallback? onDeleted;
 
   const CommonTab({
-    Key? key,
+    super.key,
     this.avatar,
     required this.label,
     required this.selected,
@@ -214,7 +220,7 @@ class CommonTab extends StatefulWidget {
     this.style,
     this.width,
     this.height,
-  }) : super(key: key);
+  });
 
   CommonTab.fromWarp({
     super.key,
