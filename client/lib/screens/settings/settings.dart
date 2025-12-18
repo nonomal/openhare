@@ -31,39 +31,36 @@ class SettingsPage extends ConsumerWidget {
           ],
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              height: 40,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SettingTabButton(
-                    text: AppLocalizations.of(context)!.preferences,
-                    onTap: () {
-                      ref.read(settingTabServiceProvider.notifier).setSelectedSettingType(SettingType.system);
-                    },
-                    isSelected: model.settingTab.selectedSettingType == SettingType.system,
-                  ),
-                  const SizedBox(width: kSpacingMedium),
-                  SettingTabButton(
-                    text: AppLocalizations.of(context)!.llm_api,
-                    onTap: () {
-                      ref.read(settingTabServiceProvider.notifier).setSelectedSettingType(SettingType.llmApi);
-                    },
-                    isSelected: model.settingTab.selectedSettingType == SettingType.llmApi,
-                  ),
-                ],
-              ),
+            Row(
+              children: [
+                Icon(Icons.settings, color: Theme.of(context).colorScheme.primary),
+                const SizedBox(width: kSpacingSmall),
+                Text(
+                  AppLocalizations.of(context)!.preferences,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
             ),
             const SizedBox(height: kSpacingSmall),
-            Expanded(
-              child: IndexedStack(
-                index: model.settingTab.selectedSettingType.index,
-                children: [
-                  SystemSettingPage(model: model.systemSetting),
-                  const LLMApiSettingPage(),
-                ],
-              ),
+            SystemSettingPage(model: model.systemSetting),
+            const SizedBox(height: kSpacingMedium),
+            const PixelDivider(),
+            const SizedBox(height: kSpacingMedium),
+            Row(
+              children: [
+                Icon(Icons.api, color: Theme.of(context).colorScheme.primary),
+                const SizedBox(width: kSpacingSmall),
+                Text(
+                  AppLocalizations.of(context)!.llm_api,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+            ),
+            const SizedBox(height: kSpacingSmall),
+            const Expanded(
+              child: LLMApiSettingPage(),
             ),
           ],
         ),
@@ -170,7 +167,6 @@ class SystemSettingPage extends ConsumerWidget {
             const Spacer(),
           ],
         ),
-        const Spacer(),
       ],
     );
   }
@@ -453,67 +449,6 @@ class _InfoRow extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class SettingTabButton extends StatefulWidget {
-  final String text;
-  final Function() onTap;
-  final bool isSelected;
-
-  const SettingTabButton({
-    super.key,
-    required this.text,
-    required this.onTap,
-    required this.isSelected,
-  });
-
-  @override
-  State<SettingTabButton> createState() => _SettingTabButtonState();
-}
-
-class _SettingTabButtonState extends State<SettingTabButton> {
-  bool _isHovering = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color primaryColor = Theme.of(context).colorScheme.primary;
-    final Color? defaultColor = Theme.of(context).textTheme.titleMedium?.color;
-
-    Color getTextColor() {
-      if (widget.isSelected) {
-        return primaryColor;
-      } else if (_isHovering) {
-        return primaryColor;
-      } else {
-        return defaultColor ?? Colors.black;
-      }
-    }
-
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovering = true),
-      onExit: (_) => setState(() => _isHovering = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: Container(
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: widget.isSelected ? primaryColor : Colors.transparent,
-                width: 2,
-              ),
-            ),
-          ),
-          child: Text(
-            widget.text,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: getTextColor(),
-                ),
-          ),
-        ),
-      ),
     );
   }
 }
