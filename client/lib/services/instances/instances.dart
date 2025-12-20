@@ -48,10 +48,10 @@ class InstancesServices extends _$InstancesServices {
     return repo.isntances(key, pageNumber: pageNumber, pageSize: pageSize);
   }
 
-  Future<void> addActiveInstance(InstanceId instanceId, {String? schema}) async {
-    await ref.read(instanceRepoProvider).addActiveInstance(instanceId);
+  void addActiveInstance(InstanceId instanceId, {String? schema}) async {
+    ref.read(instanceRepoProvider).addActiveInstance(instanceId);
     if (schema != null) {
-      await ref.read(instanceRepoProvider).addInstanceActiveSchema(instanceId, schema);
+      ref.read(instanceRepoProvider).addInstanceActiveSchema(instanceId, schema);
       _invalidateSelf();
     }
   }

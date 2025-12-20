@@ -14,9 +14,8 @@ abstract class InstanceRepo {
   InstanceModel? getInstanceById(InstanceId id);
   InstanceListModel isntances(String key, {int? pageNumber, int? pageSize});
   List<InstanceModel> getActiveInstances(int top);
-  Future<void> addActiveInstance(InstanceId id);
-  Future<void> addInstanceActiveSchema(InstanceId id, String schema);
-
+  void addActiveInstance(InstanceId id);
+  void addInstanceActiveSchema(InstanceId id, String schema);
   Future<List<String>> getSchemas(InstanceId instanceId);
   Future<InstanceMetadataModel> getMetadata(InstanceId instanceId);
   Future<void> refreshMetadata(InstanceId instanceId);

@@ -11,6 +11,7 @@ import 'package:client/services/sessions/session_sql_editor.dart';
 import 'package:client/services/sessions/session_sql_result.dart';
 import 'package:client/services/sessions/session_controller.dart';
 import 'package:client/services/tasks/overview.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -123,7 +124,7 @@ class SessionsServices extends _$SessionsServices {
     await connsServices.connect(connId, onSchemaChangedCallback: (schema) async {
       ref.read(sessionRepoProvider).updateSession(sessionId, currentSchema: schema);
 
-      await ref.read(instancesServicesProvider.notifier).addActiveInstance(session.instanceId!, schema: schema);
+      ref.read(instancesServicesProvider.notifier).addActiveInstance(session.instanceId!, schema: schema);
 
       _invalidateSelf();
     });

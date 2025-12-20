@@ -207,24 +207,24 @@ class InstanceRepoImpl extends InstanceRepo {
   }
 
   @override
-  Future<void> addActiveInstance(InstanceId id) async {
+  void addActiveInstance(InstanceId id) {
     final instance = _instanceBox.get(id.value);
     if (instance == null) {
       return;
     }
     instance.latestOpenAt = DateTime.now();
-    await _instanceBox.putAsync(instance);
+    _instanceBox.put(instance);
     return;
   }
 
   @override
-  Future<void> addInstanceActiveSchema(InstanceId id, String schema) async {
+  void addInstanceActiveSchema(InstanceId id, String schema) {
     final instance = _instanceBox.get(id.value);
     if (instance == null) {
       return;
     }
     instance.activeSchemas.add(schema);
-    await _instanceBox.putAsync(instance);
+    _instanceBox.put(instance);
     return;
   }
 
