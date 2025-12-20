@@ -146,6 +146,12 @@ class SessionRepoImpl extends SessionRepo {
   }
 
   @override
+  SessionModel? seletedSession() {
+    final session = _sessions.selected();
+    return session != null ? _toModel(session) : null;
+  }
+
+  @override
   SessionListModel getSessions() {
     final selected = _sessions.selected();
     return SessionListModel(

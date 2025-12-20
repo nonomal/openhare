@@ -12,27 +12,27 @@ import 'package:client/l10n/app_localizations.dart';
 class SessionTabs extends ConsumerWidget {
   const SessionTabs({super.key});
 
-  void closeSessionDialog(BuildContext context, WidgetRef ref, SessionDetailListModel model, int index) {
+  void closeSessionDialog(BuildContext context, WidgetRef ref, SessionDetailModel model) {
     // 如果正在执行语句，则提示连接繁忙，请稍后执行
-    final state = model.sessions[index].connState;
+    final state = model.connState;
     if (SQLConnectState.isBusy(state) || SQLConnectState.isConnected(state)) {
       return doActionDialog(
         context,
         AppLocalizations.of(context)!.tip_close_session,
         AppLocalizations.of(context)!.tip_close_session_desc,
         () {
-          ref.read(sessionsServicesProvider.notifier).deleteSessionByIndex(index);
+          ref.read(sessionsServicesProvider.notifier).deleteSession(model.sessionId);
         },
         icon: Icon(Icons.warning_amber_rounded, color: Theme.of(context).colorScheme.error),
       );
     } else {
-      ref.read(sessionsServicesProvider.notifier).deleteSessionByIndex(index);
+      ref.read(sessionsServicesProvider.notifier).deleteSession(model.sessionId);
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    SessionDetailListModel model = ref.watch(sessionsDetailProvider);
+    SessionDetailListModel model = ref.watch(sessionTabProvider);
     return Container(
       padding: const EdgeInsets.only(top: kSpacingTiny, bottom: kSpacingTiny),
       child: Row(
@@ -61,7 +61,7 @@ class SessionTabs extends ConsumerWidget {
                             ref.read(sessionsServicesProvider.notifier).selectSessionByIndex(i);
                           },
                           onDeleted: () {
-                            closeSessionDialog(context, ref, model, i);
+                            closeSessionDialog(context, ref, model.sessions[i]);
                           },
                           selected: model.sessions[i].sessionId == model.selectedSession?.sessionId,
                         )
@@ -75,7 +75,7 @@ class SessionTabs extends ConsumerWidget {
                             PopupMenuItem<String>(
                               height: 30,
                               onTap: () {
-                                closeSessionDialog(context, ref, model, i);
+                                closeSessionDialog(context, ref, model.sessions[i]);
                               },
                               child: Text(AppLocalizations.of(context)!.close),
                             ),
@@ -84,7 +84,7 @@ class SessionTabs extends ConsumerWidget {
                             ref.read(sessionsServicesProvider.notifier).selectSessionByIndex(i);
                           },
                           onDeleted: () {
-                            closeSessionDialog(context, ref, model, i);
+                            closeSessionDialog(context, ref, model.sessions[i]);
                           },
                           selected: model.sessions[i].sessionId == model.selectedSession?.sessionId,
                         )

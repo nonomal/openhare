@@ -261,7 +261,7 @@ class _WindowListener with WindowListener {
 
   @override
   void onWindowClose() async {
-    SessionListModel sessions = ref.read(sessionsServicesProvider);
+    SessionDetailListModel sessions = ref.read(sessionTabProvider);
     for (var session in sessions.sessions) {
       ref.read(sessionSQLEditorServiceProvider(session.sessionId).notifier).saveCode();
     }

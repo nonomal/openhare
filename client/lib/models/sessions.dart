@@ -13,6 +13,7 @@ abstract class SessionRepo {
   SessionId newSession();
   SessionListModel getSessions();
   SessionModel? getSession(SessionId sessionId);
+  SessionModel? seletedSession();
   void updateSession(SessionId sessionId, {InstanceModel? instance, String? currentSchema});
   void setConnId(SessionId sessionId, ConnId connId);
   void unsetConnId(SessionId sessionId);
