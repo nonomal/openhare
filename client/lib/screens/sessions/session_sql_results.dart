@@ -117,11 +117,10 @@ class SqlResultTable extends ConsumerWidget {
 
   List<DataGridRow> buildRows(List<QueryResultRow> rows, BuildContext context) {
     return rows.map<DataGridRow>((e) {
-      return DataGridRow(cells: <DataGridCell<BaseQueryValue>>[
+      return DataGridRow(cells: <DataGridCell>[
         for (int i = 0; i < e.columns.length; i++)
-          DataGridCell<BaseQueryValue>(
-            contentBuilder: (context) =>
-                Text(e.values[i].getSummary() ?? '', maxLines: 1, style: Theme.of(context).textTheme.bodySmall),
+          DataGridCell(
+            data: e.values[i].getSummary() ?? '',
           ),
       ]);
     }).toList();
