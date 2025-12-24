@@ -75,6 +75,8 @@ class SqlResultTables extends ConsumerWidget {
       children: [
         Expanded(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 alignment: Alignment.centerLeft,
