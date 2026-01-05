@@ -9,7 +9,6 @@ import 'package:client/widgets/empty.dart';
 import 'package:client/widgets/loading.dart';
 import 'package:client/widgets/tooltip.dart';
 import 'package:db_driver/db_driver.dart';
-import 'package:client/widgets/data_type_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:client/widgets/tab_widget.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -97,35 +96,27 @@ class SqlResultTables extends ConsumerWidget {
 class SqlResultTable extends ConsumerWidget {
   const SqlResultTable({super.key});
 
-  List<DataGridColumn> buildColumns(List<BaseQueryColumn> columns) {
-    return columns.map<DataGridColumn>((e) {
-      final width = (e.dataType() == DataType.number) ? 80.0 : 200.0;
-      return DataGridColumn(
-        size: RowSize(width: width),
-        contentBuilder: (context) => Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(right: kSpacingTiny),
-              child: DataTypeIcon(type: e.dataType(), size: kIconSizeSmall),
+  List<DataGridColumn> buildColumns(
+    BuildContext context,
+    List<BaseQueryColumn> columns,
+    List<QueryResultRow> rows,
+  ) {
+    List<DataGridColumn> result = [];
+    for (int i = 0; i < columns.length; i++) {
+      final column = columns[i];
+      result.add(DataGridColumn.autoSize(
+        context: context,
+        name: column.name,
+        dataType: column.dataType(),
+        cells: <DataGridCell>[
+          for (int j = 0; j < rows.length; j++)
+            DataGridCell(
+              data: rows[j].values[i].getSummary() ?? '',
             ),
-            Expanded(
-              child: Text(e.name, overflow: TextOverflow.ellipsis),
-            ),
-          ],
-        ),
-      );
-    }).toList();
-  }
-
-  List<DataGridRow> buildRows(List<QueryResultRow> rows, BuildContext context) {
-    return rows.map<DataGridRow>((e) {
-      return DataGridRow(cells: <DataGridCell>[
-        for (int i = 0; i < e.columns.length; i++)
-          DataGridCell(
-            data: e.values[i].getSummary() ?? '',
-          ),
-      ]);
-    }).toList();
+        ],
+      ));
+    }
+    return result;
   }
 
   Widget buildEmptyBody(BuildContext context) {
@@ -220,8 +211,7 @@ class SqlResultTable extends ConsumerWidget {
       final controller = SQLResultController.sqlResultController(
         model.resultId,
         () => DataGridController(
-          columns: buildColumns(model.data!.columns),
-          rows: buildRows(model.data!.rows, context),
+          columns: buildColumns(context, model.data!.columns, model.data!.rows),
         ),
       );
       return DataGrid(
