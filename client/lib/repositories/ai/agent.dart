@@ -1,9 +1,8 @@
 import 'package:client/models/ai.dart';
 import 'package:client/repositories/repo.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:client/repositories/objectbox.g.dart';
 import 'package:objectbox/objectbox.dart';
+import 'package:client/repositories/objectbox.g.dart';
 
 part 'agent.g.dart';
 
@@ -67,10 +66,7 @@ class LLMAgentRepoImpl implements LLMAgentRepo {
   LLMAgentsModel getLLMAgents() {
     final agents = _llmAgentSettingBox.getAll();
     return LLMAgentsModel(
-      agents: agents
-          .map((e) => _toModel(e))
-          .fold<Map<LLMAgentId, LLMAgentModel>>(
-              {}, (acc, e) => acc..[e.id] = e),
+      agents: agents.map((e) => _toModel(e)).fold<Map<LLMAgentId, LLMAgentModel>>({}, (acc, e) => acc..[e.id] = e),
       lastUsedLLMAgent: getLastUsedLLMAgent(),
     );
   }
@@ -98,13 +94,13 @@ class LLMAgentRepoImpl implements LLMAgentRepo {
   @override
   void create(LLMAgentSettingModel setting) {
     final model = _llmAgentSettingBox.put(LLMApiSettingStorage(
-        name: setting.name,
-        baseUrl: setting.baseUrl,
-        apiKey: setting.apiKey,
-        modelName: setting.modelName));
+      name: setting.name,
+      baseUrl: setting.baseUrl,
+      apiKey: setting.apiKey,
+      modelName: setting.modelName,
+    ));
 
-    _status[LLMAgentId(value: model)] =
-        const LLMAgentStatusModel(state: LLMAgentState.unknown);
+    _status[LLMAgentId(value: model)] = const LLMAgentStatusModel(state: LLMAgentState.unknown);
   }
 
   @override

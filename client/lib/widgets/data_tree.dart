@@ -30,8 +30,7 @@ DataNode buildDataValueNode(MetaDataNode node) {
   return switch (node.type) {
     MetaType.database => SchemaValueNode(node.value),
     MetaType.table => TableValueNode(node.value),
-    MetaType.column =>
-      ColumnValueNode(node.value, node.getProp(MetaDataPropType.dataType)),
+    MetaType.column => ColumnValueNode(node.value, node.getProp(MetaDataPropType.dataType)),
     _ => SchemaValueNode(node.value)
   };
 }
@@ -137,40 +136,35 @@ class DatabaseNode extends FolderNode {
   DatabaseNode() : super();
 
   @override
-  String _name(BuildContext context) =>
-      AppLocalizations.of(context)!.metadata_tree_database;
+  String _name(BuildContext context) => AppLocalizations.of(context)!.metadata_tree_database;
 }
 
 class TableNode extends FolderNode {
   TableNode() : super();
 
   @override
-  String _name(BuildContext context) =>
-      AppLocalizations.of(context)!.metadata_tree_table;
+  String _name(BuildContext context) => AppLocalizations.of(context)!.metadata_tree_table;
 }
 
 class ColumnNode extends FolderNode {
   ColumnNode() : super();
 
   @override
-  String _name(BuildContext context) =>
-      AppLocalizations.of(context)!.metadata_tree_column;
+  String _name(BuildContext context) => AppLocalizations.of(context)!.metadata_tree_column;
 }
 
 class SchemaNode extends FolderNode {
   SchemaNode() : super();
 
   @override
-  String _name(BuildContext context) =>
-      AppLocalizations.of(context)!.metadata_tree_schema;
+  String _name(BuildContext context) => AppLocalizations.of(context)!.metadata_tree_schema;
 }
 
 class InstanceNode extends FolderNode {
   InstanceNode() : super();
 
   @override
-  String _name(BuildContext context) =>
-      AppLocalizations.of(context)!.metadata_tree_instance;
+  String _name(BuildContext context) => AppLocalizations.of(context)!.metadata_tree_instance;
 }
 
 class DataValueNode extends RootNode {
@@ -206,15 +200,14 @@ class DataValueNode extends RootNode {
     return TooltipText(
       text: name,
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: isOpen
-              ? Theme.of(context).colorScheme.onPrimaryContainer
-              : Theme.of(context).colorScheme.onSurface),
+            color: isOpen ? Theme.of(context).colorScheme.onPrimaryContainer : Theme.of(context).colorScheme.onSurface,
+          ),
     );
   }
 }
 
 class SchemaValueNode extends DataValueNode {
-  SchemaValueNode(String name) : super(name);
+  SchemaValueNode(super.name);
 
   @override
   Widget openIcons(BuildContext context) {
@@ -236,7 +229,7 @@ class SchemaValueNode extends DataValueNode {
 }
 
 class TableValueNode extends DataValueNode {
-  TableValueNode(String name) : super(name);
+  TableValueNode(super.name);
 
   @override
   Widget openIcons(BuildContext context) {
@@ -259,7 +252,8 @@ class TableValueNode extends DataValueNode {
 
 class ColumnValueNode extends DataValueNode {
   DataType type;
-  ColumnValueNode(String name, this.type) : super(name);
+
+  ColumnValueNode(super.name, this.type);
 
   @override
   Widget openIcons(BuildContext context) {
@@ -277,10 +271,10 @@ class DataTree extends StatefulWidget {
   final ScrollController? scrollController;
 
   const DataTree({
-    Key? key,
+    super.key,
     required this.controller,
     this.scrollController,
-  }) : super(key: key);
+  });
 
   @override
   State<DataTree> createState() => _DataTreeState();
@@ -340,9 +334,7 @@ class _MyTreeTileState extends State<MyTreeTile> {
         onTap: widget.onTap,
         child: Container(
           color: isEnter
-              ? Theme.of(context)
-                  .colorScheme
-                  .surfaceContainer // meta data detail 鼠标移入的颜色.
+              ? Theme.of(context).colorScheme.surfaceContainer // meta data detail 鼠标移入的颜色.
               : null,
           child: TreeIndentation(
             entry: widget.entry,
@@ -358,12 +350,9 @@ class _MyTreeTileState extends State<MyTreeTile> {
                   (widget.entry.hasChildren)
                       ? (widget.entry.isExpanded)
                           ? const Icon(Icons.expand_more, size: kIconSizeSmall)
-                          : const Icon(Icons.chevron_right,
-                              size: kIconSizeSmall)
+                          : const Icon(Icons.chevron_right, size: kIconSizeSmall)
                       : const SizedBox(width: kIconSizeSmall),
-                  (isOpen)
-                      ? widget.entry.node.openIcons(context)
-                      : widget.entry.node.closeIcons(context),
+                  (isOpen) ? widget.entry.node.openIcons(context) : widget.entry.node.closeIcons(context),
                   const SizedBox(width: kSpacingTiny),
                   Expanded(
                     child: widget.entry.node.builder(context, isOpen),

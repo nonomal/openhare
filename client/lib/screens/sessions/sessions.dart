@@ -9,11 +9,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SessionsPage extends ConsumerWidget {
-  const SessionsPage({Key? key}) : super(key: key);
+  const SessionsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    SessionModel? session = ref.watch(selectedSessionNotifierProvider);
+    SessionModel? session = ref.watch(selectedSessionProvider);
     if (session == null || session.instanceId == null) {
       return const PageSkeleton(
         key: Key("add_session"),

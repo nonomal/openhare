@@ -1,6 +1,5 @@
 import 'package:client/models/settings.dart';
 import 'package:client/repositories/repo.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:client/repositories/objectbox.g.dart';
 import 'package:objectbox/objectbox.dart';
@@ -40,8 +39,7 @@ class SettingsRepoImpl implements SettingsRepo {
   @override
   SystemSettingModel getSettings() {
     final settings = _getSettings();
-    return SystemSettingModel(
-        theme: settings.theme, language: settings.language);
+    return SystemSettingModel(theme: settings.theme, language: settings.language);
   }
 
   @override

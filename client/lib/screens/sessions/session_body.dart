@@ -12,15 +12,13 @@ import 'package:client/widgets/split_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SessionBodyPage extends ConsumerWidget {
-  const SessionBodyPage({Key? key}) : super(key: key);
+  const SessionBodyPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    SessionEditorModel sessionEditor = ref
-        .watch(sessionEditorNotifierProvider); // todo: 合并或者拆分page, 不要两个页面混在一起刷新
-    SessionDrawerModel sessionDrawer = ref.watch(sessionDrawerNotifierProvider);
-    SessionController sessionController =
-        SessionController.sessionController(sessionDrawer.sessionId);
+    SessionEditorModel sessionEditor = ref.watch(sessionEditorProvider); // todo: 合并或者拆分page, 不要两个页面混在一起刷新
+    SessionDrawerModel sessionDrawer = ref.watch(sessionDrawerProvider);
+    SessionController sessionController = SessionController.sessionController(sessionDrawer.sessionId);
 
     final Widget left = Row(
       children: [

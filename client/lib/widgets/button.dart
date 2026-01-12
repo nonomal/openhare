@@ -8,62 +8,66 @@ class RectangleIconButton extends StatefulWidget {
   final double size;
   final double iconSize;
   final double padding;
+
+  /// 不同的icon 存在视觉对齐与实际对齐不一样，因此加一个偏移量来调整
+  final double verticalOffset;
   final Color? iconColor;
   final Color? backgroundColor;
   final Color? hoverBackgroundColor;
   final VoidCallback? onPressed;
 
-  const RectangleIconButton(
-      {Key? key,
-      this.tooltip,
-      required this.icon,
-      this.onPressed,
-      required this.size,
-      required this.iconSize,
-      required this.padding,
-      this.iconColor,
-      this.backgroundColor,
-      this.hoverBackgroundColor})
-      : super(key: key);
+  const RectangleIconButton({
+    super.key,
+    this.tooltip,
+    required this.icon,
+    this.onPressed,
+    required this.size,
+    required this.iconSize,
+    required this.padding,
+    this.verticalOffset = 0,
+    this.iconColor,
+    this.backgroundColor,
+    this.hoverBackgroundColor,
+  });
 
   const RectangleIconButton.medium({
-    Key? key,
+    super.key,
     this.tooltip,
     required this.icon,
     this.onPressed,
     this.iconColor,
     this.backgroundColor,
     this.hoverBackgroundColor,
+    this.verticalOffset = 0,
   })  : size = kIconButtonSizeMedium,
         iconSize = kIconSizeMedium,
-        padding = 4,
-        super(key: key);
+        padding = 4;
 
-  const RectangleIconButton.small(
-      {Key? key,
-      this.tooltip,
-      required this.icon,
-      this.onPressed,
-      this.iconColor,
-      this.backgroundColor,
-      this.hoverBackgroundColor})
-      : size = kIconButtonSizeSmall,
+  const RectangleIconButton.small({
+    super.key,
+    this.tooltip,
+    required this.icon,
+    this.onPressed,
+    this.iconColor,
+    this.backgroundColor,
+    this.hoverBackgroundColor,
+    this.verticalOffset = 0,
+  })  : size = kIconButtonSizeSmall,
         iconSize = kIconSizeSmall,
-        padding = 2,
-        super(key: key);
+        padding = 2;
 
-  const RectangleIconButton.tiny(
-      {Key? key,
-      this.tooltip,
-      required this.icon,
-      this.onPressed,
-      this.iconColor,
-      this.backgroundColor,
-      this.hoverBackgroundColor})
-      : size = kIconButtonSizeTiny,
+  const RectangleIconButton.tiny({
+    super.key,
+    this.tooltip,
+    required this.icon,
+    this.onPressed,
+    this.iconColor,
+    this.backgroundColor,
+    this.hoverBackgroundColor,
+    this.verticalOffset = 0,
+  })  : size = kIconButtonSizeTiny,
         iconSize = kIconSizeTiny,
-        padding = 2,
-        super(key: key);
+        padding = 2;
 
   @override
   State<RectangleIconButton> createState() => _RectangleIconButtonState();
@@ -75,16 +79,16 @@ class _RectangleIconButtonState extends State<RectangleIconButton> {
   @override
   Widget build(BuildContext context) {
     final button = MouseRegion(
-        cursor: SystemMouseCursors.click,
+        cursor: widget.onPressed != null ? SystemMouseCursors.click : SystemMouseCursors.basic,
         onEnter: (value) {
-          if (!_isHovering) {
+          if (widget.onPressed != null && !_isHovering) {
             setState(() {
               _isHovering = true;
             });
           }
         },
         onExit: (value) {
-          if (_isHovering) {
+          if (widget.onPressed != null && _isHovering) {
             setState(() {
               _isHovering = false;
             });
@@ -93,7 +97,12 @@ class _RectangleIconButtonState extends State<RectangleIconButton> {
         child: GestureDetector(
           onTap: widget.onPressed,
           child: Padding(
-            padding: EdgeInsets.all(widget.padding),
+            padding: EdgeInsets.only(
+              left: widget.padding,
+              right: widget.padding,
+              top: widget.padding + widget.verticalOffset,
+              bottom: widget.padding - widget.verticalOffset,
+            ),
             child: Container(
               width: widget.size - widget.padding * 2,
               height: widget.size - widget.padding * 2,
@@ -101,9 +110,7 @@ class _RectangleIconButtonState extends State<RectangleIconButton> {
                 borderRadius: BorderRadius.circular(widget.size * 0.2),
                 color: _isHovering
                     ? widget.hoverBackgroundColor ??
-                        Theme.of(context)
-                            .colorScheme
-                            .primaryContainer // icon button 鼠标悬浮的颜色
+                        Theme.of(context).colorScheme.primaryContainer // icon button 鼠标悬浮的颜色
                     : widget.backgroundColor, // icon button 背景色
               ),
               child: Icon(
@@ -130,8 +137,12 @@ class LinkButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final double? maxWidth;
 
-  const LinkButton({Key? key, required this.text, this.onPressed, this.maxWidth})
-      : super(key: key);
+  const LinkButton({
+    super.key,
+    required this.text,
+    this.onPressed,
+    this.maxWidth,
+  });
 
   @override
   State<LinkButton> createState() => _LinkButtonState();
@@ -143,8 +154,7 @@ class _LinkButtonState extends State<LinkButton> {
   @override
   Widget build(BuildContext context) {
     final Color normalColor = Theme.of(context).colorScheme.primary;
-    final Color hoverColor =
-        Theme.of(context).colorScheme.primary.withOpacity(0.7);
+    final Color hoverColor = Theme.of(context).colorScheme.primary.withOpacity(0.7);
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovering = true),
@@ -155,8 +165,7 @@ class _LinkButtonState extends State<LinkButton> {
           constraints: BoxConstraints(
             maxWidth: widget.maxWidth ?? 200,
           ),
-          padding:
-              const EdgeInsets.fromLTRB(kSpacingSmall, 0, kSpacingSmall, 0),
+          padding: const EdgeInsets.fromLTRB(kSpacingSmall, 0, kSpacingSmall, 0),
           // 只有当TextOverflow.ellipsis实际发生时才显示tooltip
           child: TooltipText(
             text: widget.text,

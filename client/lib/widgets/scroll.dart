@@ -43,8 +43,7 @@ class KeepOffestScrollController extends ScrollController {
 }
 
 /// 支持自动保存 offset 的 LinkedScrollControllerGroup
-class KeepOffestLinkedScrollControllerGroup
-    extends LinkedScrollControllerGroup {
+class KeepOffestLinkedScrollControllerGroup extends LinkedScrollControllerGroup {
   double _offset = 0.0;
 
   @override

@@ -12,7 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:client/l10n/app_localizations.dart';
 
 class InstancesPage extends StatelessWidget {
-  const InstancesPage({Key? key}) : super(key: key);
+  const InstancesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +22,8 @@ class InstancesPage extends StatelessWidget {
     );
   }
 }
+
+final instanceSearchTextController = TextEditingController();
 
 class InstanceTable extends ConsumerStatefulWidget {
   const InstanceTable({super.key});
@@ -35,17 +37,21 @@ class _InstanceTableState extends ConsumerState<InstanceTable> {
     return DataRow(cells: [
       DataCell(Row(
         children: [
-          Image.asset(connectionMetaMap[instance.dbType]!.logoAssertPath),
+          Image.asset(
+            connectionMetaMap[instance.dbType]!.logoAssertPath,
+            width: kIconSizeMedium,
+            height: kIconSizeMedium,
+          ),
           Padding(
-            padding: const EdgeInsets.only(left: 20),
+            padding: const EdgeInsets.only(left: kSpacingSmall),
             child: Text(instance.connectValue.name),
           )
         ],
       )),
-      DataCell(Text(instance.connectValue.desc)),
       DataCell(Text(instance.connectValue.host)),
       DataCell(Text("${instance.connectValue.port}")),
       DataCell(Text(instance.connectValue.user)),
+      DataCell(Text(instance.connectValue.desc, overflow: TextOverflow.ellipsis)),
       DataCell(Row(
         children: [
           RectangleIconButton.small(
@@ -58,11 +64,7 @@ class _InstanceTableState extends ConsumerState<InstanceTable> {
           RectangleIconButton.small(
             icon: Icons.delete,
             onPressed: () async {
-              await ref
-                  .read(instancesServicesProvider.notifier)
-                  .deleteInstance(instance.id);
-
-              ref.read(instancesNotifierProvider.notifier).refresh();
+              ref.read(instancesServicesProvider.notifier).deleteInstance(instance.id);
             },
           ),
           RectangleIconButton.small(
@@ -77,17 +79,36 @@ class _InstanceTableState extends ConsumerState<InstanceTable> {
   @override
   Widget build(BuildContext context) {
     final column = [
-      DataColumn(label: Text(AppLocalizations.of(context)!.db_instance_name)),
-      DataColumn(label: Text(AppLocalizations.of(context)!.db_instance_desc)),
-      DataColumn(label: Text(AppLocalizations.of(context)!.db_instance_host)),
-      DataColumn(label: Text(AppLocalizations.of(context)!.db_instance_port)),
-      DataColumn(label: Text(AppLocalizations.of(context)!.db_instance_user)),
-      DataColumn(label: Text(AppLocalizations.of(context)!.db_instance_op))
+      DataColumn(
+        label: Text(AppLocalizations.of(context)!.db_instance_name),
+        columnWidth: const FlexColumnWidth(2),
+      ),
+      DataColumn(
+        label: Text(AppLocalizations.of(context)!.db_instance_host),
+        columnWidth: const FlexColumnWidth(2),
+      ),
+      DataColumn(
+        label: Text(AppLocalizations.of(context)!.db_instance_port),
+        columnWidth: const FlexColumnWidth(1),
+      ),
+      DataColumn(
+        label: Text(AppLocalizations.of(context)!.db_instance_user),
+        columnWidth: const FlexColumnWidth(1),
+      ),
+      DataColumn(
+        label: Text(AppLocalizations.of(context)!.db_instance_desc),
+        columnWidth: const FlexColumnWidth(3),
+      ),
+      DataColumn(
+        label: Text(AppLocalizations.of(context)!.db_instance_op),
+        columnWidth: const FlexColumnWidth(2),
+      ),
     ];
 
-    final model = ref.watch(instancesNotifierProvider);
+    final model = ref.watch(instancesProvider);
 
-    final searchTextController = TextEditingController(text: model.key);
+    final rows = model.instances.instances.map((instance) => buildDataRow(instance)).toList();
+
     return BodyPageSkeleton(
       bottomSpaceSize: kSpacingSmall,
       header: Row(
@@ -119,12 +140,22 @@ class _InstanceTableState extends ConsumerState<InstanceTable> {
                       maxWidth: 200,
                     )),
                 child: SearchBar(
-                  controller: searchTextController,
+                  controller: instanceSearchTextController,
+                  backgroundColor: WidgetStatePropertyAll(
+                    Theme.of(context).colorScheme.surfaceContainerLow,
+                  ),
+                  side: WidgetStatePropertyAll(
+                    BorderSide(
+                      color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                      width: 0.5,
+                    ),
+                  ),
                   onChanged: (value) {
-                    ref.read(instancesNotifierProvider.notifier).changePage(
-                        value,
-                        pageNumber: model.currentPage,
-                        pageSize: model.pageSize);
+                    ref.read(instancesProvider.notifier).changePage(
+                          value,
+                          pageNumber: model.currentPage,
+                          pageSize: model.pageSize,
+                        );
                   },
                   trailing: const [Icon(Icons.search)],
                 ),
@@ -142,12 +173,12 @@ class _InstanceTableState extends ConsumerState<InstanceTable> {
                 scrollDirection: Axis.vertical,
                 child: DataTable(
                   checkboxHorizontalMargin: 0,
+                  horizontalMargin: 0,
+                  columnSpacing: 0,
                   dividerThickness: kDividerThickness,
                   showBottomBorder: true,
                   columns: column,
-                  rows: model.instances.map((instance) {
-                    return buildDataRow(instance);
-                  }).toList(),
+                  rows: rows,
                   sortAscending: false,
                   showCheckboxColumn: true,
                 ),
@@ -155,14 +186,15 @@ class _InstanceTableState extends ConsumerState<InstanceTable> {
             ),
           ),
           TablePaginatedBar(
-            count: model.count,
+            count: model.instances.count,
             pageSize: model.pageSize,
             pageNumber: model.currentPage,
             onChange: (pageNumber) {
-              ref.read(instancesNotifierProvider.notifier).changePage(
-                  searchTextController.text,
-                  pageNumber: pageNumber,
-                  pageSize: model.pageSize);
+              ref.read(instancesProvider.notifier).changePage(
+                    instanceSearchTextController.text,
+                    pageNumber: pageNumber,
+                    pageSize: model.pageSize,
+                  );
             },
           ),
         ],

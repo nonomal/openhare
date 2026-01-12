@@ -11,7 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:client/l10n/app_localizations.dart';
 
 class UpdateInstancePage extends StatefulWidget {
-  const UpdateInstancePage({Key? key}) : super(key: key);
+  const UpdateInstancePage({super.key});
 
   @override
   State<UpdateInstancePage> createState() => _UpdateInstancePageState();
@@ -21,8 +21,7 @@ class _UpdateInstancePageState extends State<UpdateInstancePage> {
   @override
   void initState() {
     super.initState();
-    updateInstanceController
-        .addListener(() => mounted ? setState(() {}) : null);
+    updateInstanceController.addListener(() => mounted ? setState(() {}) : null);
   }
 
   @override
@@ -53,7 +52,7 @@ class _UpdateInstancePageState extends State<UpdateInstancePage> {
 }
 
 class UpdateInstance extends ConsumerStatefulWidget {
-  const UpdateInstance({Key? key}) : super(key: key);
+  const UpdateInstance({super.key});
 
   @override
   ConsumerState<UpdateInstance> createState() => _UpdateInstanceState();
@@ -63,8 +62,7 @@ class _UpdateInstanceState extends ConsumerState<UpdateInstance> {
   @override
   void initState() {
     super.initState();
-    updateInstanceController
-        .addListener(() => mounted ? setState(() {}) : null);
+    updateInstanceController.addListener(() => mounted ? setState(() {}) : null);
   }
 
   @override
@@ -106,18 +104,12 @@ class _UpdateInstanceState extends ConsumerState<UpdateInstance> {
                     },
               child: Text(AppLocalizations.of(context)!.db_instance_test)),
           TextButton(
-              onPressed: () async {
+              onPressed: () {
                 if (updateInstanceController.validate()) {
-                  await ref
-                      .read(instancesServicesProvider.notifier)
-                      .updateInstance(
+                  ref.read(instancesServicesProvider.notifier).updateInstance(
                         updateInstanceController.getInstanceModel(),
                       );
-
                   updateInstanceController.clear();
-
-                  ref.read(instancesNotifierProvider.notifier).refresh();
-
                   GoRouter.of(context).go('/instances/list');
                 }
               },
@@ -130,13 +122,9 @@ class _UpdateInstanceState extends ConsumerState<UpdateInstance> {
               child: SizedBox(
             child: Container(
               padding: const EdgeInsets.fromLTRB(0, kSpacingSmall, 0, 0),
-              child:
-                  Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+              child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
                 DatabaseTypeCardList(
-                  connectionMetas: [
-                    connectionMetaMap[
-                        updateInstanceController.selectedDatabaseType]!
-                  ],
+                  connectionMetas: [connectionMetaMap[updateInstanceController.selectedDatabaseType]!],
                   selectedColor: selectedColor(updateInstanceController),
                 ),
                 const SizedBox(height: kSpacingMedium),
@@ -197,8 +185,7 @@ class UpdateInstanceController extends AddInstanceController {
   InstanceModel? instance;
 
   @override
-  DatabaseType get selectedDatabaseType =>
-      instance?.dbType ?? DatabaseType.mysql;
+  DatabaseType get selectedDatabaseType => instance?.dbType ?? DatabaseType.mysql;
 
   @override
   void onDatabaseTypeChange(DatabaseType type) {

@@ -28,7 +28,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:client/l10n/app_localizations.dart';
 
 class SessionDrawerChat extends ConsumerStatefulWidget {
-  const SessionDrawerChat({Key? key}) : super(key: key);
+  const SessionDrawerChat({super.key});
 
   @override
   ConsumerState<SessionDrawerChat> createState() => _SessionDrawerChatState();
@@ -37,22 +37,16 @@ class SessionDrawerChat extends ConsumerStatefulWidget {
 class _SessionDrawerChatState extends ConsumerState<SessionDrawerChat> {
   @override
   Widget build(BuildContext context) {
-    SessionAIChatModel? model = ref.watch(sessionAIChatNotifierProvider);
-    if (model == null) {
-      return const Spacer();
-    }
-
+    SessionAIChatModel model = ref.watch(sessionAIChatProvider);
     return Column(
       children: [
         // 聊天内容
         Expanded(
-          child: (model.llmAgents.agents.isEmpty)
-              ? const SessionChatGuide()
-              : const SessionChatMessages(),
+          child: (model.llmAgents.agents.isEmpty) ? const SessionChatGuide() : SessionChatMessages(model: model),
         ),
         const SizedBox(height: kSpacingSmall),
         // 下方的输入框区域
-        const SessionChatInputCard(),
+        SessionChatInputCard(model: model),
         const SizedBox(height: kSpacingMedium),
       ],
     );
@@ -60,11 +54,12 @@ class _SessionDrawerChatState extends ConsumerState<SessionDrawerChat> {
 }
 
 class SessionChatInputCard extends ConsumerStatefulWidget {
-  const SessionChatInputCard({Key? key}) : super(key: key);
+  final SessionAIChatModel model;
+
+  const SessionChatInputCard({super.key, required this.model});
 
   @override
-  ConsumerState<SessionChatInputCard> createState() =>
-      _SessionChatInputCardState();
+  ConsumerState<SessionChatInputCard> createState() => _SessionChatInputCardState();
 }
 
 class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
@@ -74,8 +69,7 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
 
   bool _isTableSelected(SessionAIChatModel model, String tableName) {
     return model.chatModel.tables.containsKey(model.currentSchema ?? "") &&
-        model.chatModel.tables[model.currentSchema ?? ""]!
-            .containsKey(tableName);
+        model.chatModel.tables[model.currentSchema ?? ""]!.containsKey(tableName);
   }
 
   Map<String, String> _allTable(SessionAIChatModel model, String searchText) {
@@ -96,8 +90,7 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
     }
 
     for (var table in allTable.keys) {
-      if (!model.chatModel.tables[model.currentSchema ?? ""]!
-          .containsKey(table)) {
+      if (!model.chatModel.tables[model.currentSchema ?? ""]!.containsKey(table)) {
         return false;
       }
     }
@@ -105,26 +98,19 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
     return true;
   }
 
-  Future<void> _sendMessage(
-      AIChatId chatId, SessionAIChatModel chatModel) async {
-    final text = SessionController.sessionController(chatModel.sessionId)
-        .chatInputController
-        .text
-        .trim();
-    SessionController.sessionController(chatModel.sessionId)
-        .chatInputController
-        .clear();
+  Future<void> _sendMessage(AIChatId chatId, SessionAIChatModel chatModel) async {
+    final text = SessionController.sessionController(chatModel.sessionId).chatInputController.text.trim();
+    SessionController.sessionController(chatModel.sessionId).chatInputController.clear();
 
     // 调用AIChatService的chat方法
     await ref.read(aIChatServiceProvider.notifier).chat(
-        chatId,
-        chatModel.llmAgents.lastUsedLLMAgent!.id,
-        genChatSystemPrompt(chatModel),
-        message: text);
+          chatId,
+          chatModel.llmAgents.lastUsedLLMAgent!.id,
+          genChatSystemPrompt(chatModel),
+          message: text,
+        );
 
-    final scrollController =
-        SessionController.sessionController(chatModel.sessionId)
-            .aiChatScrollController;
+    final scrollController = SessionController.sessionController(chatModel.sessionId).aiChatScrollController;
 
     // 滚动到底部
     Future.delayed(const Duration(milliseconds: 100), () {
@@ -140,26 +126,17 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
 
   @override
   Widget build(BuildContext context) {
-    SessionAIChatModel? model = ref.watch(sessionAIChatNotifierProvider);
-    if (model == null) {
-      return const Spacer();
-    }
     final services = ref.read(aIChatServiceProvider.notifier);
 
-    final chatInputController =
-        SessionController.sessionController(model.sessionId)
-            .chatInputController;
-    final searchTextController =
-        SessionController.sessionController(model.sessionId)
-            .aiChatSearchTextController;
+    final chatInputController = SessionController.sessionController(widget.model.sessionId).chatInputController;
+    final searchTextController = SessionController.sessionController(widget.model.sessionId).aiChatSearchTextController;
 
     // 模型选择工具栏
     final modelToolWidget = Container(
       constraints: const BoxConstraints(
         maxWidth: 120,
       ),
-      padding: const EdgeInsets.fromLTRB(
-          kSpacingSmall, kSpacingTiny, kSpacingSmall, kSpacingTiny),
+      padding: const EdgeInsets.fromLTRB(kSpacingSmall, kSpacingTiny, kSpacingSmall, kSpacingTiny),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(10),
@@ -169,14 +146,13 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
         ),
       ),
       child: Text(
-        model.llmAgents.lastUsedLLMAgent?.setting.name ?? "-",
+        widget.model.llmAgents.lastUsedLLMAgent?.setting.name ?? "-",
         overflow: TextOverflow.ellipsis,
         style: Theme.of(context).textTheme.bodySmall,
       ),
     );
 
-    final tableCount =
-        model.chatModel.tables[model.currentSchema ?? ""]?.length ?? 0;
+    final tableCount = widget.model.chatModel.tables[widget.model.currentSchema ?? ""]?.length ?? 0;
 
     // 表选择工具栏
     final tableToolWidget = IntrinsicWidth(
@@ -184,8 +160,7 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
         constraints: const BoxConstraints(
           maxWidth: 80,
         ),
-        padding: const EdgeInsets.fromLTRB(
-            kSpacingSmall, kSpacingTiny, kSpacingSmall, kSpacingTiny),
+        padding: const EdgeInsets.fromLTRB(kSpacingSmall, kSpacingTiny, kSpacingSmall, kSpacingTiny),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(10),
@@ -206,8 +181,7 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
             Expanded(
               child: (tableCount > 10)
                   ? Tooltip(
-                      message: AppLocalizations.of(context)!
-                          .ai_chat_table_tip_more_than_10,
+                      message: AppLocalizations.of(context)!.ai_chat_table_tip_more_than_10,
                       child: Text(
                         "+$tableCount",
                         overflow: TextOverflow.ellipsis,
@@ -230,8 +204,7 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(kSpacingSmall, 0, kSpacingSmall, 0),
       child: Container(
-        padding: const EdgeInsets.fromLTRB(
-            kSpacingSmall, kSpacingSmall, kSpacingSmall, kSpacingTiny),
+        padding: const EdgeInsets.fromLTRB(kSpacingSmall, kSpacingSmall, kSpacingSmall, kSpacingTiny),
         // 设置一个圆角
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainer,
@@ -249,18 +222,16 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
               controller: chatInputController,
               minLines: 1,
               maxLines: 5,
-              enabled: model.chatModel.state != AIChatState.waiting,
+              enabled: widget.model.chatModel.state != AIChatState.waiting,
               textInputAction: TextInputAction.done,
               decoration: InputDecoration(
                 hintText: AppLocalizations.of(context)!.ai_chat_input_tip,
                 border: InputBorder.none,
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                    vertical: kSpacingSmall, horizontal: kSpacingTiny),
+                contentPadding: const EdgeInsets.symmetric(vertical: kSpacingSmall, horizontal: kSpacingTiny),
               ),
-              onSubmitted: (_) => model.canSendMessage()
-                  ? _sendMessage(model.chatModel.id, model)
-                  : null,
+              onSubmitted: (_) =>
+                  widget.model.canSendMessage() ? _sendMessage(widget.model.chatModel.id, widget.model) : null,
             ),
 
             const SizedBox(height: kSpacingSmall),
@@ -274,12 +245,11 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
                   isAbove: true,
                   spacing: kSpacingTiny,
                   tabs: [
-                    for (var agent in model.llmAgents.agents.values)
+                    for (var agent in widget.model.llmAgents.agents.values)
                       OverlayMenuItem(
                         height: 24,
                         child: Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                              kSpacingSmall, 0, kSpacingSmall, 0),
+                          padding: const EdgeInsets.fromLTRB(kSpacingSmall, 0, kSpacingSmall, 0),
                           child: Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
@@ -289,9 +259,7 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
                           ),
                         ),
                         onTabSelected: () {
-                          ref
-                              .read(lLMAgentServiceProvider.notifier)
-                              .updateLastUsedLLMAgent(agent.id);
+                          ref.read(lLMAgentServiceProvider.notifier).updateLastUsedLLMAgent(agent.id);
                         },
                       ),
                   ],
@@ -300,26 +268,23 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
                 const SizedBox(width: kSpacingTiny),
 
                 // 表选择
-                (model.currentSchema != null && model.currentSchema != "")
+                (widget.model.currentSchema != null && widget.model.currentSchema != "")
                     ? OverlayMenu(
                         isAbove: true,
                         closeOnSelectItem: false,
                         spacing: kSpacingTiny,
                         tabs: [
-                          for (var table
-                              in _allTable(model, searchTextController.text)
-                                  .keys)
+                          for (var table in _allTable(widget.model, searchTextController.text).keys)
                             OverlayMenuItem(
                               height: 36,
                               child: Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                    kSpacingSmall, 0, kSpacingSmall, 0),
+                                padding: const EdgeInsets.fromLTRB(kSpacingSmall, 0, kSpacingSmall, 0),
                                 child: Align(
                                   alignment: Alignment.centerLeft,
                                   child: Row(
                                     children: [
                                       // 如果table 在aichatmodel.tables 中，则显示选中状态
-                                      _isTableSelected(model, table)
+                                      _isTableSelected(widget.model, table)
                                           ? const Icon(
                                               Icons.check_circle,
                                               size: kIconSizeSmall,
@@ -331,33 +296,27 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
                                             ),
                                       const SizedBox(width: kSpacingTiny),
                                       Expanded(
-                                        child: TooltipText(
-                                            text: table,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall),
+                                        child: TooltipText(text: table, style: Theme.of(context).textTheme.bodySmall),
                                       ),
                                     ],
                                   ),
                                 ),
                               ),
                               onTabSelected: () {
-                                final newTables = Map<String, String>.from(model
-                                        .chatModel
-                                        .tables[model.currentSchema ?? ""] ??
-                                    {});
+                                final newTables = Map<String, String>.from(
+                                    widget.model.chatModel.tables[widget.model.currentSchema ?? ""] ?? {});
 
-                                if (_isTableSelected(model, table)) {
+                                if (_isTableSelected(widget.model, table)) {
                                   // delete it
                                   newTables.remove(table);
-                                  services.updateTables(model.chatModel.id,
-                                      model.currentSchema ?? "", newTables);
+                                  services.updateTables(
+                                      widget.model.chatModel.id, widget.model.currentSchema ?? "", newTables);
                                   return;
                                 } else {
                                   // 如果table 不在aichatmodel.tables 中，则添加
                                   newTables[table] = table;
-                                  services.updateTables(model.chatModel.id,
-                                      model.currentSchema ?? "", newTables);
+                                  services.updateTables(
+                                      widget.model.chatModel.id, widget.model.currentSchema ?? "", newTables);
                                 }
                               },
                             ),
@@ -365,56 +324,44 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
                         footer: OverlayMenuFooter(
                           height: 36,
                           child: Padding(
-                            padding: const EdgeInsets.fromLTRB(kSpacingSmall,
-                                kSpacingTiny, kSpacingSmall, kSpacingTiny),
+                            padding:
+                                const EdgeInsets.fromLTRB(kSpacingSmall, kSpacingTiny, kSpacingSmall, kSpacingTiny),
                             child: Row(
                               children: [
                                 GestureDetector(
                                   onTap: () {
                                     // 全选或者全取消操作
-                                    if (_isAllTableSelected(
-                                        model, searchTextController.text)) {
+                                    if (_isAllTableSelected(widget.model, searchTextController.text)) {
                                       // 全取消
-                                      services.updateTables(model.chatModel.id,
-                                          model.currentSchema ?? "", {});
+                                      services.updateTables(
+                                          widget.model.chatModel.id, widget.model.currentSchema ?? "", {});
                                     } else {
                                       // 全选
                                       services.updateTables(
-                                        model.chatModel.id,
-                                        model.currentSchema ?? "",
-                                        _allTable(
-                                            model, searchTextController.text),
+                                        widget.model.chatModel.id,
+                                        widget.model.currentSchema ?? "",
+                                        _allTable(widget.model, searchTextController.text),
                                       );
                                     }
                                   },
                                   child: Icon(
-                                    _isAllTableSelected(
-                                            model, searchTextController.text)
+                                    _isAllTableSelected(widget.model, searchTextController.text)
                                         ? Icons.check_circle
                                         : Icons.circle_outlined,
                                     size: kIconSizeSmall,
-                                    color: _isAllTableSelected(
-                                            model, searchTextController.text)
+                                    color: _isAllTableSelected(widget.model, searchTextController.text)
                                         ? Colors.green
-                                        : Theme.of(context)
-                                            .colorScheme
-                                            .onSurface,
+                                        : Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ),
                                 const SizedBox(width: kSpacingTiny),
                                 Expanded(
                                   child: SearchBarTheme(
                                     data: SearchBarThemeData(
-                                        textStyle: WidgetStatePropertyAll(
-                                            Theme.of(context)
-                                                .textTheme
-                                                .bodySmall),
-                                        backgroundColor: WidgetStatePropertyAll(
-                                            Theme.of(context)
-                                                .colorScheme
-                                                .surfaceContainer),
-                                        elevation:
-                                            const WidgetStatePropertyAll(0),
+                                        textStyle: WidgetStatePropertyAll(Theme.of(context).textTheme.bodySmall),
+                                        backgroundColor:
+                                            WidgetStatePropertyAll(Theme.of(context).colorScheme.surfaceContainer),
+                                        elevation: const WidgetStatePropertyAll(0),
                                         constraints: const BoxConstraints(
                                           minHeight: 24,
                                         )),
@@ -449,14 +396,10 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(Icons.info_outline,
-                                    size: kIconSizeMedium,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurface),
+                                    size: kIconSizeMedium, color: Theme.of(context).colorScheme.onSurface),
                                 const SizedBox(height: kSpacingSmall),
                                 Text(
-                                  AppLocalizations.of(context)!
-                                      .ai_chat_table_tip,
+                                  AppLocalizations.of(context)!.ai_chat_table_tip,
                                   textAlign: TextAlign.center,
                                 ),
                               ],
@@ -469,23 +412,20 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
 
                 // 清空聊天记录
                 RectangleIconButton.small(
-                  tooltip:
-                      AppLocalizations.of(context)!.button_tooltip_clear_chat,
+                  tooltip: AppLocalizations.of(context)!.button_tooltip_clear_chat,
                   icon: Icons.cleaning_services,
-                  onPressed: model.canClearMessage()
-                      ? () => services.cleanMessages(model.chatModel.id)
-                      : null,
+                  onPressed:
+                      widget.model.canClearMessage() ? () => services.cleanMessages(widget.model.chatModel.id) : null,
                 ),
 
                 // 发送消息
-                (model.chatModel.state == AIChatState.waiting)
+                (widget.model.chatModel.state == AIChatState.waiting)
                     ? const Loading.small()
                     : RectangleIconButton.small(
-                        tooltip: AppLocalizations.of(context)!
-                            .button_tooltip_send_message,
+                        tooltip: AppLocalizations.of(context)!.button_tooltip_send_message,
                         icon: Icons.send,
-                        onPressed: model.canSendMessage()
-                            ? () => _sendMessage(model.chatModel.id, model)
+                        onPressed: widget.model.canSendMessage()
+                            ? () => _sendMessage(widget.model.chatModel.id, widget.model)
                             : null,
                       ),
               ],
@@ -525,8 +465,7 @@ class _SqlChatFieldState extends State<SqlChatField> {
           width: 0.5,
         ),
       ),
-      padding: const EdgeInsets.fromLTRB(
-          kSpacingSmall, kSpacingTiny, kSpacingSmall, kSpacingSmall),
+      padding: const EdgeInsets.fromLTRB(kSpacingSmall, kSpacingTiny, kSpacingSmall, kSpacingSmall),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -536,11 +475,9 @@ class _SqlChatFieldState extends State<SqlChatField> {
               const Spacer(),
               if (widget.name == "sql")
                 RectangleIconButton.small(
-                  tooltip: AppLocalizations.of(context)!
-                      .button_tooltip_run_sql_new_tab,
+                  tooltip: AppLocalizations.of(context)!.button_tooltip_run_sql_new_tab,
                   icon: Icons.not_started_outlined,
-                  iconColor:
-                      (widget.onRun != null) ? Colors.green : Colors.grey,
+                  iconColor: (widget.onRun != null) ? Colors.green : Colors.grey,
                   onPressed: () {
                     widget.onRun?.call(widget.codes);
                   },
@@ -571,8 +508,7 @@ class _SqlChatFieldState extends State<SqlChatField> {
             child: RichText(
               text: getSQLHighlightTextSpan(
                 widget.codes,
-                defalutStyle:
-                    TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                defalutStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               ),
             ),
           ),
@@ -583,27 +519,20 @@ class _SqlChatFieldState extends State<SqlChatField> {
 }
 
 class SessionChatMessages extends ConsumerWidget {
-  const SessionChatMessages({super.key});
+  final SessionAIChatModel model;
+  const SessionChatMessages({super.key, required this.model});
 
-  void _runSQL(BuildContext context, WidgetRef ref, SessionAIChatModel model,
-      String code) {
-    ref
-        .read(sQLResultsServicesProvider.notifier)
-        .queryAddResult(model.sessionId, code);
+  void _runSQL(BuildContext context, WidgetRef ref, SessionAIChatModel model, String code) {
+    ref.read(sQLResultsServicesProvider.notifier).queryAddResult(model.sessionId, code);
   }
 
-  void _retryMessage(BuildContext context, WidgetRef ref,
-      SessionAIChatModel model, AIChatMessageModel message) {
+  void _retryMessage(BuildContext context, WidgetRef ref, SessionAIChatModel model, AIChatMessageModel message) {
     // 调用AIChatService的chat方法
-    ref.read(aIChatServiceProvider.notifier).retryChat(
-        model.chatModel.id,
-        model.llmAgents.lastUsedLLMAgent!.id,
-        genChatSystemPrompt(model),
-        message);
+    ref
+        .read(aIChatServiceProvider.notifier)
+        .retryChat(model.chatModel.id, model.llmAgents.lastUsedLLMAgent!.id, genChatSystemPrompt(model), message);
 
-    final scrollController =
-        SessionController.sessionController(model.sessionId)
-            .aiChatScrollController;
+    final scrollController = SessionController.sessionController(model.sessionId).aiChatScrollController;
 
     // 滚动到底部
     Future.delayed(const Duration(milliseconds: 100), () {
@@ -617,8 +546,7 @@ class SessionChatMessages extends ConsumerWidget {
     });
   }
 
-  Widget _buildMessage(BuildContext context, WidgetRef ref,
-      SessionAIChatModel model, AIChatMessageModel message) {
+  Widget _buildMessage(BuildContext context, WidgetRef ref, SessionAIChatModel model, AIChatMessageModel message) {
     switch (message.role) {
       case AIRole.user:
         return userMessageWidget(context, message);
@@ -630,8 +558,7 @@ class SessionChatMessages extends ConsumerWidget {
   // 用户消息组件
   Widget userMessageWidget(BuildContext context, AIChatMessageModel message) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-          kSpacingSmall, kSpacingSmall, kSpacingSmall, kSpacingSmall),
+      padding: const EdgeInsets.fromLTRB(kSpacingSmall, kSpacingSmall, kSpacingSmall, kSpacingSmall),
       child: Align(
         alignment: Alignment.centerLeft,
         child: Container(
@@ -656,11 +583,10 @@ class SessionChatMessages extends ConsumerWidget {
   }
 
   // AI助手消息组件
-  Widget assistantMessageWidget(BuildContext context, WidgetRef ref,
-      SessionAIChatModel model, AIChatMessageModel message) {
+  Widget assistantMessageWidget(
+      BuildContext context, WidgetRef ref, SessionAIChatModel model, AIChatMessageModel message) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-          kSpacingSmall, kSpacingSmall, kSpacingSmall, kSpacingSmall),
+      padding: const EdgeInsets.fromLTRB(kSpacingSmall, kSpacingSmall, kSpacingSmall, kSpacingSmall),
       child: Align(
         alignment: Alignment.centerLeft,
         child: Container(
@@ -683,8 +609,7 @@ class SessionChatMessages extends ConsumerWidget {
                   text: TextSpan(
                       text: message.thinking ?? "",
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                             fontStyle: FontStyle.italic,
                           )),
                 ),
@@ -698,8 +623,7 @@ class SessionChatMessages extends ConsumerWidget {
                   h5: Theme.of(context).textTheme.bodyMedium,
                   h6: Theme.of(context).textTheme.bodySmall,
                   hrLineThickness: 0.2,
-                  highlightColor:
-                      Theme.of(context).colorScheme.surfaceContainerLowest,
+                  highlightColor: Theme.of(context).colorScheme.surfaceContainerLowest,
                 ),
                 child: GptMarkdown(
                   key: ValueKey(model),
@@ -711,10 +635,9 @@ class SessionChatMessages extends ConsumerWidget {
                     return SqlChatField(
                       name: name,
                       codes: code,
-                      onRun:
-                          (name == "sql" && SQLConnectState.isIdle(model.state))
-                              ? (code) => _runSQL(context, ref, model, code)
-                              : null,
+                      onRun: (name == "sql" && SQLConnectState.isIdle(model.state))
+                          ? (code) => _runSQL(context, ref, model, code)
+                          : null,
                     );
                   },
                 ),
@@ -724,8 +647,7 @@ class SessionChatMessages extends ConsumerWidget {
                 Row(
                   children: [
                     RectangleIconButton.small(
-                      tooltip: AppLocalizations.of(context)!
-                          .button_tooltip_retry_message,
+                      tooltip: AppLocalizations.of(context)!.button_tooltip_retry_message,
                       icon: Icons.refresh,
                       onPressed: () {
                         _retryMessage(context, ref, model, message);
@@ -742,9 +664,7 @@ class SessionChatMessages extends ConsumerWidget {
   }
 
   void _scrollToBottom(SessionAIChatModel model) {
-    final scrollController =
-        SessionController.sessionController(model.sessionId)
-            .aiChatScrollController;
+    final scrollController = SessionController.sessionController(model.sessionId).aiChatScrollController;
     if (scrollController.hasClients) {
       final position = scrollController.position;
       final target = position.maxScrollExtent;
@@ -763,10 +683,6 @@ class SessionChatMessages extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    SessionAIChatModel? model = ref.watch(sessionAIChatNotifierProvider);
-    if (model == null) {
-      return const Spacer();
-    }
     final messages = model.chatModel.messages;
     // 简单实现：AIChatState.waiting时每帧都滚动到底部
     if (model.chatModel.state == AIChatState.waiting) {
@@ -775,8 +691,7 @@ class SessionChatMessages extends ConsumerWidget {
       });
     }
     return ListView.builder(
-      controller: SessionController.sessionController(model.sessionId)
-          .aiChatScrollController,
+      controller: SessionController.sessionController(model.sessionId).aiChatScrollController,
       itemCount: messages.length,
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemBuilder: (context, index) {
@@ -800,9 +715,7 @@ class SessionChatGuide extends ConsumerWidget {
         text: AppLocalizations.of(context)!.ai_chat_guide_tip_add_model,
         onPressed: () {
           // 切换到模型设置tab
-          ref
-              .read(settingTabServiceProvider.notifier)
-              .setSelectedSettingType(SettingType.llmApi);
+          ref.read(settingTabServiceProvider.notifier).setSelectedSettingType(SettingType.llmApi);
           GoRouter.of(context).go('/settings');
         },
       ),

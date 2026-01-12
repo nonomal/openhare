@@ -1,6 +1,5 @@
 import 'package:client/models/ai.dart';
 import 'package:client/models/instances.dart';
-import 'package:client/utils/state_value.dart';
 import 'package:client/widgets/data_tree.dart';
 import 'package:db_driver/db_driver.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
@@ -11,14 +10,14 @@ import 'package:client/widgets/split_view.dart';
 part 'sessions.freezed.dart';
 
 abstract class SessionRepo {
-  Future<SessionId> newSession();
+  SessionId newSession();
   SessionListModel getSessions();
   SessionModel? getSession(SessionId sessionId);
-  Future<void> updateSession(SessionId sessionId,
-      {InstanceModel? instance, String? currentSchema});
+  SessionModel? seletedSession();
+  void updateSession(SessionId sessionId, {InstanceModel? instance, String? currentSchema});
   void setConnId(SessionId sessionId, ConnId connId);
   void unsetConnId(SessionId sessionId);
-  Future<void> deleteSession(SessionId sessionId);
+  void deleteSession(SessionId sessionId);
   void selectSessionByIndex(int index);
   void reorderSession(int oldIndex, int newIndex);
   String? getCode(SessionId sessionId);
@@ -38,9 +37,8 @@ abstract class SessionConnRepo {
   });
   Future<void> close(ConnId connId);
   Future<void> setCurrentSchema(ConnId connId, String schema);
-  Future<List<String>> getSchemas(ConnId connId);
-  Future<List<MetaDataNode>> getMetadata(ConnId connId);
   Future<BaseQueryResult?> query(ConnId connId, String query);
+  Stream<BaseQueryStreamItem> queryStream(ConnId connId, String query);
   Future<void> killQuery(ConnId connId);
 }
 
@@ -97,7 +95,6 @@ abstract class SessionDetailModel with _$SessionDetailModel {
 abstract class SessionListModel with _$SessionListModel {
   const factory SessionListModel({
     required List<SessionModel> sessions,
-    SessionModel? selectedSession,
   }) = _SessionListModel;
 }
 
@@ -113,10 +110,12 @@ abstract class SessionDetailListModel with _$SessionDetailListModel {
 abstract class SessionOpBarModel with _$SessionOpBarModel {
   const factory SessionOpBarModel({
     required SessionId sessionId,
+    InstanceId? instanceId,
     required ConnId? connId,
     required SQLConnectState? state,
     required String currentSchema,
     required bool isRightPageOpen,
+    required int runningTaskCount,
   }) = _SessionOpBarModel;
 }
 
@@ -299,13 +298,11 @@ abstract class SessionAIChatModel with _$SessionAIChatModel {
   const SessionAIChatModel._();
 
   bool canSendMessage() {
-    return llmAgents.lastUsedLLMAgent != null &&
-        chatModel.state != AIChatState.waiting;
+    return llmAgents.lastUsedLLMAgent != null && chatModel.state != AIChatState.waiting;
   }
 
   bool canClearMessage() {
-    return chatModel.state != AIChatState.waiting &&
-        chatModel.messages.isNotEmpty;
+    return chatModel.state != AIChatState.waiting && chatModel.messages.isNotEmpty;
   }
 }
 
@@ -314,6 +311,6 @@ abstract class SessionAIChatModel with _$SessionAIChatModel {
 abstract class SessionMetadataTreeModel with _$SessionMetadataTreeModel {
   const factory SessionMetadataTreeModel({
     required SessionId sessionId,
-    required StateValue<TreeController<DataNode>> metadataTreeCtrl,
+    required TreeController<DataNode> metadataTreeCtrl,
   }) = _SessionMetadataTreeModel;
 }

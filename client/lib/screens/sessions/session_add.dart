@@ -1,5 +1,6 @@
 import 'package:client/screens/page_skeleton.dart';
 import 'package:client/services/instances/instances.dart';
+import 'package:client/screens/instances/instance_tables.dart';
 import 'package:client/services/sessions/sessions.dart';
 import 'package:client/widgets/button.dart';
 import 'package:client/widgets/const.dart';
@@ -13,28 +14,25 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:client/l10n/app_localizations.dart';
 
 class AddSession extends HookConsumerWidget {
-  const AddSession({Key? key}) : super(key: key);
+  const AddSession({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final model = ref.watch(instancesNotifierProvider);
-    final searchTextController = TextEditingController(text: model.key);
+    final model = ref.watch(instancesProvider);
 
-    if (model.totalCount == 0) {
+    if (model.instances.count == 0) {
       return EmptyPage(
         color: Theme.of(context).colorScheme.surfaceContainerLow,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              AppLocalizations.of(context)!
-                  .display_no_instance_and_add_instance,
+              AppLocalizations.of(context)!.display_no_instance_and_add_instance,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: kSpacingSmall),
             LinkButton(
-              text: AppLocalizations.of(context)!
-                  .display_no_instance_and_add_instance_button,
+              text: AppLocalizations.of(context)!.display_no_instance_and_add_instance_button,
               onPressed: () {
                 GoRouter.of(context).go('/instances/add');
               },
@@ -57,30 +55,21 @@ class AddSession extends HookConsumerWidget {
         children: [
           Row(
             children: [
-              SizedBox(
-                  width: 200,
-                  child: Text(AppLocalizations.of(context)!.db_instance_name)),
+              SizedBox(width: 200, child: Text(AppLocalizations.of(context)!.db_instance_name)),
               Container(
-                  padding: const EdgeInsets.only(
-                    left: 12,
-                  ), // 与下面的TextButton的padding对齐
-                  child:
-                      Text(AppLocalizations.of(context)!.recently_used_schema))
+                  padding: const EdgeInsets.only(left: 12), // 与下面的TextButton的padding对齐
+                  child: Text(AppLocalizations.of(context)!.recently_used_schema))
             ],
           ),
           const SizedBox(height: kSpacingSmall),
-          for (var inst in ref
-              .read(instancesServicesProvider.notifier)
-              .activeInstances()) // todo
+          for (var inst in ref.read(instancesServicesProvider.notifier).activeInstances()) // todo
             LayoutBuilder(
               builder: (context, constraints) {
                 // 计算schema按钮的最大宽度
                 final schemaCount = inst.activeSchemas.length;
                 // 预留200给左侧instance，剩余宽度分配给schema
                 final availableWidth = constraints.maxWidth - 200;
-                final schemaButtonWidth = schemaCount > 0
-                    ? (availableWidth / schemaCount).clamp(80.0, 200.0)
-                    : 0.0;
+                final schemaButtonWidth = schemaCount > 0 ? (availableWidth / schemaCount).clamp(80.0, 200.0) : 0.0;
                 return Row(
                   // mainAxisAlignment: MainAxisAlignment。,
                   children: [
@@ -94,9 +83,7 @@ class AddSession extends HookConsumerWidget {
                           ),
                           LinkButton(
                               onPressed: () {
-                                ref
-                                    .read(sessionsServicesProvider.notifier)
-                                    .addSession(inst);
+                                ref.read(sessionsServicesProvider.notifier).addSession(inst);
                               },
                               text: inst.connectValue.name),
                         ],
@@ -107,9 +94,7 @@ class AddSession extends HookConsumerWidget {
                         text: schema,
                         maxWidth: schemaButtonWidth,
                         onPressed: () {
-                          ref
-                              .read(sessionsServicesProvider.notifier)
-                              .addSession(inst, schema: schema);
+                          ref.read(sessionsServicesProvider.notifier).addSession(inst, schema: schema);
                         },
                       ),
                   ],
@@ -137,13 +122,22 @@ class AddSession extends HookConsumerWidget {
                               maxWidth: 200,
                             )),
                         child: SearchBar(
-                          controller: searchTextController,
+                          controller: instanceSearchTextController,
+                          backgroundColor: WidgetStatePropertyAll(
+                            Theme.of(context).colorScheme.surfaceContainerLow,
+                          ),
+                          side: WidgetStatePropertyAll(
+                            BorderSide(
+                              color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                              width: 0.5,
+                            ),
+                          ),
                           onChanged: (value) {
-                            ref
-                                .read(instancesNotifierProvider.notifier)
-                                .changePage(value,
-                                    pageNumber: model.currentPage,
-                                    pageSize: model.pageSize);
+                            ref.read(instancesProvider.notifier).changePage(
+                                  value,
+                                  pageNumber: model.currentPage,
+                                  pageSize: model.pageSize,
+                                );
                           },
                           trailing: const [Icon(Icons.search)],
                         ),
@@ -159,9 +153,7 @@ class AddSession extends HookConsumerWidget {
           const SizedBox(height: kSpacingMedium),
           Row(
             children: [
-              SizedBox(
-                  width: 200,
-                  child: Text(AppLocalizations.of(context)!.db_instance_name)),
+              SizedBox(width: 200, child: Text(AppLocalizations.of(context)!.db_instance_name)),
               Container(
                   width: 200,
                   padding: const EdgeInsets.only(left: 12),
@@ -172,7 +164,7 @@ class AddSession extends HookConsumerWidget {
             ],
           ),
           const SizedBox(height: kSpacingSmall),
-          for (var inst in model.instances) //todo
+          for (var inst in model.instances.instances)
             Row(
               children: [
                 SizedBox(
@@ -186,9 +178,7 @@ class AddSession extends HookConsumerWidget {
                       LinkButton(
                         text: inst.connectValue.name,
                         onPressed: () {
-                          ref
-                              .read(sessionsServicesProvider.notifier)
-                              .addSession(inst);
+                          ref.read(sessionsServicesProvider.notifier).addSession(inst);
                         },
                       ),
                     ],
@@ -199,32 +189,31 @@ class AddSession extends HookConsumerWidget {
                   width: 200,
                   child: Row(
                     children: [
-                      Text(
-                          "${inst.connectValue.host}:${inst.connectValue.port}",
-                          overflow: TextOverflow.ellipsis),
+                      Text("${inst.connectValue.host}:${inst.connectValue.port}", overflow: TextOverflow.ellipsis),
                     ],
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.only(left: 12),
-                  width: 200,
-                  child: Row(
-                    children: [
-                      Text(inst.connectValue.desc),
-                    ],
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: Text(
+                      inst.connectValue.desc,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
               ],
             ),
           TablePaginatedBar(
-            count: model.count,
+            count: model.instances.count,
             pageSize: model.pageSize,
             pageNumber: model.currentPage,
             onChange: (pageNumber) {
-              ref.read(instancesNotifierProvider.notifier).changePage(
-                  searchTextController.text,
-                  pageNumber: pageNumber,
-                  pageSize: model.pageSize);
+              ref.read(instancesProvider.notifier).changePage(
+                    instanceSearchTextController.text,
+                    pageNumber: pageNumber,
+                    pageSize: model.pageSize,
+                  );
             },
           ),
         ],

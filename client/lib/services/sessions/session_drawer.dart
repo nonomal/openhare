@@ -10,12 +10,13 @@ class SessionDrawerServices extends _$SessionDrawerServices {
   @override
   SessionDrawerModel build(SessionId sessionId) {
     return SessionDrawerModel(
-        sessionId: sessionId,
-        drawerPage: DrawerPage.metadataTree,
-        sqlResult: null,
-        sqlColumn: null,
-        showRecord: false,
-        isRightPageOpen: true);
+      sessionId: sessionId,
+      drawerPage: DrawerPage.metadataTree,
+      sqlResult: null,
+      sqlColumn: null,
+      showRecord: false,
+      isRightPageOpen: true,
+    );
   }
 
   void showRightPage() {
@@ -47,10 +48,9 @@ class SessionDrawerServices extends _$SessionDrawerServices {
 class SessionDrawerNotifier extends _$SessionDrawerNotifier {
   @override
   SessionDrawerModel build() {
-    SessionModel? sessionModel = ref.watch(selectedSessionNotifierProvider);
+    SessionModel? sessionModel = ref.watch(selectedSessionProvider);
     if (sessionModel == null) {
-      return ref
-          .watch(sessionDrawerServicesProvider(const SessionId(value: 0)));
+      return ref.watch(sessionDrawerServicesProvider(const SessionId(value: 0)));
     }
     return ref.watch(sessionDrawerServicesProvider(sessionModel.sessionId));
   }

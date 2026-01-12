@@ -1,20 +1,24 @@
 import 'package:client/models/instances.dart';
 import 'package:client/repositories/instances/instances.dart';
-import 'package:client/services/instances/metadata.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'instances.g.dart';
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 class InstancesServices extends _$InstancesServices {
   @override
   int build() {
     return 1;
   }
 
-  Future<void> addInstance(InstanceModel instance) async {
+  void _invalidateSelf() {
+    state++;
+  }
+
+  void addInstance(InstanceModel instance) {
     final repo = ref.read(instanceRepoProvider);
-    await repo.add(instance);
+    repo.add(instance);
+    _invalidateSelf();
   }
 
   InstanceModel? getInstanceById(InstanceId instanceId) {
@@ -22,16 +26,16 @@ class InstancesServices extends _$InstancesServices {
     return repo.getInstanceById(instanceId);
   }
 
-  Future<void> updateInstance(InstanceModel instance) async {
+  void updateInstance(InstanceModel instance) {
     final repo = ref.read(instanceRepoProvider);
-    await repo.update(instance);
+    repo.update(instance);
+    _invalidateSelf();
   }
 
-  Future<void> deleteInstance(InstanceId id) async {
+  void deleteInstance(InstanceId id) {
     final repo = ref.read(instanceRepoProvider);
-    await repo.delete(id);
-    ref.invalidate(
-        instanceMetadataServicesProvider(id)); // close metadata provider
+    repo.delete(id);
+    _invalidateSelf();
   }
 
   bool isInstanceExist(String name) {
@@ -39,30 +43,16 @@ class InstancesServices extends _$InstancesServices {
     return repo.isInstanceExist(name);
   }
 
-  PaginationInstanceListModel instances(String key,
-      {int? pageNumber, int? pageSize}) {
+  InstanceListModel instances(String key, {int? pageNumber, int? pageSize}) {
     final repo = ref.read(instanceRepoProvider);
-    final instances =
-        repo.search(key, pageNumber: pageNumber, pageSize: pageSize);
-    final count = repo.count(key: key);
-    final totalCount = repo.count();
-
-    return PaginationInstanceListModel(
-      count: count,
-      pageSize: pageSize ?? 10,
-      currentPage: pageNumber ?? 1,
-      instances: instances,
-      key: key,
-      totalCount: totalCount,
-    );
+    return repo.isntances(key, pageNumber: pageNumber, pageSize: pageSize);
   }
 
-  Future<void> addActiveInstance(InstanceId instanceId, {String? schema}) async {
-    await ref.read(instanceRepoProvider).addActiveInstance(instanceId);
+  void addActiveInstance(InstanceId instanceId, {String? schema}) async {
+    ref.read(instanceRepoProvider).addActiveInstance(instanceId);
     if (schema != null) {
-      await ref
-          .read(instanceRepoProvider)
-          .addInstanceActiveSchema(instanceId, schema);
+      ref.read(instanceRepoProvider).addInstanceActiveSchema(instanceId, schema);
+      _invalidateSelf();
     }
   }
 
@@ -70,25 +60,36 @@ class InstancesServices extends _$InstancesServices {
     final repo = ref.read(instanceRepoProvider);
     return repo.getActiveInstances(5);
   }
+
+  Future<List<String>> getSchemas(InstanceId instanceId) async {
+    final repo = ref.read(instanceRepoProvider);
+    return await repo.getSchemas(instanceId);
+  }
 }
 
 @Riverpod(keepAlive: true)
 class InstancesNotifier extends _$InstancesNotifier {
   @override
   PaginationInstanceListModel build() {
-    return ref
-        .read(instancesServicesProvider.notifier)
-        .instances("", pageNumber: 1, pageSize: 10);
+    ref.watch(instancesServicesProvider);
+    return instances("", pageNumber: 1, pageSize: 10);
   }
 
-  void changePage(String key, {int? pageNumber = 1, int? pageSize = 10}) {
-    state = ref
-        .read(instancesServicesProvider.notifier)
-        .instances(key, pageNumber: pageNumber, pageSize: pageSize);
+  PaginationInstanceListModel instances(String key, {int pageNumber = 1, int pageSize = 10}) {
+    final instances = ref.read(instancesServicesProvider.notifier).instances(
+          key,
+          pageNumber: pageNumber,
+          pageSize: pageSize,
+        );
+    return PaginationInstanceListModel(
+      instances: instances,
+      key: key,
+      currentPage: pageNumber,
+      pageSize: pageSize,
+    );
   }
 
-  void refresh() {
-    state = ref.read(instancesServicesProvider.notifier).instances(state.key,
-        pageNumber: state.currentPage, pageSize: state.pageSize);
+  void changePage(String key, {int pageNumber = 1, int pageSize = 10}) {
+    state = instances(key, pageNumber: pageNumber, pageSize: pageSize);
   }
 }

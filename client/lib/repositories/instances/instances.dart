@@ -1,11 +1,11 @@
 import 'package:client/models/instances.dart';
-import 'package:client/repositories/objectbox.g.dart';
+import 'package:client/repositories/instances/session_conn.dart';
 import 'package:objectbox/objectbox.dart';
+import 'package:client/repositories/objectbox.g.dart';
 import 'package:client/repositories/repo.dart';
 import 'package:client/utils/active_set.dart';
 import 'package:db_driver/db_driver.dart';
 import 'dart:convert';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'instances.g.dart';
@@ -37,8 +37,7 @@ class InstanceStorage {
   String get stCustom => jsonEncode(custom);
 
   set stCustom(String value) {
-    custom =
-        jsonDecode(value).map((key, value) => MapEntry(key, value.toString()));
+    custom = jsonDecode(value).map((key, value) => MapEntry(key, value.toString()));
   }
 
   List<String> initQuerys;
@@ -123,20 +122,26 @@ class InstanceRepoImpl extends InstanceRepo {
   final ObjectBox ob;
   final Box<InstanceStorage> _instanceBox;
 
+  Map<InstanceId, InstanceMetadataModel> metadataCache = {};
+
   InstanceRepoImpl(this.ob) : _instanceBox = ob.store.box();
 
   @override
-  Future<void> add(InstanceModel instance) async {
-    await _instanceBox.putAsync(InstanceStorage.fromModel(instance));
+  void add(InstanceModel instance) {
+    _instanceBox.put(InstanceStorage.fromModel(instance));
   }
 
   @override
-  Future<void> update(InstanceModel instance) async {
-    await _instanceBox.putAsync(InstanceStorage.fromModel(instance));
+  void update(InstanceModel instance) {
+    _instanceBox.put(InstanceStorage.fromModel(instance));
+    metadataCache.remove(instance.id);
   }
 
   @override
-  Future<void> delete(InstanceId id) => _instanceBox.removeAsync(id.value);
+  void delete(InstanceId id) {
+    _instanceBox.remove(id.value);
+    metadataCache.remove(id);
+  }
 
   @override
 // todo: aync
@@ -148,8 +153,7 @@ class InstanceRepoImpl extends InstanceRepo {
   @override
 // todo: aync
   InstanceModel? getInstanceByName(String name) {
-    final build =
-        _instanceBox.query(InstanceStorage_.name.equals(name)).build();
+    final build = _instanceBox.query(InstanceStorage_.name.equals(name)).build();
     return build.findFirst()?.toModel();
   }
 
@@ -160,28 +164,36 @@ class InstanceRepoImpl extends InstanceRepo {
   }
 
   @override
-// todo: aync
-  List<InstanceModel> search(String key, {int? pageNumber, int? pageSize}) {
-    final build = _instanceBox
-        .query(InstanceStorage_.name.contains(key))
-        .order(InstanceStorage_.createdAt, flags: Order.descending)
-        .build();
-    build.limit = (pageSize ?? 10);
-    build.offset = ((pageNumber ?? 1) - 1) * (pageSize ?? 10);
-    final instances = build.find();
+  InstanceListModel isntances(String key, {int? pageNumber, int? pageSize}) {
+    final sanitizedKey = key.trim();
+    Condition<InstanceStorage>? condition;
 
-    return instances.map((e) => e.toModel()).toList();
-  }
-
-  @override
-// todo: aync
-  int count({String? key}) {
-    if (key == null) {
-      return _instanceBox.count();
+    if (sanitizedKey.isNotEmpty) {
+      condition = InstanceStorage_.name.contains(sanitizedKey, caseSensitive: false);
     }
-    final build =
-        _instanceBox.query(InstanceStorage_.name.contains(key)).build();
-    return build.count();
+
+    // 统计总数
+    final countQuery = _instanceBox.query(condition).build();
+    final totalCount = countQuery.count();
+    countQuery.close();
+
+    // 分页参数
+    final currentPage = (pageNumber != null && pageNumber > 0) ? pageNumber : 1;
+    final size = (pageSize != null && pageSize > 0) ? pageSize : 10;
+    final offset = (currentPage - 1) * size;
+
+    // 获取分页数据（按创建时间倒序）
+    final dataQuery = _instanceBox.query(condition).order(InstanceStorage_.createdAt, flags: Order.descending).build();
+    dataQuery.limit = size;
+    dataQuery.offset = offset;
+
+    final instanceList = dataQuery.find();
+    dataQuery.close();
+
+    return InstanceListModel(
+      instances: instanceList.map((e) => e.toModel()).toList(),
+      count: totalCount,
+    );
   }
 
   @override
@@ -195,25 +207,89 @@ class InstanceRepoImpl extends InstanceRepo {
   }
 
   @override
-  Future<void> addActiveInstance(InstanceId id) async {
+  void addActiveInstance(InstanceId id) {
     final instance = _instanceBox.get(id.value);
     if (instance == null) {
       return;
     }
     instance.latestOpenAt = DateTime.now();
-    await _instanceBox.putAsync(instance);
+    _instanceBox.put(instance);
     return;
   }
 
   @override
-  Future<void> addInstanceActiveSchema(InstanceId id, String schema) async {
+  void addInstanceActiveSchema(InstanceId id, String schema) {
     final instance = _instanceBox.get(id.value);
     if (instance == null) {
       return;
     }
     instance.activeSchemas.add(schema);
-    await _instanceBox.putAsync(instance);
+    _instanceBox.put(instance);
     return;
+  }
+
+  @override
+  Future<List<String>> getSchemas(InstanceId instanceId) async {
+    final instance = _instanceBox.get(instanceId.value);
+    if (instance == null) {
+      return List.empty();
+    }
+    final model = metadataCache[instanceId];
+
+    if (model == null) {
+      return List.empty();
+    }
+    final schemas = List<String>.empty(growable: true);
+    for (final meta in model.metadata) {
+      meta.visitor((node, parent) {
+        if (node.type == MetaType.schema) {
+          schemas.add(node.value);
+        }
+        return true;
+      });
+    }
+    return schemas;
+  }
+
+  Future<InstanceMetadataModel> _getMetadata(InstanceModel instance) async {
+    SessionConn? conn;
+    try {
+      conn = SessionConn(model: instance);
+      await conn.connect();
+      final metadataNode = await conn.metadata();
+      return InstanceMetadataModel(metadata: metadataNode);
+    } catch (e) {
+      rethrow;
+    } finally {
+      if (conn != null) {
+        await conn.close();
+      }
+    }
+  }
+
+  @override
+  Future<InstanceMetadataModel> getMetadata(InstanceId instanceId) async {
+    final metadata = metadataCache[instanceId];
+    if (metadata != null) {
+      return metadata;
+    }
+    final instance = _instanceBox.get(instanceId.value);
+    if (instance == null) {
+      throw Exception("Instance not found");
+    }
+    final newMetadata = await _getMetadata(instance.toModel());
+    metadataCache[instanceId] = newMetadata;
+    return newMetadata;
+  }
+
+  @override
+  Future<void> refreshMetadata(InstanceId instanceId) async {
+    final instance = _instanceBox.get(instanceId.value);
+    if (instance == null) {
+      throw Exception("Instance not found");
+    }
+    final newMetadata = await _getMetadata(instance.toModel());
+    metadataCache[instanceId] = newMetadata;
   }
 }
 

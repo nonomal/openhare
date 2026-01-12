@@ -7,13 +7,13 @@ class TablePaginatedBar extends StatefulWidget {
   final int pageNumber;
   final void Function(int pageNumber) onChange;
 
-  const TablePaginatedBar(
-      {Key? key,
-      required this.count,
-      required this.pageSize,
-      required this.pageNumber,
-      required this.onChange})
-      : super(key: key);
+  const TablePaginatedBar({
+    super.key,
+    required this.count,
+    required this.pageSize,
+    required this.pageNumber,
+    required this.onChange,
+  });
 
   @override
   State<TablePaginatedBar> createState() => _PaginatedBarState();
@@ -46,13 +46,11 @@ class _PaginatedBarState extends State<TablePaginatedBar> {
           ),
           RectangleIconButton.medium(
             icon: Icons.keyboard_arrow_left,
-            onPressed:
-                isFirstPage ? null : () => _onChange(widget.pageNumber - 1),
+            onPressed: isFirstPage ? null : () => _onChange(widget.pageNumber - 1),
           ),
           RectangleIconButton.medium(
             icon: Icons.keyboard_arrow_right_outlined,
-            onPressed:
-                isLastPage ? null : () => _onChange(widget.pageNumber + 1),
+            onPressed: isLastPage ? null : () => _onChange(widget.pageNumber + 1),
           ),
           RectangleIconButton.medium(
             icon: Icons.last_page,

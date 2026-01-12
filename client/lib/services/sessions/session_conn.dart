@@ -1,7 +1,7 @@
 import 'package:client/models/instances.dart';
 import 'package:client/models/sessions.dart';
 import 'package:client/repositories/instances/instances.dart';
-import 'package:client/repositories/sessions/session_conn.dart';
+import 'package:client/repositories/instances/session_conn.dart';
 import 'package:db_driver/db_driver.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -18,12 +18,9 @@ class SessionConnsServices extends _$SessionConnsServices {
     return ref.read(sessionConnRepoProvider).getConn(connId);
   }
 
-  Future<SessionConnModel> createConn(InstanceId instanceId,
-      {String? currentSchema}) async {
+  Future<SessionConnModel> createConn(InstanceId instanceId, {String? currentSchema}) async {
     final instance = ref.read(instanceRepoProvider).getInstanceById(instanceId);
-    return ref
-        .read(sessionConnRepoProvider)
-        .createConn(instance!, currentSchema: currentSchema);
+    return ref.read(sessionConnRepoProvider).createConn(instance!, currentSchema: currentSchema);
   }
 
   Future<void> removeConn(ConnId connId) async {
@@ -54,16 +51,12 @@ class SessionConnsServices extends _$SessionConnsServices {
     ref.invalidateSelf();
   }
 
-  Future<List<String>> getSchemas(ConnId connId) async {
-    return ref.read(sessionConnRepoProvider).getSchemas(connId);
-  }
-
-  Future<List<MetaDataNode>> getMetadata(ConnId connId) async {
-    return ref.read(sessionConnRepoProvider).getMetadata(connId);
-  }
-
   Future<BaseQueryResult?> query(ConnId connId, String query) async {
     return ref.read(sessionConnRepoProvider).query(connId, query);
+  }
+
+  Stream<BaseQueryStreamItem> queryStream(ConnId connId, String query) {
+    return ref.read(sessionConnRepoProvider).queryStream(connId, query);
   }
 
   Future<void> killQuery(ConnId connId) async {

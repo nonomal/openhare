@@ -4,8 +4,8 @@ import 'package:client/repositories/sessions/session_sql_result.dart';
 import 'package:client/services/sessions/session_controller.dart';
 import 'package:client/services/sessions/sessions.dart';
 import 'package:db_driver/db_driver.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:excel/excel.dart' as excel;
 
 part 'session_sql_result.g.dart';
 
@@ -52,21 +52,17 @@ class SQLResultsServices extends _$SQLResultsServices {
     SQLResultController.removeSQLResultController(resultId);
     repo.updateSQLResult(
       resultId,
-      SQLResultDetailModel(
-          resultId: resultId, query: query, state: SQLExecuteState.init),
+      SQLResultDetailModel(resultId: resultId, query: query, state: SQLExecuteState.init),
     );
     ref.invalidateSelf();
 
     // todo
-    final sessionModel = ref
-        .read(sessionsServicesProvider.notifier)
-        .getSession(resultId.sessionId);
+    final sessionModel = ref.read(sessionsServicesProvider.notifier).getSession(resultId.sessionId);
 
     try {
       DateTime start = DateTime.now();
       final connServices = ref.read(sessionConnsServicesProvider.notifier);
-      BaseQueryResult? queryResult =
-          await connServices.query(sessionModel!.connId!, query);
+      BaseQueryResult? queryResult = await connServices.query(sessionModel!.connId!, query);
       DateTime end = DateTime.now();
       // sleep 100ms, 不然当界面刷新太快时，无法感知结果是没变还是没执行.
       await Future.delayed(const Duration(milliseconds: 100));
@@ -117,7 +113,7 @@ class SQLResultsServices extends _$SQLResultsServices {
 class SelectedSQLResultTabNotifier extends _$SelectedSQLResultTabNotifier {
   @override
   SessionSQLResultsModel? build() {
-    SessionModel? sessionModel = ref.watch(selectedSessionNotifierProvider);
+    SessionModel? sessionModel = ref.watch(selectedSessionProvider);
     if (sessionModel == null) {
       return null;
     }
@@ -131,34 +127,16 @@ class SelectedSQLResultTabNotifier extends _$SelectedSQLResultTabNotifier {
 class SelectedSQLResultNotifier extends _$SelectedSQLResultNotifier {
   @override
   SQLResultDetailModel? build() {
-    SessionModel? sessionModel = ref.watch(selectedSessionNotifierProvider);
+    SessionModel? sessionModel = ref.watch(selectedSessionProvider);
     if (sessionModel == null) {
       return null;
     }
-    SQLResultModel? sqlResultModel =
-        ref.watch(sQLResultsServicesProvider.select((m) {
+    SQLResultModel? sqlResultModel = ref.watch(sQLResultsServicesProvider.select((m) {
       return m.cache[sessionModel.sessionId]?.selected;
     }));
     if (sqlResultModel == null) {
       return null;
     }
-    return ref
-        .read(sQLResultsServicesProvider.notifier)
-        .getSQLResult(sqlResultModel.resultId);
-  }
-
-  excel.Excel toExcel() {
-    final data = excel.Excel.createExcel();
-    final sheet = data["Sheet1"];
-    sheet.appendRow(state!.data!.columns
-        .map<excel.TextCellValue>((e) => excel.TextCellValue(e.name))
-        .toList());
-    for (final row in state!.data!.rows) {
-      sheet.appendRow(row.values
-          .map<excel.TextCellValue>(
-              (e) => excel.TextCellValue(e.getString() ?? ''))
-          .toList());
-    }
-    return data;
+    return ref.read(sQLResultsServicesProvider.notifier).getSQLResult(sqlResultModel.resultId);
   }
 }

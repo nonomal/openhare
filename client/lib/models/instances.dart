@@ -1,27 +1,24 @@
-import 'package:client/utils/state_value.dart';
 import 'package:db_driver/db_driver.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter/foundation.dart';
 
 part 'instances.freezed.dart';
+part 'instances.g.dart';
 
 abstract class InstanceRepo {
-  Future<void> add(InstanceModel model);
-  Future<void> update(InstanceModel model);
-  Future<void> delete(InstanceId id);
+  void add(InstanceModel model);
+  void update(InstanceModel model);
+  void delete(InstanceId id);
   bool isInstanceExist(String name);
   InstanceModel? getInstanceByName(String name);
   InstanceModel? getInstanceById(InstanceId id);
-  List<InstanceModel> search(String key, {int? pageNumber, int? pageSize});
-  int count({String? key});
+  InstanceListModel isntances(String key, {int? pageNumber, int? pageSize});
   List<InstanceModel> getActiveInstances(int top);
-  Future<void> addActiveInstance(InstanceId id);
-  Future<void> addInstanceActiveSchema(InstanceId id, String schema);
-}
-
-abstract class InstanceMetadataRepo {
-  InstanceMetadataModel? getMetadata(InstanceId instanceId);
-  void updateMetadata(InstanceId instanceId, StateValue<List<MetaDataNode>> metadata);
+  void addActiveInstance(InstanceId id);
+  void addInstanceActiveSchema(InstanceId id, String schema);
+  Future<List<String>> getSchemas(InstanceId instanceId);
+  Future<InstanceMetadataModel> getMetadata(InstanceId instanceId);
+  Future<void> refreshMetadata(InstanceId instanceId);
 }
 
 // instances model
@@ -31,6 +28,8 @@ abstract class InstanceId with _$InstanceId {
   const factory InstanceId({
     required int value,
   }) = _InstanceId;
+
+  factory InstanceId.fromJson(Map<String, dynamic> json) => _$InstanceIdFromJson(json);
 }
 
 @freezed
@@ -65,14 +64,20 @@ abstract class InstanceModel with _$InstanceModel {
 }
 
 @freezed
+abstract class InstanceListModel with _$InstanceListModel {
+  const factory InstanceListModel({
+    required List<InstanceModel> instances,
+    required int count,
+  }) = _InstanceListModel;
+}
+
+@freezed
 abstract class PaginationInstanceListModel with _$PaginationInstanceListModel {
   const factory PaginationInstanceListModel({
-    required List<InstanceModel> instances,
+    required InstanceListModel instances,
     required int currentPage,
     required int pageSize,
-    required int count,
     required String key,
-    required int totalCount, // 总个数，非筛选过后的
   }) = _PaginationInstanceListModel;
 }
 
@@ -81,7 +86,6 @@ abstract class PaginationInstanceListModel with _$PaginationInstanceListModel {
 @freezed
 abstract class InstanceMetadataModel with _$InstanceMetadataModel {
   const factory InstanceMetadataModel({
-    required InstanceId instanceId,
-    required StateValue<List<MetaDataNode>> metadata,
+    required List<MetaDataNode> metadata,
   }) = _InstanceMetadataModel;
 }

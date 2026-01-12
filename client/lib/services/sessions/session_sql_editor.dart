@@ -15,8 +15,7 @@ class SessionSQLEditorService extends _$SessionSQLEditorService {
   SessionEditorModel build(SessionId sessionId) {
     final controller = CodeLineEditingController(
       spanBuilder: ({required codeLines, required context, required style}) {
-        return getSQLHighlightTextSpan(codeLines.asString(TextLineBreak.lf),
-            defalutStyle: style);
+        return getSQLHighlightTextSpan(codeLines.asString(TextLineBreak.lf), defalutStyle: style);
       },
     );
 
@@ -31,22 +30,24 @@ class SessionSQLEditorService extends _$SessionSQLEditorService {
 }
 
 @Riverpod(keepAlive: true)
-class SelectedSessionSQLEditorNotifier
-    extends _$SelectedSessionSQLEditorNotifier {
+class SelectedSessionSQLEditorNotifier extends _$SelectedSessionSQLEditorNotifier {
   @override
   SessionSQLEditorModel build() {
-    SessionModel? sessionModel = ref.watch(selectedSessionNotifierProvider);
+    SessionModel? sessionModel = ref.watch(selectedSessionProvider);
     if (sessionModel == null) {
       return const SessionSQLEditorModel(sessionId: SessionId(value: 0));
     }
     if (sessionModel.instanceId != null) {
-      InstanceMetadataModel? sessionMeta =
+      AsyncValue<InstanceMetadataModel>? sessionMeta =
           ref.watch(instanceMetadataServicesProvider(sessionModel.instanceId!));
       return SessionSQLEditorModel(
         sessionId: sessionModel.sessionId,
         currentSchema: sessionModel.currentSchema,
-        metadata: sessionMeta?.metadata
-            .match((value) => value, (error) => null, () => null),
+        metadata: sessionMeta?.when(
+          data: (data) => data.metadata,
+          error: (error, trace) => null,
+          loading: () => null,
+        ),
       );
     }
 
@@ -62,10 +63,9 @@ class SelectedSessionSQLEditorNotifier
 class SessionEditorNotifier extends _$SessionEditorNotifier {
   @override
   SessionEditorModel build() {
-    SessionModel? sessionModel = ref.watch(selectedSessionNotifierProvider);
+    SessionModel? sessionModel = ref.watch(selectedSessionProvider);
     if (sessionModel == null) {
-      return ref
-          .watch(sessionSQLEditorServiceProvider(const SessionId(value: 0)));
+      return ref.watch(sessionSQLEditorServiceProvider(const SessionId(value: 0)));
     }
     return ref.watch(sessionSQLEditorServiceProvider(sessionModel.sessionId));
   }

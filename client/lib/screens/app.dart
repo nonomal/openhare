@@ -18,73 +18,73 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:client/l10n/app_localizations.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:client/screens/tasks/task.dart';
 
-final GlobalKey<NavigatorState> _rootNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'root');
-final GlobalKey<NavigatorState> _shellNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'shell');
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
+final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'shell');
 
 class App extends HookConsumerWidget {
   App({super.key});
 
   final GoRouter _router = GoRouter(
-      navigatorKey: _rootNavigatorKey,
-      initialLocation: '/sessions',
-      debugLogDiagnostics: true,
-      routes: [
-        GoRoute(
-          path: "/sessions",
-          pageBuilder: (context, state) =>
-              const NoTransitionPage<void>(child: SessionsPage()),
-        ),
-        GoRoute(
-          path: '/settings',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage<void>(child: SettingsPage()),
-        ),
-        // About 页面
-        GoRoute(
-          path: '/about',
-          pageBuilder: (context, state) =>
-              const NoTransitionPage<void>(child: AboutPage()),
-        ),
-        ShellRoute(
-            navigatorKey: _shellNavigatorKey,
-            pageBuilder:
-                (BuildContext context, GoRouterState state, Widget child) {
-              return NoTransitionPage<void>(child: child);
+    navigatorKey: _rootNavigatorKey,
+    initialLocation: '/sessions',
+    debugLogDiagnostics: true,
+    routes: [
+      GoRoute(
+        path: "/sessions",
+        pageBuilder: (context, state) => const NoTransitionPage<void>(child: SessionsPage()),
+      ),
+      GoRoute(
+        path: "/tasks",
+        pageBuilder: (context, state) => const NoTransitionPage<void>(child: TaskPage()),
+      ),
+      GoRoute(
+        path: '/settings',
+        pageBuilder: (context, state) => const NoTransitionPage<void>(child: SettingsPage()),
+      ),
+      // About 页面
+      GoRoute(
+        path: '/about',
+        pageBuilder: (context, state) => const NoTransitionPage<void>(child: AboutPage()),
+      ),
+      ShellRoute(
+        navigatorKey: _shellNavigatorKey,
+        pageBuilder: (BuildContext context, GoRouterState state, Widget child) {
+          return NoTransitionPage<void>(child: child);
+        },
+        routes: [
+          GoRoute(
+            path: "/instances",
+            redirect: (context, state) {
+              return lastInstancePage;
             },
-            routes: [
-              GoRoute(
-                path: "/instances",
-                redirect: (context, state) {
-                  return lastInstancePage;
-                },
-              ),
-              GoRoute(
-                path: '/instances/list',
-                pageBuilder: (context, state) {
-                  lastInstancePage = '/instances/list';
-                  return const NoTransitionPage<void>(child: InstancesPage());
-                },
-              ),
-              GoRoute(
-                path: '/instances/add',
-                pageBuilder: (context, state) {
-                  lastInstancePage = '/instances/add';
-                  return const NoTransitionPage<void>(child: AddInstancePage());
-                },
-              ),
-              GoRoute(
-                path: '/instances/update',
-                pageBuilder: (context, state) {
-                  lastInstancePage = '/instances/update';
-                  return const NoTransitionPage<void>(
-                      child: UpdateInstancePage());
-                },
-              ),
-            ]),
-      ]);
+          ),
+          GoRoute(
+            path: '/instances/list',
+            pageBuilder: (context, state) {
+              lastInstancePage = '/instances/list';
+              return const NoTransitionPage<void>(child: InstancesPage());
+            },
+          ),
+          GoRoute(
+            path: '/instances/add',
+            pageBuilder: (context, state) {
+              lastInstancePage = '/instances/add';
+              return const NoTransitionPage<void>(child: AddInstancePage());
+            },
+          ),
+          GoRoute(
+            path: '/instances/update',
+            pageBuilder: (context, state) {
+              lastInstancePage = '/instances/update';
+              return const NoTransitionPage<void>(child: UpdateInstancePage());
+            },
+          ),
+        ],
+      ),
+    ],
+  );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -95,7 +95,7 @@ class App extends HookConsumerWidget {
       return null;
     }, []);
 
-    final model = ref.watch(systemSettingNotifierProvider);
+    final model = ref.watch(systemSettingProvider);
 
     return MaterialApp.router(
       title: 'openhare',
@@ -114,7 +114,10 @@ String lastInstancePage = "/instances/list";
 class ScaffoldWithNavRail extends StatefulWidget {
   final Widget child;
 
-  const ScaffoldWithNavRail({Key? key, required this.child}) : super(key: key);
+  const ScaffoldWithNavRail({
+    super.key,
+    required this.child,
+  });
 
   @override
   State<ScaffoldWithNavRail> createState() => _ScaffoldWithNavRailState();
@@ -130,9 +133,7 @@ class _ScaffoldWithNavRailState extends State<ScaffoldWithNavRail> {
         MoveWindows(
           child: NavigationRail(
             minWidth: navigationRailWidth,
-            backgroundColor: Theme.of(context)
-                .colorScheme
-                .surfaceContainerLow, // navigation color
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow, // navigation color
             useIndicator: true,
             selectedIndex: _calculateSelectedIndex(context),
             onDestinationSelected: (value) {
@@ -160,6 +161,13 @@ class _ScaffoldWithNavRailState extends State<ScaffoldWithNavRail> {
                 icon: const Icon(Icons.personal_video),
                 label: Text(
                   AppLocalizations.of(context)!.sessions,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              NavigationRailDestination(
+                icon: const Icon(Icons.schedule),
+                label: Text(
+                  AppLocalizations.of(context)!.scheduled_task,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
@@ -207,14 +215,17 @@ class _ScaffoldWithNavRailState extends State<ScaffoldWithNavRail> {
     if (location.startsWith('/sessions')) {
       return 0;
     }
-    if (location.startsWith('/instances')) {
+    if (location.startsWith('/tasks')) {
       return 1;
     }
-    if (location.startsWith('/settings')) {
+    if (location.startsWith('/instances')) {
       return 2;
     }
-    if (location.startsWith('/about')) {
+    if (location.startsWith('/settings')) {
       return 3;
+    }
+    if (location.startsWith('/about')) {
+      return 4;
     }
     return 0;
   }
@@ -226,12 +237,19 @@ class _ScaffoldWithNavRailState extends State<ScaffoldWithNavRail> {
     switch (index) {
       case 0:
         GoRouter.of(context).go('/sessions');
+        break;
       case 1:
-        GoRouter.of(context).go('/instances');
+        GoRouter.of(context).go('/tasks');
+        break;
       case 2:
-        GoRouter.of(context).go('/settings');
+        GoRouter.of(context).go('/instances');
+        break;
       case 3:
+        GoRouter.of(context).go('/settings');
+        break;
+      case 4:
         GoRouter.of(context).go('/about');
+        break;
     }
   }
 }
@@ -243,11 +261,9 @@ class _WindowListener with WindowListener {
 
   @override
   void onWindowClose() async {
-    SessionListModel sessions = ref.read(sessionsServicesProvider);
+    SessionDetailListModel sessions = ref.read(sessionTabProvider);
     for (var session in sessions.sessions) {
-      ref
-          .read(sessionSQLEditorServiceProvider(session.sessionId).notifier)
-          .saveCode();
+      ref.read(sessionSQLEditorServiceProvider(session.sessionId).notifier).saveCode();
     }
     await windowManager.destroy();
   }

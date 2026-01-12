@@ -1,6 +1,5 @@
 import 'package:client/models/sessions.dart';
 import 'package:client/utils/reorder_list.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'session_sql_result.g.dart';
@@ -8,8 +7,7 @@ part 'session_sql_result.g.dart';
 class SQLResultRepoImpl extends SQLResultRepo {
   Map<SessionId, ReorderSelectedList<SQLResultDetailModel>> sqlResults = {};
 
-  ReorderSelectedList<SQLResultDetailModel> sessionSqlResults(
-      SessionId sessionId) {
+  ReorderSelectedList<SQLResultDetailModel> sessionSqlResults(SessionId sessionId) {
     if (!sqlResults.containsKey(sessionId)) {
       sqlResults[sessionId] = ReorderSelectedList();
     }
@@ -20,10 +18,7 @@ class SQLResultRepoImpl extends SQLResultRepo {
     return !sqlResults.containsKey(sessionId)
         ? 0
         : sessionSqlResults(sessionId).fold(
-                0,
-                (previousId, element) => previousId < element.resultId.value
-                    ? element.resultId.value
-                    : previousId) +
+                0, (previousId, element) => previousId < element.resultId.value ? element.resultId.value : previousId) +
             1;
   }
 
@@ -51,9 +46,7 @@ class SQLResultRepoImpl extends SQLResultRepo {
       cache[sessionIdObj] = SessionSQLResultsModel(
         sessionId: sessionIdObj,
         results: resultList.map((r) => _toModel(r)).toList(),
-        selected: resultList.selected() != null
-            ? _toModel(resultList.selected()!)
-            : null,
+        selected: resultList.selected() != null ? _toModel(resultList.selected()!) : null,
       );
     });
     return SQLResultsModel(cache: cache);
@@ -61,14 +54,13 @@ class SQLResultRepoImpl extends SQLResultRepo {
 
   @override
   void deleteSQLResults(SessionId sessionId) {
-    sqlResults.remove(sessionId.value);
+    sqlResults.remove(sessionId);
   }
 
   @override
   void selectSQLResult(ResultId resultId) {
     final result = getSQLResult(resultId);
-    sessionSqlResults(resultId.sessionId)
-        .select(sessionSqlResults(resultId.sessionId).indexOf(result));
+    sessionSqlResults(resultId.sessionId).select(sessionSqlResults(resultId.sessionId).indexOf(result));
   }
 
   @override
@@ -87,8 +79,7 @@ class SQLResultRepoImpl extends SQLResultRepo {
 
   @override
   void updateSQLResult(ResultId resultId, SQLResultDetailModel result) {
-    sessionSqlResults(resultId.sessionId)
-        .replace(getSQLResult(resultId), result);
+    sessionSqlResults(resultId.sessionId).replace(getSQLResult(resultId), result);
   }
 
   @override
@@ -107,8 +98,7 @@ class SQLResultRepoImpl extends SQLResultRepo {
   @override
   void deleteSQLResult(ResultId resultId) {
     final result = getSQLResult(resultId);
-    sessionSqlResults(resultId.sessionId)
-        .removeAt(sessionSqlResults(resultId.sessionId).indexOf(result));
+    sessionSqlResults(resultId.sessionId).removeAt(sessionSqlResults(resultId.sessionId).indexOf(result));
   }
 }
 

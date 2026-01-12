@@ -7,10 +7,10 @@ import 'package:client/services/ai/chat.dart';
 import 'package:client/services/instances/instances.dart';
 import 'package:client/services/sessions/session_conn.dart';
 import 'package:client/services/sessions/session_drawer.dart';
-import 'package:client/services/sessions/session_metadata_tree.dart';
 import 'package:client/services/sessions/session_sql_editor.dart';
 import 'package:client/services/sessions/session_sql_result.dart';
 import 'package:client/services/sessions/session_controller.dart';
+import 'package:client/services/tasks/overview.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'sessions.g.dart';
@@ -18,57 +18,65 @@ part 'sessions.g.dart';
 @Riverpod(keepAlive: true)
 class SessionsServices extends _$SessionsServices {
   @override
-  SessionListModel build() {
-    SessionListModel sessions = ref.watch(sessionRepoProvider).getSessions();
-    return sessions;
+  int build() {
+    return 1;
+  }
+
+  void _invalidateSelf() {
+    state++;
   }
 
   SessionModel? getSession(SessionId sessionId) {
     return ref.read(sessionRepoProvider).getSession(sessionId);
   }
 
+  SessionListModel getSessions() {
+    return ref.read(sessionRepoProvider).getSessions();
+  }
+
   void selectSessionByIndex(int index) {
     ref.read(sessionRepoProvider).selectSessionByIndex(index);
-    ref.invalidateSelf();
+    _invalidateSelf();
   }
 
   void reorderSession(int oldIndex, int newIndex) {
     ref.read(sessionRepoProvider).reorderSession(oldIndex, newIndex);
-    ref.invalidateSelf();
+    _invalidateSelf();
   }
 
   Future<void> addSession(InstanceModel instance, {String? schema}) async {
     SessionId selectedSessionId;
-    if (state.selectedSession == null) {
-      selectedSessionId = await ref.read(sessionRepoProvider).newSession();
+    final selectedSession = ref.read(sessionRepoProvider).seletedSession();
+    if (selectedSession == null) {
+      selectedSessionId = ref.read(sessionRepoProvider).newSession();
     } else {
-      selectedSessionId = state.selectedSession!.sessionId;
+      selectedSessionId = selectedSession.sessionId;
     }
 
-    await ref
-        .read(instancesServicesProvider.notifier)
-        .addActiveInstance(instance.id, schema: schema);
+    // is async
+    ref.read(instancesServicesProvider.notifier).addActiveInstance(instance.id, schema: schema);
 
-    await ref.read(sessionRepoProvider).updateSession(selectedSessionId,
-        instance: instance, currentSchema: schema);
+    ref.read(sessionRepoProvider).updateSession(selectedSessionId, instance: instance, currentSchema: schema);
 
-    ref.invalidateSelf();
+    _invalidateSelf();
 
     // auto connect when new session.
     connectSession(selectedSessionId);
   }
 
-  Future<void> newSession() async {
-    await ref.read(sessionRepoProvider).newSession();
-    ref.invalidateSelf();
+  void newSession() {
+    ref.read(sessionRepoProvider).newSession();
+    _invalidateSelf();
   }
 
-  Future<void> deleteSessionByIndex(int index) async {
-    SessionModel session = state.sessions[index];
-
+  Future<void> deleteSession(SessionId sessionId) async {
+    SessionModel? session = ref.read(sessionRepoProvider).getSession(sessionId);
+    if (session == null) {
+      return;
+    }
     // 1. delete session
-    await ref.read(sessionRepoProvider).deleteSession(session.sessionId);
-    ref.invalidateSelf();
+    ref.read(sessionRepoProvider).deleteSession(session.sessionId);
+    _invalidateSelf();
 
     // 2. kill and close conn
     if (session.connId != null) {
@@ -82,14 +90,11 @@ class SessionsServices extends _$SessionsServices {
     ref.read(sqlResultsRepoProvider).deleteSQLResults(session.sessionId);
 
     // 4. delete ai chat
-    ref
-        .read(aIChatServiceProvider.notifier)
-        .delete(AIChatId(value: session.sessionId.value));
+    ref.read(aIChatServiceProvider.notifier).delete(AIChatId(value: session.sessionId.value));
 
     // 5. delete provider status
     ref.invalidate(sessionSQLEditorServiceProvider(session.sessionId));
     ref.invalidate(sessionDrawerServicesProvider(session.sessionId));
-    ref.invalidate(sessionMetadataServicesProvider(session.sessionId));
     SessionController.removeSessionController(session.sessionId);
   }
 
@@ -110,24 +115,19 @@ class SessionsServices extends _$SessionsServices {
       final repo = ref.read(sessionRepoProvider);
       repo.setConnId(session.sessionId, connModel.connId);
       connId = connModel.connId;
-      ref.invalidateSelf();
+      _invalidateSelf();
     }
 
     // connect conn
-    await connsServices.connect(connId,
-        onSchemaChangedCallback: (schema) async {
-      await ref
-          .read(sessionRepoProvider)
-          .updateSession(sessionId, currentSchema: schema);
+    await connsServices.connect(connId, onSchemaChangedCallback: (schema) async {
+      ref.read(sessionRepoProvider).updateSession(sessionId, currentSchema: schema);
 
-      await ref
-          .read(instancesServicesProvider.notifier)
-          .addActiveInstance(session.instanceId!, schema: schema);
+      ref.read(instancesServicesProvider.notifier).addActiveInstance(session.instanceId!, schema: schema);
 
-      ref.invalidateSelf();
+      _invalidateSelf();
     });
 
-    ref.invalidateSelf();
+    _invalidateSelf();
   }
 
   Future<void> disconnectSession(SessionId sessionId) async {
@@ -148,7 +148,7 @@ class SessionsServices extends _$SessionsServices {
     // set connId to null
     ref.read(sessionRepoProvider).unsetConnId(session.sessionId);
 
-    ref.invalidateSelf();
+    _invalidateSelf();
   }
 }
 
@@ -156,45 +156,53 @@ class SessionsServices extends _$SessionsServices {
 class SelectedSessionNotifier extends _$SelectedSessionNotifier {
   @override
   SessionModel? build() {
-    return ref.watch(sessionsServicesProvider.select((s) {
-      return s.selectedSession;
-    }));
+    ref.watch(sessionsServicesProvider);
+    return ref.read(sessionRepoProvider).seletedSession();
   }
 }
 
 @Riverpod(keepAlive: true)
-class SessionsDetailNotifier extends _$SessionsDetailNotifier {
+class SelectedSessionDetailNotifier extends _$SelectedSessionDetailNotifier {
+  @override
+  SessionDetailModel? build() {
+    final session = ref.watch(selectedSessionProvider);
+    SessionConnListModel conns = ref.watch(sessionConnsServicesProvider);
+    InstancesServices instanceServices = ref.read(instancesServicesProvider.notifier);
+    if (session == null) {
+      return null;
+    }
+    InstanceModel? selectedInstance =
+        session.instanceId == null ? null : instanceServices.getInstanceById(session.instanceId!);
+    return SessionDetailModel(
+      sessionId: session.sessionId,
+      instanceId: session.instanceId,
+      instanceName: selectedInstance?.name,
+      dbType: selectedInstance?.dbType,
+      connId: conns.conns[session.connId]?.connId,
+      connState: conns.conns[session.connId]?.state,
+      connErrorMsg: conns.conns[session.connId]?.errorMsg,
+      currentSchema: session.currentSchema,
+    );
+  }
+}
+
+@Riverpod(keepAlive: true)
+class SessionTabNotifier extends _$SessionTabNotifier {
   @override
   SessionDetailListModel build() {
-    SessionListModel sessions = ref.watch(sessionsServicesProvider);
+    ref.watch(sessionsServicesProvider);
     SessionConnListModel conns = ref.watch(sessionConnsServicesProvider);
-    InstancesServices instanceServices =
-        ref.read(instancesServicesProvider.notifier);
+    InstancesServices instanceServices = ref.read(instancesServicesProvider.notifier);
 
+    final sessions = ref.read(sessionsServicesProvider.notifier).getSessions();
     // selected instance
-    SessionDetailModel? selectedSession;
-    if (sessions.selectedSession != null) {
-      InstanceModel? selectedInstance =
-          sessions.selectedSession!.instanceId == null
-              ? null
-              : instanceServices
-                  .getInstanceById(sessions.selectedSession!.instanceId!);
-      selectedSession = SessionDetailModel(
-        sessionId: sessions.selectedSession!.sessionId,
-        instanceId: sessions.selectedSession!.instanceId,
-        instanceName: selectedInstance?.name,
-        dbType: selectedInstance?.dbType,
-        connId: conns.conns[sessions.selectedSession!.connId]?.connId,
-        connState: conns.conns[sessions.selectedSession!.connId]?.state,
-        connErrorMsg: conns.conns[sessions.selectedSession!.connId]?.errorMsg,
-        currentSchema: sessions.selectedSession!.currentSchema,
-      );
-    }
+
+    SessionDetailModel? selectedSession = ref.watch(selectedSessionDetailProvider);
+
     return SessionDetailListModel(
       sessions: sessions.sessions.map((session) {
-        InstanceModel? instance = session.instanceId == null
-            ? null
-            : instanceServices.getInstanceById(session.instanceId!);
+        InstanceModel? instance =
+            session.instanceId == null ? null : instanceServices.getInstanceById(session.instanceId!);
         return SessionDetailModel(
           sessionId: session.sessionId,
           instanceId: session.instanceId,
@@ -211,38 +219,32 @@ class SessionsDetailNotifier extends _$SessionsDetailNotifier {
   }
 }
 
-@Riverpod(keepAlive: true)
-class SelectedSessionDetailNotifier extends _$SelectedSessionDetailNotifier {
-  @override
-  SessionDetailModel? build() {
-    return ref.watch(sessionsDetailNotifierProvider.select((s) {
-      return s.selectedSession;
-    }));
-  }
-}
-
 @Riverpod()
 class SessionOpBarNotifier extends _$SessionOpBarNotifier {
   @override
   SessionOpBarModel? build() {
-    SessionDetailModel? session =
-        ref.watch(selectedSessionDetailNotifierProvider);
+    SessionDetailModel? session = ref.watch(selectedSessionDetailProvider);
     if (session == null) {
       return null;
     }
 
-    SessionDrawerModel? sessionDrawer =
-        ref.watch(sessionDrawerNotifierProvider);
+    SessionDrawerModel? sessionDrawer = ref.watch(sessionDrawerProvider);
     if (sessionDrawer == null) {
       return null;
     }
 
+    // Watch task overview to get running task count for auto refresh
+    final taskOverview = ref.watch(taskOverviewServiceProvider);
+    final runningTaskCount = taskOverview.runningTasks.length;
+
     return SessionOpBarModel(
       sessionId: session.sessionId,
+      instanceId: session.instanceId,
       connId: session.connId,
       state: session.connState,
       currentSchema: session.currentSchema ?? "",
       isRightPageOpen: sessionDrawer.isRightPageOpen,
+      runningTaskCount: runningTaskCount,
     );
   }
 }
@@ -251,14 +253,12 @@ class SessionOpBarNotifier extends _$SessionOpBarNotifier {
 class SelectedSessionStatusNotifier extends _$SelectedSessionStatusNotifier {
   @override
   SessionStatusModel? build() {
-    SessionDetailModel? session =
-        ref.watch(selectedSessionDetailNotifierProvider);
+    SessionDetailModel? session = ref.watch(selectedSessionDetailProvider);
     if (session == null) {
       return null;
     }
 
-    SQLResultDetailModel? sqlResultModel =
-        ref.watch(selectedSQLResultNotifierProvider);
+    SQLResultDetailModel? sqlResultModel = ref.watch(selectedSQLResultProvider);
 
     return SessionStatusModel(
       sessionId: session.sessionId,

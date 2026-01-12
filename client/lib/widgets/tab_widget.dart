@@ -14,15 +14,15 @@ class CommonTabBar extends StatefulWidget {
   final Color? color;
   final CommonTabStyle? tabStyle;
 
-  const CommonTabBar(
-      {Key? key,
-      this.height,
-      required this.tabs,
-      required this.onReorder,
-      this.addTab,
-      this.color,
-      this.tabStyle})
-      : super(key: key);
+  const CommonTabBar({
+    super.key,
+    this.height,
+    required this.tabs,
+    required this.onReorder,
+    this.addTab,
+    this.color,
+    this.tabStyle,
+  });
 
   @override
   State<CommonTabBar> createState() => _CommonTabBarState();
@@ -93,8 +93,7 @@ class _CommonTabBarState extends State<CommonTabBar> {
       final sumTabLength = c.maxWidth - addTabWidth - moreWidth;
 
       // 每个tab的平均 width；
-      double width = min(sumTabLength / widget.tabs.length,
-          style.maxWidth ?? defaultTabMaxWidth);
+      double width = min(sumTabLength / widget.tabs.length, style.maxWidth ?? defaultTabMaxWidth);
 
       // 如果总宽度不够，就只能展示后面length个tab
       int length = widget.tabs.length;
@@ -167,13 +166,14 @@ class CommonTabWrap {
   final GestureTapCallback? onTap;
   final VoidCallback? onDeleted;
 
-  CommonTabWrap(
-      {this.avatar,
-      required this.label,
-      this.items,
-      required this.selected,
-      this.onTap,
-      this.onDeleted});
+  CommonTabWrap({
+    this.avatar,
+    required this.label,
+    this.items,
+    required this.selected,
+    this.onTap,
+    this.onDeleted,
+  });
 }
 
 class CommonTabStyle {
@@ -210,7 +210,7 @@ class CommonTab extends StatefulWidget {
   final VoidCallback? onDeleted;
 
   const CommonTab({
-    Key? key,
+    super.key,
     this.avatar,
     required this.label,
     required this.selected,
@@ -220,15 +220,15 @@ class CommonTab extends StatefulWidget {
     this.style,
     this.width,
     this.height,
-  }) : super(key: key);
+  });
 
-  CommonTab.fromWarp(
-      {super.key,
-      required CommonTabWrap warp,
-      this.style,
-      this.width,
-      this.height})
-      : avatar = warp.avatar,
+  CommonTab.fromWarp({
+    super.key,
+    required CommonTabWrap warp,
+    this.style,
+    this.width,
+    this.height,
+  })  : avatar = warp.avatar,
         label = warp.label,
         items = warp.items,
         onTap = warp.onTap,
@@ -245,19 +245,13 @@ class _CommonTabState extends State<CommonTab> {
   Color color() {
     if (widget.selected) {
       Color defaultColor = Theme.of(context).colorScheme.surfaceContainerHigh;
-      return widget.style != null
-          ? (widget.style!.selectedColor ?? defaultColor)
-          : defaultColor;
+      return widget.style != null ? (widget.style!.selectedColor ?? defaultColor) : defaultColor;
     } else if (isEnter) {
       Color defaultColor = Theme.of(context).colorScheme.primaryContainer;
-      return widget.style != null
-          ? (widget.style!.hoverColor ?? defaultColor)
-          : defaultColor;
+      return widget.style != null ? (widget.style!.hoverColor ?? defaultColor) : defaultColor;
     } else {
       Color defaultColor = Theme.of(context).colorScheme.surface;
-      return widget.style != null
-          ? (widget.style!.color ?? defaultColor)
-          : defaultColor;
+      return widget.style != null ? (widget.style!.color ?? defaultColor) : defaultColor;
     }
   }
 
@@ -280,9 +274,7 @@ class _CommonTabState extends State<CommonTab> {
               ? null
               : (detail) {
                   final position = detail.globalPosition;
-                  final RenderBox overlay = Overlay.of(context)
-                      .context
-                      .findRenderObject() as RenderBox;
+                  final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
                   final overlayPos = overlay.localToGlobal(Offset.zero);
 
                   showMenu(
@@ -308,12 +300,9 @@ class _CommonTabState extends State<CommonTab> {
                     height: widget.height ?? 40,
                     decoration: BoxDecoration(
                       color: color(),
-                      borderRadius: widget.style?.borderRadius ??
-                          const BorderRadius.all(Radius.circular(10)),
+                      borderRadius: widget.style?.borderRadius ?? const BorderRadius.all(Radius.circular(10)),
                       border: Border.all(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
                         width: 0.5,
                       ),
                     ),

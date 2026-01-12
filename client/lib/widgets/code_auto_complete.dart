@@ -28,8 +28,7 @@ class FuzzyMatchCodePrompt extends CodeKeywordPrompt {
   int get hashCode => word.hashCode;
 
   /// Builds a TextSpan with highlighted match positions.
-  TextSpan getTextSpan(BuildContext context, String input,
-      [FuzzyMatchResult? cachedResult]) {
+  TextSpan getTextSpan(BuildContext context, String input, [FuzzyMatchResult? cachedResult]) {
     final matchResult = cachedResult ?? FuzzyMatch.matchWithResult(input, word);
     final baseStyle = GoogleFonts.robotoMono(
       textStyle: Theme.of(context).textTheme.bodyMedium,
@@ -37,9 +36,7 @@ class FuzzyMatchCodePrompt extends CodeKeywordPrompt {
     );
 
     // If no match or no matchPositions, return plain text
-    if (!matchResult.matched ||
-        matchResult.matchPositions == null ||
-        matchResult.matchPositions!.isEmpty) {
+    if (!matchResult.matched || matchResult.matchPositions == null || matchResult.matchPositions!.isEmpty) {
       return TextSpan(text: word, style: baseStyle);
     }
 
@@ -125,26 +122,25 @@ extension _CodeAutocompleteCharactersExtension on Characters {
   }
 }
 
-class SQLEditorAutocompletePromptsBuilder
-    implements DefaultCodeAutocompletePromptsBuilder {
+class SQLEditorAutocompletePromptsBuilder implements DefaultCodeAutocompletePromptsBuilder {
   final List<CodeKeywordPrompt> keywordPrompts;
   final List<CodePrompt> directPrompts;
   final Map<String, List<CodePrompt>> relatedPrompts;
 
   final Set<CodePrompt> _allKeywordPrompts = {};
 
-  SQLEditorAutocompletePromptsBuilder(
-      {required this.keywordPrompts,
-      required this.directPrompts,
-      required this.relatedPrompts}) {
+  SQLEditorAutocompletePromptsBuilder({
+    required this.keywordPrompts,
+    required this.directPrompts,
+    required this.relatedPrompts,
+  }) {
     _allKeywordPrompts.addAll(keywordPrompts);
     _allKeywordPrompts.addAll(directPrompts);
   }
 
   bool _isInsideString(Characters before, Characters after) {
     // Check whether the position is inside a string
-    return before.containsSymbols(const ['\'', '"']) &&
-        after.containsSymbols(const ['\'', '"']);
+    return before.containsSymbols(const ['\'', '"']) && after.containsSymbols(const ['\'', '"']);
   }
 
   String _extractWordBeforePosition(Characters characters, int endOffset) {
@@ -163,8 +159,7 @@ class SQLEditorAutocompletePromptsBuilder
       return '';
     }
     // Handle regular input extraction
-    final input =
-        _extractWordBeforePosition(charactersBefore, charactersBefore.length);
+    final input = _extractWordBeforePosition(charactersBefore, charactersBefore.length);
 
     // If input is empty and not a dot notation, no autocomplete needed
     if (input.isEmpty && charactersBefore.takeLast(1).string != '.') {
@@ -173,43 +168,33 @@ class SQLEditorAutocompletePromptsBuilder
     return input;
   }
 
-  Iterable<CodePrompt> _getPromptsForInput(
-      String input, Characters charactersBefore) {
+  Iterable<CodePrompt> _getPromptsForInput(String input, Characters charactersBefore) {
     // Handle dot notation (e.g., table.column)
     if (charactersBefore.takeLast(1).string == '.') {
-      final target = _extractWordBeforePosition(
-          charactersBefore, charactersBefore.length - 1);
+      final target = _extractWordBeforePosition(charactersBefore, charactersBefore.length - 1);
       return relatedPrompts[target] ?? const [];
     }
 
     // Check if this is a qualified name (e.g., table.column)
-    if (charactersBefore.length > 1 &&
-        charactersBefore.elementAt(charactersBefore.length - 2) == '.') {
-      final target = _extractWordBeforePosition(
-          charactersBefore, charactersBefore.length - 1);
-      final allPrompts =
-          relatedPrompts[target]?.where((prompt) => prompt.match(input)) ??
-              const [];
+    if (charactersBefore.length > 1 && charactersBefore.elementAt(charactersBefore.length - 2) == '.') {
+      final target = _extractWordBeforePosition(charactersBefore, charactersBefore.length - 1);
+      final allPrompts = relatedPrompts[target]?.where((prompt) => prompt.match(input)) ?? const [];
       return _sortAndLimitPrompts(allPrompts, input);
     }
 
     // Handle keyword/direct prompts
-    final allPrompts =
-        _allKeywordPrompts.where((prompt) => prompt.match(input));
+    final allPrompts = _allKeywordPrompts.where((prompt) => prompt.match(input));
     return _sortAndLimitPrompts(allPrompts, input);
   }
 
   @override
-  CodeAutocompleteEditingValue? build(
-      BuildContext context, CodeLine codeLine, CodeLineSelection selection) {
+  CodeAutocompleteEditingValue? build(BuildContext context, CodeLine codeLine, CodeLineSelection selection) {
     final String text = codeLine.text;
-    final Characters charactersBefore =
-        text.substring(0, selection.extentOffset).characters;
+    final Characters charactersBefore = text.substring(0, selection.extentOffset).characters;
     if (charactersBefore.isEmpty) {
       return null;
     }
-    final Characters charactersAfter =
-        text.substring(selection.extentOffset).characters;
+    final Characters charactersAfter = text.substring(selection.extentOffset).characters;
 
     if (_isInsideString(charactersBefore, charactersAfter)) {
       return null;
@@ -230,8 +215,7 @@ class SQLEditorAutocompletePromptsBuilder
       return null;
     }
 
-    return CodeAutocompleteEditingValue(
-        input: input, prompts: prompts.toList(), index: 0);
+    return CodeAutocompleteEditingValue(input: input, prompts: prompts.toList(), index: 0);
   }
 
   /// Sorts prompts by match score and limits the result count for performance.
@@ -239,8 +223,7 @@ class SQLEditorAutocompletePromptsBuilder
   /// Limits to top 100 matches to prevent UI lag when there are many candidates.
   static const int _maxPrompts = 100;
 
-  List<CodePrompt> _sortAndLimitPrompts(
-      Iterable<CodePrompt> prompts, String input) {
+  List<CodePrompt> _sortAndLimitPrompts(Iterable<CodePrompt> prompts, String input) {
     if (input.isEmpty) {
       return prompts.take(_maxPrompts).toList();
     }
@@ -267,18 +250,17 @@ class SQLEditorAutocompletePromptsBuilder
   }
 }
 
-class SQLEditorAutoCompleteListView extends StatefulWidget
-    implements PreferredSizeWidget {
+class SQLEditorAutoCompleteListView extends StatefulWidget implements PreferredSizeWidget {
   static const double kItemHeight = 26;
 
   final ValueNotifier<CodeAutocompleteEditingValue> notifier;
   final ValueChanged<CodeAutocompleteResult> onSelected;
 
   const SQLEditorAutoCompleteListView({
-    Key? key,
+    super.key,
     required this.notifier,
     required this.onSelected,
-  }) : super(key: key);
+  });
 
   @override
   Size get preferredSize {
@@ -317,8 +299,7 @@ class SQLEditorAutoCompleteListView extends StatefulWidget
   State<StatefulWidget> createState() => _SQLEditorAutoCompleteListViewState();
 }
 
-class _SQLEditorAutoCompleteListViewState
-    extends State<SQLEditorAutoCompleteListView> {
+class _SQLEditorAutoCompleteListViewState extends State<SQLEditorAutoCompleteListView> {
   @override
   void initState() {
     widget.notifier.addListener(_onValueChanged);
@@ -402,10 +383,8 @@ class _SQLEditorAutoCompleteListViewState
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor =
-        Theme.of(context).colorScheme.surfaceContainerLowest; // 提示窗口的背景色
-    final selectedBackgroundColor =
-        Theme.of(context).colorScheme.surfaceContainer; // 提示窗口选中项的背景色
+    final backgroundColor = Theme.of(context).colorScheme.surfaceContainerLowest; // 提示窗口的背景色
+    final selectedBackgroundColor = Theme.of(context).colorScheme.surfaceContainer; // 提示窗口选中项的背景色
 
     return Container(
         constraints: BoxConstraints.loose(widget.preferredSize),
@@ -427,19 +406,13 @@ class _SQLEditorAutoCompleteListViewState
             final BorderRadius radius = BorderRadius.only(
               topLeft: index == 0 ? const Radius.circular(5) : Radius.zero,
               topRight: index == 0 ? const Radius.circular(5) : Radius.zero,
-              bottomLeft: index == widget.notifier.value.prompts.length - 1
-                  ? const Radius.circular(5)
-                  : Radius.zero,
-              bottomRight: index == widget.notifier.value.prompts.length - 1
-                  ? const Radius.circular(5)
-                  : Radius.zero,
+              bottomLeft: index == widget.notifier.value.prompts.length - 1 ? const Radius.circular(5) : Radius.zero,
+              bottomRight: index == widget.notifier.value.prompts.length - 1 ? const Radius.circular(5) : Radius.zero,
             );
             return InkWell(
                 borderRadius: radius,
                 onTap: () {
-                  widget.onSelected(widget.notifier.value
-                      .copyWith(index: index)
-                      .autocomplete);
+                  widget.onSelected(widget.notifier.value.copyWith(index: index).autocomplete);
                 },
                 child: Container(
                   width: double.infinity,
@@ -447,9 +420,7 @@ class _SQLEditorAutoCompleteListViewState
                   padding: const EdgeInsets.only(left: 5, right: 5),
                   alignment: Alignment.centerLeft,
                   decoration: BoxDecoration(
-                    color: index == widget.notifier.value.index
-                        ? selectedBackgroundColor
-                        : null,
+                    color: index == widget.notifier.value.index ? selectedBackgroundColor : null,
                     borderRadius: radius,
                   ),
                   child: Row(
@@ -458,13 +429,10 @@ class _SQLEditorAutoCompleteListViewState
                       const SizedBox(width: kSpacingTiny),
                       Expanded(child: _buildPromptText(context, prompt)),
                       const SizedBox(width: kSpacingTiny),
-                      if (prompt is DBObjectPrompt &&
-                          prompt.type == MetaType.column)
+                      if (prompt is DBObjectPrompt && prompt.type == MetaType.column)
                         DataTypeIcon(
                           size: 16,
-                          type: prompt.props?[MetaDataPropType.dataType]?.value
-                                  as DataType? ??
-                              DataType.blob,
+                          type: prompt.props?[MetaDataPropType.dataType]?.value as DataType? ?? DataType.blob,
                         ),
                       const SizedBox(width: kSpacingTiny),
                     ],
@@ -496,12 +464,10 @@ class SQLEditorAutoCompleteScrollListView extends StatefulWidget {
   });
 
   @override
-  State<StatefulWidget> createState() =>
-      _SQLEditorAutoCompleteScrollListViewState();
+  State<StatefulWidget> createState() => _SQLEditorAutoCompleteScrollListViewState();
 }
 
-class _SQLEditorAutoCompleteScrollListViewState
-    extends State<SQLEditorAutoCompleteScrollListView> {
+class _SQLEditorAutoCompleteScrollListViewState extends State<SQLEditorAutoCompleteScrollListView> {
   late final List<GlobalKey> _keys;
 
   @override
@@ -514,11 +480,9 @@ class _SQLEditorAutoCompleteScrollListViewState
   }
 
   @override
-  void didUpdateWidget(
-      covariant SQLEditorAutoCompleteScrollListView oldWidget) {
+  void didUpdateWidget(covariant SQLEditorAutoCompleteScrollListView oldWidget) {
     if (widget.itemCount > oldWidget.itemCount) {
-      _keys.addAll(List.generate(
-          widget.itemCount - oldWidget.itemCount, (index) => GlobalKey()));
+      _keys.addAll(List.generate(widget.itemCount - oldWidget.itemCount, (index) => GlobalKey()));
     } else if (widget.itemCount < oldWidget.itemCount) {
       _keys.sublist(oldWidget.itemCount - widget.itemCount);
     }
@@ -587,8 +551,7 @@ class _SQLEditorAutoCompleteScrollListViewState
     }
     if (pre < widget.controller.offset) {
       controller.jumpTo(pre - 1);
-    } else if (cur >
-        controller.offset + controller.position.viewportDimension) {
+    } else if (cur > controller.offset + controller.position.viewportDimension) {
       controller.jumpTo(cur - controller.position.viewportDimension);
     }
   }

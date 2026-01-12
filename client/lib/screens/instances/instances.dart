@@ -3,7 +3,7 @@ import 'package:client/screens/page_skeleton.dart';
 import 'package:flutter/material.dart';
 
 class InstancesPage extends StatelessWidget {
-  const InstancesPage({Key? key}) : super(key: key);
+  const InstancesPage({super.key});
 
   @override
   Widget build(BuildContext context) {

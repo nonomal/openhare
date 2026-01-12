@@ -4,7 +4,7 @@ import 'package:client/models/instances.dart';
 import 'package:client/models/sessions.dart';
 import 'package:db_driver/db_driver.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 
 part 'session_conn.g.dart';
 
@@ -78,18 +78,13 @@ class SessionConnRepoImpl extends SessionConnRepo {
   }
 
   @override
-  Future<List<String>> getSchemas(ConnId connId) {
-    return conns[connId.value]!.getSchemas();
-  }
-
-  @override
-  Future<List<MetaDataNode>> getMetadata(ConnId connId) {
-    return conns[connId.value]!.metadata();
-  }
-
-  @override
   Future<BaseQueryResult?> query(ConnId connId, String query) {
     return conns[connId.value]!.query(query);
+  }
+
+  @override
+  Stream<BaseQueryStreamItem> queryStream(ConnId connId, String query) {
+    return conns[connId.value]!.queryStream(query);
   }
 
   @override
@@ -124,9 +119,7 @@ class SessionConn {
     _onStateChangedCallback?.call();
   }
 
-  Future<void> connect(
-      {Function()? onStateChangedCallback,
-      Function(String)? onSchemaChangedCallback}) async {
+  Future<void> connect({Function()? onStateChangedCallback, Function(String)? onSchemaChangedCallback}) async {
     try {
       _onStateChangedCallback = onStateChangedCallback;
       if (conn2 != null) {
@@ -146,7 +139,6 @@ class SessionConn {
       startHealthCheck();
     } catch (e) {
       errorMsg = e.toString();
-      print("conn error: $e");
       _setState(SQLConnectState.failed);
       rethrow;
     }
@@ -170,15 +162,15 @@ class SessionConn {
         return;
       }
       await conn2!.ping();
-      print("Connection $hashCode is alive");
+      debugPrint("Connection $hashCode is alive");
     } catch (e) {
-      print("Connection $hashCode check failed: $e");
+      debugPrint("Connection $hashCode check failed: $e");
 
       _setState(SQLConnectState.unHealth);
       try {
         _onStateChangedCallback?.call();
       } catch (callbackError) {
-        print("调用 onCloseCallback 时出错: $callbackError");
+        debugPrint("调用 onCloseCallback 时出错: $callbackError");
       }
     }
   }
@@ -201,13 +193,25 @@ class SessionConn {
     return (conn2 != null && state == SQLConnectState.connected);
   }
 
+  // todo: 需要一个参数来决定是否限制返回数据量
   Future<BaseQueryResult?> query(String query) async {
     try {
       _setState(SQLConnectState.executing);
-      BaseQueryResult queryResult = await conn2!.query(query);
+      BaseQueryResult queryResult = await conn2!.query(query, limit: 100);
       return queryResult;
     } catch (e) {
       rethrow;
+    } finally {
+      _setState(SQLConnectState.connected);
+    }
+  }
+
+  Stream<BaseQueryStreamItem> queryStream(String query) async* {
+    try {
+      _setState(SQLConnectState.executing);
+      await for (final item in conn2!.queryStream(query)) {
+        yield item;
+      }
     } finally {
       _setState(SQLConnectState.connected);
     }
@@ -217,18 +221,13 @@ class SessionConn {
     try {
       await conn2!.killQuery();
     } catch (e) {
-      print("Failed to kill query: $e");
+      debugPrint("Failed to kill query: $e");
     }
   }
 
   Future<void> setCurrentSchema(String schema) async {
     await conn2!.setCurrentSchema(schema);
     currentSchema = schema;
-  }
-
-  Future<List<String>> getSchemas() async {
-    List<String> schemas = await conn2!.schemas();
-    return schemas;
   }
 
   Future<List<MetaDataNode>> metadata() async {

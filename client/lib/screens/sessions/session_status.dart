@@ -1,18 +1,14 @@
-import 'dart:io';
 import 'package:client/models/sessions.dart';
-import 'package:client/services/sessions/session_sql_result.dart';
 import 'package:client/services/sessions/sessions.dart';
 import 'package:client/widgets/const.dart';
-import 'package:client/widgets/button.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:client/utils/duration_extend.dart';
+import 'package:client/utils/time_format.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:client/l10n/app_localizations.dart';
 import 'package:client/widgets/divider.dart';
 
 class SessionStatusTab extends ConsumerWidget {
-  const SessionStatusTab({Key? key}) : super(key: key);
+  const SessionStatusTab({super.key});
 
   Widget divider(BuildContext context) {
     return const Padding(
@@ -23,8 +19,7 @@ class SessionStatusTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    SessionStatusModel? model =
-        ref.watch(selectedSessionStatusNotifierProvider);
+    SessionStatusModel? model = ref.watch(selectedSessionStatusProvider);
     if (model == null) {
       return Container(
         height: 30,
@@ -55,12 +50,10 @@ class SessionStatusTab extends ConsumerWidget {
                             child: switch (model.connState) {
                           SQLConnectState.connected ||
                           SQLConnectState.executing =>
-                            const Icon(Icons.check_circle,
-                                size: kIconSizeSmall, color: Colors.green),
+                            const Icon(Icons.check_circle, size: kIconSizeSmall, color: Colors.green),
                           SQLConnectState.failed ||
                           SQLConnectState.unHealth =>
-                            const Icon(Icons.error,
-                                size: kIconSizeSmall, color: Colors.red),
+                            const Icon(Icons.error, size: kIconSizeSmall, color: Colors.red),
                           _ => const Text("-"),
                         } // 根据model.state展示不同的图标
                             ),
@@ -90,39 +83,11 @@ class SessionStatusTab extends ConsumerWidget {
             // sql query
             divider(context),
             ValueStatusWidget(
-                width: 300,
-                label: AppLocalizations.of(context)!.query,
-                value: shortQueryDisplay,
-                tooltip: model.query ??
-                    AppLocalizations.of(context)!.no_query_executed),
-
-            // download result
-            if (model.state == SQLExecuteState.done &&
-                model.resultId != null) ...[
-              divider(context),
-              RectangleIconButton.medium(
-                tooltip: AppLocalizations.of(context)!
-                    .button_tooltip_sql_result_download,
-                icon: Icons.download_rounded,
-                iconColor: Colors.green,
-                onPressed: () async {
-                  String? outputFile = await FilePicker.platform.saveFile(
-                    dialogTitle:
-                        AppLocalizations.of(context)!.display_msg_downlaod,
-                    fileName:
-                        '${model.instanceName}-${DateTime.now().toIso8601String().replaceAll(":", "-").split('.')[0]}.xlsx',
-                  );
-                  if (outputFile == null) {
-                    return;
-                  }
-                  File file = File(outputFile);
-                  await file.writeAsBytes(ref
-                      .read(selectedSQLResultNotifierProvider.notifier)
-                      .toExcel()
-                      .save()!);
-                },
-              )
-            ],
+              width: 300,
+              label: AppLocalizations.of(context)!.query,
+              value: shortQueryDisplay,
+              tooltip: model.query ?? AppLocalizations.of(context)!.no_query_executed,
+            ),
           ],
           const Spacer(),
         ],
@@ -138,12 +103,12 @@ class ValueStatusWidget extends StatelessWidget {
   final double width;
 
   const ValueStatusWidget({
-    Key? key,
+    super.key,
     required this.label,
     required this.value,
     this.tooltip,
     this.width = 150,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

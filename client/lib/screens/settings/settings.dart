@@ -16,7 +16,7 @@ class SettingsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    SettingModel model = ref.watch(settingNotifierProvider);
+    SettingModel model = ref.watch(settingProvider);
 
     return PageSkeleton(
       key: const Key("settings"),
@@ -31,45 +31,36 @@ class SettingsPage extends ConsumerWidget {
           ],
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              height: 40,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SettingTabButton(
-                    text: AppLocalizations.of(context)!.preferences,
-                    onTap: () {
-                      ref
-                          .read(settingTabServiceProvider.notifier)
-                          .setSelectedSettingType(SettingType.system);
-                    },
-                    isSelected: model.settingTab.selectedSettingType ==
-                        SettingType.system,
-                  ),
-                  const SizedBox(width: kSpacingMedium),
-                  SettingTabButton(
-                    text: AppLocalizations.of(context)!.llm_api,
-                    onTap: () {
-                      ref
-                          .read(settingTabServiceProvider.notifier)
-                          .setSelectedSettingType(SettingType.llmApi);
-                    },
-                    isSelected: model.settingTab.selectedSettingType ==
-                        SettingType.llmApi,
-                  ),
-                ],
-              ),
+            Row(
+              children: [
+                Icon(Icons.settings, color: Theme.of(context).colorScheme.primary),
+                const SizedBox(width: kSpacingSmall),
+                Text(
+                  AppLocalizations.of(context)!.preferences,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
             ),
             const SizedBox(height: kSpacingSmall),
-            Expanded(
-              child: IndexedStack(
-                index: model.settingTab.selectedSettingType.index,
-                children: [
-                  SystemSettingPage(model: model.systemSetting),
-                  const LLMApiSettingPage(),
-                ],
-              ),
+            SystemSettingPage(model: model.systemSetting),
+            const SizedBox(height: kSpacingMedium),
+            const PixelDivider(),
+            const SizedBox(height: kSpacingMedium),
+            Row(
+              children: [
+                Icon(Icons.api, color: Theme.of(context).colorScheme.primary),
+                const SizedBox(width: kSpacingSmall),
+                Text(
+                  AppLocalizations.of(context)!.llm_api,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+            ),
+            const SizedBox(height: kSpacingSmall),
+            const Expanded(
+              child: LLMApiSettingPage(),
             ),
           ],
         ),
@@ -106,9 +97,7 @@ class SystemSettingPage extends ConsumerWidget {
                 value: "en",
                 groupValue: model.language,
                 onChanged: (value) {
-                  ref
-                      .read(systemSettingServiceProvider.notifier)
-                      .setLanguage(value!);
+                  ref.read(systemSettingServiceProvider.notifier).setLanguage(value!);
                 },
                 dense: true,
                 visualDensity: VisualDensity.compact,
@@ -122,9 +111,7 @@ class SystemSettingPage extends ConsumerWidget {
                 value: "zh",
                 groupValue: model.language,
                 onChanged: (value) {
-                  ref
-                      .read(systemSettingServiceProvider.notifier)
-                      .setLanguage(value!);
+                  ref.read(systemSettingServiceProvider.notifier).setLanguage(value!);
                 },
                 dense: true,
                 visualDensity: VisualDensity.compact,
@@ -156,9 +143,7 @@ class SystemSettingPage extends ConsumerWidget {
                 value: "light",
                 groupValue: model.theme,
                 onChanged: (value) {
-                  ref
-                      .read(systemSettingServiceProvider.notifier)
-                      .setTheme(value!);
+                  ref.read(systemSettingServiceProvider.notifier).setTheme(value!);
                 },
                 dense: true,
                 visualDensity: VisualDensity.compact,
@@ -172,9 +157,7 @@ class SystemSettingPage extends ConsumerWidget {
                 value: "dark",
                 groupValue: model.theme,
                 onChanged: (value) {
-                  ref
-                      .read(systemSettingServiceProvider.notifier)
-                      .setTheme(value!);
+                  ref.read(systemSettingServiceProvider.notifier).setTheme(value!);
                 },
                 dense: true,
                 visualDensity: VisualDensity.compact,
@@ -184,7 +167,6 @@ class SystemSettingPage extends ConsumerWidget {
             const Spacer(),
           ],
         ),
-        const Spacer(),
       ],
     );
   }
@@ -195,7 +177,7 @@ class LLMApiSettingPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final models = ref.watch(lLMAgentNotifierProvider);
+    final models = ref.watch(lLMAgentProvider);
 
     return GridView.extent(
       maxCrossAxisExtent: 350,
@@ -222,13 +204,12 @@ class LLMApiSettingPage extends ConsumerWidget {
   }
 }
 
-void showLLMApiSettingDialog(BuildContext context, String title,
-    LLMAgentModel? model, Function(LLMAgentSettingModel) onSubmit) {
+void showLLMApiSettingDialog(
+    BuildContext context, String title, LLMAgentModel? model, Function(LLMAgentSettingModel) onSubmit) {
   final nameController = TextEditingController(text: model?.setting.name);
   final baseUrlController = TextEditingController(text: model?.setting.baseUrl);
   final apiKeyController = TextEditingController(text: model?.setting.apiKey);
-  final modelNameController =
-      TextEditingController(text: model?.setting.modelName);
+  final modelNameController = TextEditingController(text: model?.setting.modelName);
 
   showDialog(
     context: context,
@@ -237,8 +218,7 @@ void showLLMApiSettingDialog(BuildContext context, String title,
         child: Container(
           width: 400,
           height: 400,
-          padding: const EdgeInsets.fromLTRB(
-              kSpacingMedium, kSpacingLarge, kSpacingMedium, kSpacingMedium),
+          padding: const EdgeInsets.fromLTRB(kSpacingMedium, kSpacingLarge, kSpacingMedium, kSpacingMedium),
           child: Column(
             // mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -314,20 +294,17 @@ class LLMApiSettingItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final status = ref.watch(lLMAgentNotifierProvider).agents[model.id]!.status;
+    final status = ref.watch(lLMAgentProvider).agents[model.id]!.status;
 
     return Container(
       constraints: const BoxConstraints(),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-            color: Theme.of(context).colorScheme.surfaceContainerHigh,
-            width: 1),
+        border: Border.all(color: Theme.of(context).colorScheme.surfaceContainerHigh, width: 1),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-            kSpacingMedium, kSpacingSmall, kSpacingMedium, kSpacingSmall),
+        padding: const EdgeInsets.fromLTRB(kSpacingMedium, kSpacingSmall, kSpacingMedium, kSpacingSmall),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -339,10 +316,7 @@ class LLMApiSettingItem extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     model.setting.name,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -363,7 +337,8 @@ class LLMApiSettingItem extends ConsumerWidget {
                   ? model.setting.apiKey.replaceRange(
                       4,
                       model.setting.apiKey.length - 4,
-                      '*' * (model.setting.apiKey.length - 8))
+                      '*' * (model.setting.apiKey.length - 8),
+                    )
                   : model.setting.apiKey,
             ),
             const SizedBox(height: kSpacingTiny),
@@ -380,9 +355,7 @@ class LLMApiSettingItem extends ConsumerWidget {
                       icon: Icons.check_circle_outline,
                       iconColor: Colors.green,
                       onPressed: () {
-                        ref
-                            .read(lLMAgentServiceProvider.notifier)
-                            .ping(model.id);
+                        ref.read(lLMAgentServiceProvider.notifier).ping(model.id);
                       },
                     ),
                   LLMAgentState.unavailable => RectangleIconButton.small(
@@ -390,18 +363,14 @@ class LLMApiSettingItem extends ConsumerWidget {
                       icon: Icons.error_outline,
                       iconColor: Colors.red,
                       onPressed: () {
-                        ref
-                            .read(lLMAgentServiceProvider.notifier)
-                            .ping(model.id);
+                        ref.read(lLMAgentServiceProvider.notifier).ping(model.id);
                       },
                     ),
                   LLMAgentState.unknown => RectangleIconButton.small(
-                    tooltip: AppLocalizations.of(context)!.button_tooltip_ai_test,
+                      tooltip: AppLocalizations.of(context)!.button_tooltip_ai_test,
                       icon: Icons.flash_on,
                       onPressed: () {
-                        ref
-                            .read(lLMAgentServiceProvider.notifier)
-                            .ping(model.id);
+                        ref.read(lLMAgentServiceProvider.notifier).ping(model.id);
                       },
                     ),
                 },
@@ -436,9 +405,7 @@ class AddLLMApiSettingItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-            color: Theme.of(context).colorScheme.surfaceContainerHigh,
-            width: 1),
+        border: Border.all(color: Theme.of(context).colorScheme.surfaceContainerHigh, width: 1),
       ),
       child: Center(
         child: IconButton(
@@ -482,66 +449,6 @@ class _InfoRow extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class SettingTabButton extends StatefulWidget {
-  final String text;
-  final Function() onTap;
-  final bool isSelected;
-  const SettingTabButton(
-      {Key? key,
-      required this.text,
-      required this.onTap,
-      required this.isSelected})
-      : super(key: key);
-
-  @override
-  State<SettingTabButton> createState() => _SettingTabButtonState();
-}
-
-class _SettingTabButtonState extends State<SettingTabButton> {
-  bool _isHovering = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color primaryColor = Theme.of(context).colorScheme.primary;
-    final Color? defaultColor = Theme.of(context).textTheme.titleMedium?.color;
-
-    Color getTextColor() {
-      if (widget.isSelected) {
-        return primaryColor;
-      } else if (_isHovering) {
-        return primaryColor;
-      } else {
-        return defaultColor ?? Colors.black;
-      }
-    }
-
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovering = true),
-      onExit: (_) => setState(() => _isHovering = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: Container(
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: widget.isSelected ? primaryColor : Colors.transparent,
-                width: 2,
-              ),
-            ),
-          ),
-          child: Text(
-            widget.text,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: getTextColor(),
-                ),
-          ),
-        ),
-      ),
     );
   }
 }

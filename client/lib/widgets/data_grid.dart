@@ -1,59 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 import 'const.dart';
+import 'dart:math';
+import 'data_type_icon.dart';
+import 'package:db_driver/db_driver.dart';
+
+const double kMinColumnWidth = 44.0; // 主要是确保序号列的宽度与SQL编辑的行号对齐
+const double kMaxColumnWidth = 300.0;
+
+const double tablePadding = 12.0;
+
+const double borderWidth = 1.0;
 
 class DataGridController extends ChangeNotifier {
   final List<DataGridColumn> columns;
-  final List<DataGridRow> rows;
 
-  Postion? selectedCellPostion;
+  Position? selectedCellPosition;
 
-  DataGridController(
-      {required this.columns, required this.rows, this.selectedCellPostion});
+  DataGridController({
+    required this.columns,
+    this.selectedCellPosition,
+  });
 
   List<double> get columnWidths => columns.map((e) => e.size.width).toList();
 
-  void updateColumnWidth(int index, double width) {
-    if (index >= 0 && index < columns.length) {
-      // 确保列宽在合理范围内
-      final column = columns[index];
-      final clampedWidth = width.clamp(
-        column.size.minWidth ?? 50.0,
-        column.size.maxWidth ?? double.infinity,
-      );
-      columns[index].size.width = clampedWidth;
-      notifyListeners();
-    }
+  void updateSelectedCell(Position p) {
+    selectedCellPosition = p;
+    notifyListeners();
   }
 
-  void updateSelectedCell(Postion p) {
-    selectedCellPostion = p;
+  // 仅通知列宽变化
+  void updateColumnWidth(int index, double width) {
     notifyListeners();
   }
 }
 
-class Postion {
+class Position {
   final int rowIndex;
   final int columnIndex;
 
-  const Postion({required this.rowIndex, required this.columnIndex});
+  const Position({required this.rowIndex, required this.columnIndex});
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is Postion &&
-        other.rowIndex == rowIndex &&
-        other.columnIndex == columnIndex;
+    return other is Position && other.rowIndex == rowIndex && other.columnIndex == columnIndex;
   }
 
   @override
   int get hashCode => Object.hash(rowIndex, columnIndex);
 }
 
-class RowSize {
-  /// 实际大小
-  double width;
-
+class RowSize extends ValueNotifier<double> {
   /// 最小宽度
   final double? minWidth;
 
@@ -61,33 +59,141 @@ class RowSize {
   final double? maxWidth;
 
   RowSize({
-    required this.width,
-    this.minWidth = 50.0,
-    this.maxWidth = 500.0,
-  });
+    required double width,
+    this.minWidth = kMinColumnWidth,
+    this.maxWidth = kMaxColumnWidth,
+  }) : super(width);
+
+  /// 获取当前宽度（等同于 value）
+  double get width => value;
+
+  /// 设置宽度（等同于设置 value，但会进行范围限制）
+  set width(double width) {
+    value = width.clamp(minWidth ?? kMinColumnWidth, maxWidth ?? kMaxColumnWidth);
+  }
 }
 
 /// 列定义
 class DataGridColumn {
-  final RowSize size;
-  final Widget Function(BuildContext context) contentBuilder;
+  /// 列名
+  final String name;
 
-  const DataGridColumn({required this.contentBuilder, required this.size});
-}
+  /// 数据类型
+  final DataType? dataType;
 
-class DataGridRow {
   final List<DataGridCell> cells;
 
-  const DataGridRow({
+  /// 是否可调整大小（拖动调整列宽）
+  final bool resizable;
+
+  /// 列宽
+  final RowSize size;
+
+  /// 数据对齐方式
+  final Alignment? dataAlignment;
+
+  /// cell 里的文本颜色
+  final Color? textColor;
+
+  const DataGridColumn({
+    required this.name,
+    this.dataType,
     required this.cells,
+    required this.size,
+    this.resizable = true,
+    this.dataAlignment = Alignment.centerLeft,
+    this.textColor,
   });
+
+  DataGridColumn.autoSize({
+    required BuildContext context,
+    required this.name,
+    this.dataType,
+    required this.cells,
+    this.resizable = true,
+    this.dataAlignment = Alignment.centerLeft,
+    this.textColor,
+  }) : size = _calculateAutoSize(context, name, dataType, cells);
+
+  /// 构建表头 Widget
+  static Widget buildHeaderWidget({
+    required BuildContext context,
+    required String name,
+    DataType? dataType,
+  }) {
+    if (name.isEmpty) return const SizedBox.shrink();
+    return Container(
+      alignment: Alignment.centerLeft,
+      padding: const EdgeInsets.symmetric(horizontal: kSpacingSmall),
+      child: Row(
+        children: [
+          if (dataType != null)
+            Padding(
+              padding: const EdgeInsets.only(right: kSpacingTiny),
+              child: DataTypeIcon(type: dataType, size: kIconSizeSmall),
+            ),
+          Expanded(
+            child: Text(
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 计算自动列宽
+  static RowSize _calculateAutoSize(
+    BuildContext context,
+    String name,
+    DataType? dataType,
+    List<DataGridCell> cells,
+  ) {
+    final textStyle = Theme.of(context).textTheme.bodySmall ?? const TextStyle();
+    final textPainter = TextPainter(
+      textDirection: TextDirection.ltr,
+      text: TextSpan(text: '', style: textStyle),
+    );
+
+    // 测量表头宽度：图标宽度 + padding + 文本宽度
+    double headerWidth = kSpacingSmall * 2;
+    if (dataType != null) {
+      // 图标宽度 + 右边距 + 图标宽度（文字右侧留白，布局好看点）
+      headerWidth += kIconSizeSmall * 2 + kSpacingTiny;
+    }
+    // 测量列名文本宽度
+    textPainter.text = TextSpan(text: name, style: textStyle);
+    textPainter.layout();
+    headerWidth += textPainter.width;
+
+    // 测量单元格宽度：边距 + 最长的文本宽度
+    double maxCellWidth = kSpacingSmall * 2;
+
+    if (cells.isNotEmpty) {
+      final longestCellData = cells.map((cell) => cell.data).reduce((a, b) => a.length > b.length ? a : b);
+      textPainter.text = TextSpan(text: longestCellData, style: textStyle);
+      textPainter.layout();
+      maxCellWidth += textPainter.width;
+    }
+
+    final finalWidth = max(headerWidth, maxCellWidth);
+
+    return RowSize(
+      width: finalWidth.clamp(kMinColumnWidth, kMaxColumnWidth),
+      minWidth: kMinColumnWidth,
+      maxWidth: double.infinity,
+    );
+  }
 }
 
-class DataGridCell<T> {
-  final Widget Function(BuildContext context) contentBuilder;
+class DataGridCell {
+  final String data;
 
   const DataGridCell({
-    required this.contentBuilder,
+    required this.data,
   });
 }
 
@@ -95,260 +201,260 @@ class DataGridCell<T> {
 class DataGrid extends StatefulWidget {
   /// 数据表格控制器
   final DataGridController controller;
+
   /// 表头的行高
   final double headerHeight;
+
   /// 数据行的行高
   final double rowHeight;
 
   /// 水平滚动控制器组，用于同步表头和数据体的水平滚动
   final LinkedScrollControllerGroup? horizontalScrollGroup;
-  
+
   /// 垂直滚动控制器，用于数据行的垂直滚动
-  final ScrollController? verticalController;
+  final LinkedScrollControllerGroup? verticalScrollGroup;
 
   /// 单元格点击回调
-  final void Function(Postion position)? onCellTap;
+  final void Function(Position position)? onCellTap;
 
   /// 单元格双击回调
-  final void Function(Postion position)? onCellDoubleTap;
+  final void Function(Position position)? onCellDoubleTap;
 
   const DataGrid({
-    Key? key,
+    super.key,
     required this.controller,
     this.rowHeight = 24.0,
     this.headerHeight = 32.0,
     this.horizontalScrollGroup,
-    this.verticalController,
+    this.verticalScrollGroup,
     this.onCellTap,
     this.onCellDoubleTap,
-  }) : super(key: key);
+  });
 
   @override
   State<DataGrid> createState() => _DataGridState();
 }
 
 class _DataGridState extends State<DataGrid> {
+  DataGridColumn? _rowNumberColumn;
+
   // 滚动控制器管理
   late final LinkedScrollControllerGroup _horizontalScrollGroup;
-  late final ScrollController _verticalController;
   late final ScrollController _headerHorizontalController;
   late final ScrollController _bodyHorizontalController;
+
+  late final LinkedScrollControllerGroup _verticalScrollGroup;
+  late final ScrollController _fixedColumnVerticalController;
+  late final ScrollController _scrollableColumnVerticalController;
+
+  void _initRowNumberColumn() {
+    if (widget.controller.columns.isEmpty || widget.controller.columns[0].cells.isEmpty) return;
+    _rowNumberColumn = DataGridColumn.autoSize(
+      context: context,
+      name: '',
+      resizable: false,
+      dataAlignment: Alignment.center,
+      textColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+      cells: <DataGridCell>[
+        for (int i = 0; i < widget.controller.columns[0].cells.length; i++) DataGridCell(data: '${i + 1}'),
+      ],
+    );
+  }
 
   @override
   void initState() {
     super.initState();
+
     // 初始化滚动控制器
     _horizontalScrollGroup = widget.horizontalScrollGroup ?? LinkedScrollControllerGroup();
-    _verticalController = widget.verticalController ?? ScrollController();
     _headerHorizontalController = _horizontalScrollGroup.addAndGet();
     _bodyHorizontalController = _horizontalScrollGroup.addAndGet();
+
+    // 初始化垂直滚动联动组
+    _verticalScrollGroup = widget.verticalScrollGroup ?? LinkedScrollControllerGroup();
+    _fixedColumnVerticalController = _verticalScrollGroup.addAndGet();
+    _scrollableColumnVerticalController = _verticalScrollGroup.addAndGet();
   }
 
   @override
   void dispose() {
     // 清理滚动控制器
-    if (widget.verticalController == null) {
-      _verticalController.dispose();
-    }
     _headerHorizontalController.dispose();
     _bodyHorizontalController.dispose();
+    _fixedColumnVerticalController.dispose();
+    _scrollableColumnVerticalController.dispose();
     super.dispose();
-  }
-
-  /// 计算总宽度 - 确保不小于父组件宽度
-  double _calculateTotalWidth(double parentWidth) {
-    final contentWidth =
-        widget.controller.columnWidths.fold(0.0, (sum, width) => sum + width);
-    return (contentWidth + 12.0).clamp(parentWidth, double.infinity);
-  }
-
-  /// 计算总高度 - 确保不小于父组件高度（减去表头高度）
-  double _calculateTotalHeight(double parentHeight) {
-    final contentHeight = widget.controller.rows.length * widget.rowHeight;
-    final minHeight = parentHeight - widget.headerHeight;
-    return (contentHeight + 12.0).clamp(minHeight, double.infinity);
-  }
-
-  /// 更新列宽
-  void _updateColumnWidth(int index, double width) {
-    widget.controller.updateColumnWidth(index, width);
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SizedBox.expand(
-          child: AnimatedBuilder(
-            animation: widget.controller,
-            builder: (context, child) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(context, constraints.maxWidth),
-                  Expanded(
-                      child: _buildBody(context, constraints.maxWidth,
-                          constraints.maxHeight)),
-                ],
-              );
-            },
+    _initRowNumberColumn();
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildHeader(context),
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              // 固定列部分 - 只有垂直滚动
+              _buildFixedColumns(context),
+              // 可滚动列部分 - 有垂直和水平滚动
+              _buildScrollableColumns(context),
+            ],
           ),
+        ),
+      ],
+    );
+  }
+
+  /// 构建表头
+  Widget _buildHeader(BuildContext context) {
+    return SizedBox(
+      height: widget.headerHeight,
+      child: Row(
+        children: [
+          // 固定列表头
+          if (_rowNumberColumn != null)
+            _DataGridHeaderCell(
+              controller: widget.controller,
+              column: _rowNumberColumn!,
+              index: 0,
+              headerHeight: widget.headerHeight,
+            ),
+          // 可滚动列表头
+          Expanded(
+            child: SingleChildScrollView(
+              controller: _headerHorizontalController,
+              scrollDirection: Axis.horizontal,
+              physics: const ClampingScrollPhysics(),
+              child: SizedBox(
+                child: Row(
+                  children: [
+                    for (int i = 0; i < widget.controller.columns.length; i++)
+                      _DataGridHeaderCell(
+                        controller: widget.controller,
+                        column: widget.controller.columns[i],
+                        index: i,
+                        headerHeight: widget.headerHeight,
+                      ),
+                    const SizedBox(width: tablePadding),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildColumn(BuildContext context, DataGridColumn column, int columnIndex) {
+    return ValueListenableBuilder<double>(
+      valueListenable: column.size,
+      builder: (context, width, child) {
+        return Column(
+          children: [
+            for (int i = 0; i < column.cells.length; i++)
+              _DataGridCell(
+                position: Position(rowIndex: i, columnIndex: columnIndex),
+                width: width,
+                rowHeight: widget.rowHeight,
+                data: column.cells[i].data,
+                controller: widget.controller,
+                onCellTap: widget.onCellTap,
+                onCellDoubleTap: widget.onCellDoubleTap,
+                alignment: column.dataAlignment,
+                textColor: column.textColor,
+              ),
+          ],
         );
       },
     );
   }
 
-  /// 构建表头
-  Widget _buildHeader(BuildContext context, double parentWidth) {
-    return SizedBox(
-      height: widget.headerHeight,
-      child: SingleChildScrollView(
-        controller: _headerHorizontalController,
-        scrollDirection: Axis.horizontal,
-        physics: const ClampingScrollPhysics(),
-        child: SizedBox(
-          width: _calculateTotalWidth(parentWidth),
-          child: Row(
-            children: [
-              for (int i = 0; i < widget.controller.columns.length; i++)
-                _buildHeaderCell(context, widget.controller.columns[i], i),
-            ],
-          ),
-        ),
+  /// 构建固定列部分
+  Widget _buildFixedColumns(BuildContext context) {
+    return ScrollConfiguration(
+      behavior: ScrollConfiguration.of(context).copyWith(
+        scrollbars: false,
       ),
-    );
-  }
-
-  /// 构建表头单元格
-  Widget _buildHeaderCell(
-      BuildContext context, DataGridColumn column, int index) {
-    final width = widget.controller.columnWidths[index];
-
-    return DataGridCellWidget(
-      child: SizedBox(
-        width: width,
-        height: widget.headerHeight,
-        child: Stack(
+      child: SingleChildScrollView(
+        controller: _fixedColumnVerticalController,
+        scrollDirection: Axis.vertical,
+        physics: const ClampingScrollPhysics(),
+        child: Column(
           children: [
-            // 表头内容
-            Container(
-              alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.symmetric(horizontal: kSpacingSmall),
-              child: column.contentBuilder(context),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_rowNumberColumn != null) _buildColumn(context, _rowNumberColumn!, 0),
+              ],
             ),
-            // 拖动手柄
-            if (index < widget.controller.columns.length)
-              Positioned(
-                right: 0,
-                top: 0,
-                bottom: 0,
-                child: _ResizeHandle(
-                  column: column,
-                  currentWidth: width,
-                  onResize: (delta) {
-                    final newWidth = (width + delta).clamp(
-                      column.size.minWidth ?? 50.0,
-                      column.size.maxWidth ?? double.infinity,
-                    );
-                    _updateColumnWidth(index, newWidth);
-                  },
-                ),
-              ),
+            const SizedBox(height: tablePadding), // 底部留白
           ],
         ),
       ),
     );
   }
 
-  /// 构建数据主体
-  Widget _buildBody(
-      BuildContext context, double parentWidth, double parentHeight) {
-    return Stack(
-      children: [
-        Scrollbar(
+  /// 构建可滚动列部分
+  Widget _buildScrollableColumns(BuildContext context) {
+    return Expanded(
+      child: Scrollbar(
+        controller: _scrollableColumnVerticalController,
+        thumbVisibility: false,
+        notificationPredicate: (notification) => notification.metrics.axis == Axis.vertical,
+        child: Scrollbar(
           controller: _bodyHorizontalController,
           thumbVisibility: false,
-          notificationPredicate: (notification) =>
-              notification.metrics.axis == Axis.horizontal,
-          child: Scrollbar(
-            controller: _verticalController,
-            thumbVisibility: false,
-            notificationPredicate: (notification) =>
-                notification.metrics.axis == Axis.vertical,
-            child: SingleChildScrollView(
-              controller: _verticalController,
-              scrollDirection: Axis.vertical,
-              physics: const ClampingScrollPhysics(),
-              child: SingleChildScrollView(
-                controller: _bodyHorizontalController,
-                scrollDirection: Axis.horizontal,
-                physics: const ClampingScrollPhysics(),
-                child: SizedBox(
-                  width: _calculateTotalWidth(parentWidth),
-                  height: _calculateTotalHeight(parentHeight),
-                  child: _buildRow(context),
+          notificationPredicate: (notification) => notification.metrics.axis == Axis.horizontal,
+          child: CustomScrollView(
+            controller: _scrollableColumnVerticalController,
+            physics: const ClampingScrollPhysics(),
+            slivers: [
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: SingleChildScrollView(
+                  controller: _bodyHorizontalController,
+                  scrollDirection: Axis.horizontal,
+                  physics: const ClampingScrollPhysics(),
+                  child: Stack(
+                    children: [
+                      // 选中状态层（全局绘制选中行的背景和选中单元格的内边框）
+                      Positioned.fill(
+                        child: RepaintBoundary(
+                          child: CustomPaint(
+                            painter: _SelectionLayerPainter(
+                              controller: widget.controller,
+                              rowHeight: widget.rowHeight,
+                              colorScheme: Theme.of(context).colorScheme,
+                            ),
+                          ),
+                        ),
+                      ),
+                      // 数据列内容层
+                      Column(
+                        children: [
+                          Row(
+                            children: [
+                              for (int j = 0; j < widget.controller.columns.length; j++)
+                                _buildColumn(context, widget.controller.columns[j], j),
+                              const SizedBox(width: tablePadding), // 右侧留白
+                            ],
+                          ),
+                          const SizedBox(height: tablePadding), // 底部留白
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// 构建数据内容
-  Widget _buildRow(BuildContext context) {
-    return Column(
-      children: [
-        for (int i = 0; i < widget.controller.rows.length; i++)
-          SizedBox(
-            height: widget.rowHeight,
-            child: Row(
-              children: [
-                for (int j = 0; j < widget.controller.columns.length; j++)
-                  _buildCell(context, Postion(rowIndex: i, columnIndex: j)),
-              ],
-            ),
-          ),
-      ],
-    );
-  }
-
-  /// 构建单元格
-  Widget _buildCell(BuildContext context, Postion postion) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final width = widget.controller.columnWidths[postion.columnIndex];
-    final cell =
-        widget.controller.rows[postion.rowIndex].cells[postion.columnIndex];
-
-    return DataGridCellWidget(
-      selected: (widget.controller.selectedCellPostion != null)
-          ? (widget.controller.selectedCellPostion == postion)
-          : false,
-      backgroundColor: (widget.controller.selectedCellPostion != null &&
-              postion.rowIndex ==
-                  widget.controller.selectedCellPostion!.rowIndex)
-          ? colorScheme.surfaceContainerLow
-          : null,
-      child: SizedBox(
-        width: width,
-        height: widget.rowHeight,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () {
-            widget.controller.updateSelectedCell(postion);
-            widget.onCellTap?.call(postion);
-          },
-          onDoubleTap: () {
-            widget.controller.updateSelectedCell(postion);
-            widget.onCellDoubleTap?.call(postion);
-          },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.symmetric(horizontal: kSpacingSmall),
-            child: cell.contentBuilder(context),
+            ],
           ),
         ),
       ),
@@ -356,12 +462,147 @@ class _DataGridState extends State<DataGrid> {
   }
 }
 
-/// 带边框的 Cell 组件
+/// 表头单元格 Widget
+class _DataGridHeaderCell extends StatefulWidget {
+  final DataGridController controller;
+  final DataGridColumn column;
+  final int index;
+  final double headerHeight;
+
+  const _DataGridHeaderCell({
+    required this.controller,
+    required this.column,
+    required this.index,
+    required this.headerHeight,
+  });
+
+  @override
+  State<_DataGridHeaderCell> createState() => _DataGridHeaderCellState();
+}
+
+class _DataGridHeaderCellState extends State<_DataGridHeaderCell> {
+  double? _dragStartX;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<double>(
+      valueListenable: widget.column.size,
+      builder: (context, width, child) {
+        return SizedBox(
+          width: width,
+          child: DataGridCellWidget(
+            child: SizedBox(
+              width: width,
+              height: widget.headerHeight,
+              child: Stack(
+                children: [
+                  // 表头内容
+                  DataGridColumn.buildHeaderWidget(
+                    context: context,
+                    name: widget.column.name,
+                    dataType: widget.column.dataType,
+                  ),
+                  // 拖动手柄（只有可调整大小的列才显示）
+                  if (widget.column.resizable)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      bottom: 0,
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.resizeColumn,
+                        child: GestureDetector(
+                          onHorizontalDragStart: (details) {
+                            _dragStartX = details.globalPosition.dx;
+                          },
+                          onHorizontalDragUpdate: (details) {
+                            if (_dragStartX != null) {
+                              final delta = details.globalPosition.dx - _dragStartX!;
+                              // 直接更新 RowSize 的 width，会自动触发 ValueNotifier 的通知
+                              widget.column.size.width = widget.column.size.width + delta;
+                              // 通知controller 刷新选中单元格和列宽
+                              widget.controller.updateColumnWidth(widget.index, widget.column.size.width);
+                              _dragStartX = details.globalPosition.dx;
+                            }
+                          },
+                          onHorizontalDragEnd: (_) {
+                            _dragStartX = null;
+                          },
+                          child: Container(
+                            width: 8.0,
+                            color: Colors.transparent,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// 数据单元格 Widget
+class _DataGridCell extends StatelessWidget {
+  final Position position;
+  final double width;
+  final double rowHeight;
+  final String data;
+  final DataGridController controller;
+  final void Function(Position position)? onCellTap;
+  final void Function(Position position)? onCellDoubleTap;
+  final Alignment? alignment;
+  final Color? textColor;
+
+  const _DataGridCell({
+    required this.position,
+    required this.width,
+    required this.rowHeight,
+    required this.data,
+    required this.controller,
+    this.onCellTap,
+    this.onCellDoubleTap,
+    this.alignment,
+    this.textColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return DataGridCellWidget(
+      child: SizedBox(
+        width: width,
+        height: rowHeight,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            controller.updateSelectedCell(position);
+            onCellTap?.call(position);
+          },
+          onDoubleTap: () {
+            controller.updateSelectedCell(position);
+            onCellDoubleTap?.call(position);
+          },
+          child: Container(
+            alignment: alignment ?? Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(horizontal: kSpacingSmall),
+            child: Text(
+              data,
+              maxLines: 1,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: textColor),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 带边框的 Cell 组件 - 只用于绘制网格边框
 class DataGridCellWidget extends StatelessWidget {
-  final double? borderWidth;
   final Color? borderColor;
-  final Color? backgroundColor;
-  final bool? selected;
 
   final Widget child;
 
@@ -369,9 +610,6 @@ class DataGridCellWidget extends StatelessWidget {
     super.key,
     required this.child,
     this.borderColor,
-    this.borderWidth,
-    this.selected,
-    this.backgroundColor,
   });
 
   @override
@@ -379,12 +617,7 @@ class DataGridCellWidget extends StatelessWidget {
     return RepaintBoundary(
       child: CustomPaint(
         painter: _DataGridCellPainter(
-          borderColor:
-              borderColor ?? Theme.of(context).colorScheme.surfaceContainerHigh,
-          borderWidth: borderWidth ?? 1,
-          backgroundColor: backgroundColor,
-          selected: selected ?? false,
-          selectedBorderColor: Theme.of(context).colorScheme.primary,
+          borderColor: borderColor ?? Theme.of(context).colorScheme.surfaceContainerHigh,
         ),
         child: child,
       ),
@@ -395,43 +628,16 @@ class DataGridCellWidget extends StatelessWidget {
 /// Cell 边框绘制器 - 只绘制右边和下边,
 /// 为什么不用container的边框，因为边框有抗锯齿的特性，线条会粗细不均.
 class _DataGridCellPainter extends CustomPainter {
-  /// 边框的宽度
-  final double borderWidth;
-
   /// 边框的颜色
   final Color borderColor;
 
-  /// 选中状态的内边框颜色
-  final Color selectedBorderColor;
-
-  /// 是否选中
-  final bool selected;
-
-  /// cell 的背景颜色
-  final Color? backgroundColor;
-
   const _DataGridCellPainter({
     required this.borderColor,
-    required this.borderWidth,
-    required this.selected,
-    required this.selectedBorderColor,
-    this.backgroundColor,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (backgroundColor != null) {
-      final backgroundPaint = Paint()
-        ..color = backgroundColor!
-        ..style = PaintingStyle.fill;
-
-      // 先绘制背景色，避开边框区域，主要是右侧和下侧的边框.
-      final backgroundRect = Rect.fromLTWH(
-          0, 0, size.width - borderWidth, size.height - borderWidth);
-      canvas.drawRect(backgroundRect, backgroundPaint);
-    }
-
-    // 再绘制边框
+    // 绘制边框
     final paint = Paint()
       ..color = borderColor
       ..strokeWidth = borderWidth
@@ -439,79 +645,82 @@ class _DataGridCellPainter extends CustomPainter {
       ..isAntiAlias = false; // 关闭抗锯齿
 
     // 绘制右边框
-    canvas.drawLine(
-        Offset(size.width, 0), Offset(size.width, size.height), paint);
+    canvas.drawLine(Offset(size.width, 0), Offset(size.width, size.height), paint);
 
     // 绘制下边框
-    canvas.drawLine(
-        Offset(0, size.height), Offset(size.width, size.height), paint);
-
-    if (selected) {
-      // 绘制选中状态的内边框
-      final selectedPaint = Paint()
-        ..color = selectedBorderColor
-        ..strokeWidth = borderWidth
-        ..style = PaintingStyle.stroke
-        ..isAntiAlias = false;
-
-      final selectedRect = Rect.fromLTWH(borderWidth, borderWidth,
-          size.width - borderWidth * 2, size.height - borderWidth * 2);
-      canvas.drawRect(selectedRect, selectedPaint);
-    }
+    canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), paint);
   }
 
   @override
   bool shouldRepaint(covariant _DataGridCellPainter oldDelegate) {
-    return borderColor != oldDelegate.borderColor ||
-        borderWidth != oldDelegate.borderWidth ||
-        backgroundColor != oldDelegate.backgroundColor ||
-        selected != oldDelegate.selected ||
-        selectedBorderColor != oldDelegate.selectedBorderColor;
+    return borderColor != oldDelegate.borderColor;
   }
 }
 
-/// 列宽调整手柄
-class _ResizeHandle extends StatefulWidget {
-  final DataGridColumn column;
-  final double currentWidth;
-  final ValueChanged<double> onResize;
+/// 选中状态层绘制器 - 全局绘制选中行的背景和选中单元格的内边框
+class _SelectionLayerPainter extends CustomPainter {
+  final DataGridController controller;
+  final double rowHeight;
+  final ColorScheme colorScheme;
 
-  const _ResizeHandle({
-    required this.column,
-    required this.currentWidth,
-    required this.onResize,
-  });
-
-  @override
-  State<_ResizeHandle> createState() => _ResizeHandleState();
-}
-
-class _ResizeHandleState extends State<_ResizeHandle> {
-  double? _dragStartX;
+  _SelectionLayerPainter({
+    required this.controller,
+    required this.rowHeight,
+    required this.colorScheme,
+  }) : super(
+          repaint: controller,
+        );
 
   @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.resizeColumn,
-      child: GestureDetector(
-        onHorizontalDragStart: (details) {
-          _dragStartX = details.globalPosition.dx;
-        },
-        onHorizontalDragUpdate: (details) {
-          if (_dragStartX != null) {
-            final delta = details.globalPosition.dx - _dragStartX!;
-            widget.onResize(delta);
-            _dragStartX = details.globalPosition.dx;
-          }
-        },
-        onHorizontalDragEnd: (_) {
-          _dragStartX = null;
-        },
-        child: Container(
-          width: 8.0,
-          color: Colors.transparent,
-        ),
-      ),
+  void paint(Canvas canvas, Size size) {
+    final selectedPosition = controller.selectedCellPosition;
+    if (selectedPosition == null) return;
+
+    final selectedRowIndex = selectedPosition.rowIndex;
+    final selectedColumnIndex = selectedPosition.columnIndex;
+
+    // 计算选中行的Y坐标
+    final rowY = selectedRowIndex * rowHeight;
+
+    // 计算所有列总宽度
+    final totalWidth = controller.columnWidths.fold(0.0, (sum, width) => sum + width);
+
+    // 绘制选中行的背景色（覆盖所有列）
+    final rowBackgroundPaint = Paint()
+      ..color = colorScheme.surfaceContainerLow
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = false;
+
+    final rowBackgroundRect = Rect.fromLTWH(
+      0, // x
+      rowY, // y
+      totalWidth,
+      rowHeight,
     );
+    canvas.drawRect(rowBackgroundRect, rowBackgroundPaint);
+
+    // 计算选中单元格的X坐标和宽度
+    final cellX = controller.columnWidths.take(selectedColumnIndex).fold(0.0, (sum, width) => sum + width);
+    final cellWidth = controller.columnWidths[selectedColumnIndex];
+
+    // 绘制选中单元格的内边框
+    final selectedBorderPaint = Paint()
+      ..color = colorScheme.primary
+      ..strokeWidth = borderWidth
+      ..style = PaintingStyle.stroke
+      ..isAntiAlias = false;
+
+    final selectedCellRect = Rect.fromLTWH(
+      cellX + borderWidth * 2,
+      rowY + borderWidth * 2,
+      cellWidth - borderWidth * 4,
+      rowHeight - borderWidth * 4,
+    );
+    canvas.drawRect(selectedCellRect, selectedBorderPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _SelectionLayerPainter oldDelegate) {
+    return rowHeight != oldDelegate.rowHeight || colorScheme != oldDelegate.colorScheme;
   }
 }
