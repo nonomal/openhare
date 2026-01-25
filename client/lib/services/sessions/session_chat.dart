@@ -17,7 +17,7 @@ class SessionAIChatNotifier extends _$SessionAIChatNotifier {
     if (session == null) {
       throw Exception("Session not found");
     }
-    LLMAgentsModel llmAgents = ref.watch(lLMAgentServiceProvider);
+    LLMAgentsModel llmAgents = ref.watch(lLMAgentProvider);
 
     ref.watch(aIChatServiceProvider);
 

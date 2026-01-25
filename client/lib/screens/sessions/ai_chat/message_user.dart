@@ -1,0 +1,39 @@
+import 'package:client/models/ai.dart';
+import 'package:client/widgets/const.dart';
+import 'package:flutter/material.dart';
+
+class UserMessage extends StatelessWidget {
+  final AIChatUserMessageModel message;
+
+  const UserMessage({
+    super.key,
+    required this.message,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: kSpacingMedium),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              width: 0.5,
+            ),
+          ),
+          child: Text(
+            message.content,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
