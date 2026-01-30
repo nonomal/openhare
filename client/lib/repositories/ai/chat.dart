@@ -5,13 +5,11 @@ part 'chat.g.dart';
 
 class AIChatStorage {
   final AIChatId id;
-  final Map<String, Map<String, String>> tables;
   final List<AIChatMessageItem> messages;
   AIChatState state;
 
   AIChatStorage({
     required this.id,
-    required this.tables,
     required this.messages,
     required this.state,
   });
@@ -19,9 +17,6 @@ class AIChatStorage {
   factory AIChatStorage.fromModel(AIChatModel model) {
     return AIChatStorage(
       id: model.id,
-      tables: Map<String, Map<String, String>>.from(
-        model.tables.map((key, value) => MapEntry(key, Map<String, String>.from(value))),
-      ),
       messages: List<AIChatMessageItem>.from(model.messages),
       state: model.state,
     );
@@ -30,9 +25,6 @@ class AIChatStorage {
   AIChatModel toModel() {
     return AIChatModel(
       id: id,
-      tables: Map<String, Map<String, String>>.from(
-        tables.map((key, value) => MapEntry(key, Map<String, String>.from(value))),
-      ),
       messages: List<AIChatMessageItem>.from(messages),
       state: state,
     );
@@ -99,15 +91,6 @@ class AIChatRepoImpl extends AIChatRepo {
   AIChatModel? getAIChatById(AIChatId id) {
     final chat = _aiChats[id];
     return chat?.toModel();
-  }
-
-  @override
-  void updateTables(AIChatId id, String schema, Map<String, String> tables) {
-    final chat = _aiChats[id];
-    if (chat == null) {
-      return;
-    }
-    chat.tables[schema] = tables;
   }
 
   @override

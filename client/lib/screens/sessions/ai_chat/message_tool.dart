@@ -162,9 +162,7 @@ class _ToolCallWidgetState extends ConsumerState<ToolCallWidget> {
             children: [
               Text(
                 AppLocalizations.of(context)!.ai_chat_tool_execute_query,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                style: Theme.of(context).textTheme.bodySmall,
               ),
               const Spacer(),
               if (widget.onRun != null)

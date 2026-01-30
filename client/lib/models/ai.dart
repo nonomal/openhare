@@ -27,7 +27,6 @@ abstract class AIChatRepo {
   void updateMessages(AIChatId id, List<AIChatMessageItem> messages);
   void addMessage(AIChatId id, AIChatMessageItem message);
   void updateState(AIChatId id, AIChatState state);
-  void updateTables(AIChatId id, String schema, Map<String, String> tables);
   void updateMessageById(AIChatId chatId, AIChatMessageId messageId, AIChatMessageItem message);
 }
 
@@ -112,7 +111,6 @@ abstract class AIChatMessageId with _$AIChatMessageId {
 abstract class AIChatModel with _$AIChatModel {
   const factory AIChatModel({
     required AIChatId id,
-    required Map<String, Map<String, String>> tables,
     required List<AIChatMessageItem> messages,
     required AIChatState state,
   }) = _AIChatModel;

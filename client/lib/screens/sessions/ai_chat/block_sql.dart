@@ -42,12 +42,7 @@ class _SqlChatFieldState extends State<SqlChatField> {
           height: kIconButtonSizeSmall,
           child: Row(
             children: [
-              Text(
-                widget.name,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              Text(widget.name, style: Theme.of(context).textTheme.bodySmall),
               const Spacer(),
               if (widget.name == "sql")
                 RectangleIconButton.small(

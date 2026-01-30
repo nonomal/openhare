@@ -18,6 +18,7 @@ class SessionController {
   // ai chat
   final TextEditingController chatInputController;
   final TextEditingController aiChatSearchTextController;
+  final TextEditingController aiChatModelSearchTextController;
   final KeepOffestScrollController aiChatScrollController;
 
   // drawer
@@ -27,6 +28,7 @@ class SessionController {
     required this.multiSplitViewCtrl,
     required this.metaDataSplitViewCtrl,
     required this.aiChatSearchTextController,
+    required this.aiChatModelSearchTextController,
     required this.chatInputController,
     required this.aiChatScrollController,
     required this.sqlEditorScrollController,
@@ -49,6 +51,7 @@ class SessionController {
       ),
       // ai chat
       aiChatSearchTextController: TextEditingController(),
+      aiChatModelSearchTextController: TextEditingController(),
       chatInputController: TextEditingController(),
       aiChatScrollController: KeepOffestScrollController(),
 
@@ -68,6 +71,7 @@ class SessionController {
       cache[sessionId]!.sqlEditorScrollController.horizontalScroller.dispose();
       // ai chat
       cache[sessionId]!.aiChatSearchTextController.dispose();
+      cache[sessionId]!.aiChatModelSearchTextController.dispose();
       cache[sessionId]!.chatInputController.dispose();
       cache[sessionId]!.aiChatScrollController.dispose();
       // drawer

@@ -251,11 +251,6 @@ class AIChatService extends _$AIChatService {
     ref.invalidateSelf();
   }
 
-  void updateTables(AIChatId id, String schema, Map<String, String> tables) {
-    ref.read(aiChatRepoProvider).updateTables(id, schema, tables);
-    ref.invalidateSelf();
-  }
-
   void delete(AIChatId id) {
     ref.read(aiChatRepoProvider).delete(id);
     ref.invalidateSelf();

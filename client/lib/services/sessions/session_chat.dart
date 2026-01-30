@@ -30,7 +30,6 @@ class SessionAIChatNotifier extends _$SessionAIChatNotifier {
         id: AIChatId(value: session.sessionId.value), // todo: 暂时用session id 替代chatId
         messages: [],
         state: AIChatState.idle,
-        tables: {},
       );
 
       ref.read(aIChatServiceProvider.notifier).create(aiChatModel);
