@@ -1,5 +1,6 @@
 import 'package:client/models/ai.dart';
 import 'package:client/widgets/const.dart';
+import 'package:client/widgets/mention_text.dart';
 import 'package:flutter/material.dart';
 
 class UserMessage extends StatelessWidget {
@@ -26,11 +27,9 @@ class UserMessage extends StatelessWidget {
               width: 0.5,
             ),
           ),
-          child: Text(
-            message.content,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+          child: MentionTextField(
+            controller: MentionTextEditingController(text: message.content),
+            readOnly: true,
           ),
         ),
       ),

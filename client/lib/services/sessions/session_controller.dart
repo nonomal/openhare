@@ -6,6 +6,7 @@ import 'package:client/widgets/split_view.dart';
 import 'package:flutter/material.dart';
 import 'package:client/widgets/scroll.dart';
 import 'package:sql_editor/re_editor.dart';
+import 'package:client/widgets/mention_text.dart';
 
 class SessionController {
   // split
@@ -16,7 +17,7 @@ class SessionController {
   final CodeScrollController sqlEditorScrollController;
 
   // ai chat
-  final TextEditingController chatInputController;
+  final MentionTextEditingController chatInputController;
   final TextEditingController aiChatSearchTextController;
   final TextEditingController aiChatModelSearchTextController;
   final KeepOffestScrollController aiChatScrollController;
@@ -52,7 +53,7 @@ class SessionController {
       // ai chat
       aiChatSearchTextController: TextEditingController(),
       aiChatModelSearchTextController: TextEditingController(),
-      chatInputController: TextEditingController(),
+      chatInputController: MentionTextEditingController(),
       aiChatScrollController: KeepOffestScrollController(),
 
       // drawer

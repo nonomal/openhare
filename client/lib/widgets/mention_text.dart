@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 sealed class Segment {
   int get driverLength => switch (this) {
@@ -14,11 +14,6 @@ sealed class Segment {
   String toDriverString(String placeholder) => switch (this) {
         TextSegment(:final value) => value,
         MentionSegment() => placeholder,
-      };
-
-  String toDisplayText() => switch (this) {
-        TextSegment(:final value) => value,
-        MentionSegment(:final label) => '@$label',
       };
 }
 
@@ -33,20 +28,6 @@ class MentionSegment extends Segment {
 }
 
 typedef MentionState = ({int startIndex, String query});
-
-typedef MentionWidgetBuilder = Widget Function(
-  BuildContext context,
-  MentionSegment segment,
-  TextStyle baseStyle,
-);
-
-typedef MentionWidgetBuilderV2 = Widget Function(
-  BuildContext context,
-  MentionSegment segment,
-  TextStyle baseStyle,
-  bool hovering,
-  VoidCallback onDelete,
-);
 
 class MentionCandidate {
   final String label;
@@ -67,13 +48,11 @@ typedef MentionItemBuilder = Widget Function(
 const String _marker = '\uE000';
 
 class MentionSegmentSerializer {
-  static const String mentionEndChar = _marker;
-
   static String encode(List<Segment> segments) {
     return segments
         .map((s) => switch (s) {
               TextSegment(:final value) => value,
-              MentionSegment(:final label) => '@$label$mentionEndChar',
+              MentionSegment(:final label) => '@$label$_marker',
             })
         .join();
   }
@@ -89,7 +68,7 @@ class MentionSegmentSerializer {
       if (encodedString[i] == '@') {
         // 查找下一个 mentionEndChar
         int j = i + 1;
-        while (j < encodedString.length && encodedString[j] != mentionEndChar) {
+        while (j < encodedString.length && encodedString[j] != _marker) {
           j++;
         }
         // 如果找到了 mentionEndChar，则判定为 Mention
@@ -123,139 +102,20 @@ class MentionSegmentSerializer {
   }
 }
 
-const String _cbStart = '\u2060\u2063';
-const String _cbEnd = '\u2063\u2060';
-const String _cbBit0 = '\u200B'; // zero-width space
-const String _cbBit1 = '\u200C'; // zero-width non-joiner
-
 String _segmentsToClipboardText(List<Segment> segments) {
-  final b = StringBuffer();
-  for (final s in segments) {
-    switch (s) {
-      case TextSegment(:final value):
-        b.write(value);
-      case MentionSegment():
-        b.write('@${s.label}');
-        b.write(_cbStart);
-        // payload: m|label
-        b.write(_encodeClipboardPayload('m|${s.label}'));
-        b.write(_cbEnd);
-    }
-  }
-  return b.toString();
-}
-
-String _encodeClipboardPayload(String payload) {
-  final bytes = utf8.encode(payload);
-  final out = StringBuffer();
-  for (final byte in bytes) {
-    for (int i = 7; i >= 0; i--) {
-      final bit = (byte >> i) & 1;
-      out.write(bit == 0 ? _cbBit0 : _cbBit1);
-    }
-  }
-  return out.toString();
-}
-
-String? _tryDecodeClipboardPayload(String bits) {
-  if (bits.isEmpty) return null;
-  // bits must be multiple of 8
-  if (bits.length % 8 != 0) return null;
-  final bytes = <int>[];
-  for (int i = 0; i < bits.length; i += 8) {
-    int byte = 0;
-    for (int j = 0; j < 8; j++) {
-      final ch = bits[i + j];
-      final bit = ch == _cbBit1 ? 1 : (ch == _cbBit0 ? 0 : -1);
-      if (bit < 0) return null;
-      byte = (byte << 1) | bit;
-    }
-    bytes.add(byte);
-  }
-  try {
-    return utf8.decode(bytes, allowMalformed: false);
-  } catch (_) {
-    return null;
-  }
+  return MentionSegmentSerializer.encode(segments);
 }
 
 List<Segment> _decodeClipboardText(String raw) {
-  // 策略：我们在 mention 可见文本（@label）后追加零宽 payload。
-  // 粘贴回本输入框时：识别 payload，若其前缀正好是 @label，则替换为 MentionSegment。
-  final result = <Segment>[];
-  final textBuf = StringBuffer();
-
-  void flushText() {
-    if (textBuf.isEmpty) return;
-    result.add(TextSegment(textBuf.toString()));
-    textBuf.clear();
-  }
-
-  int i = 0;
-  while (i < raw.length) {
-    if (raw.startsWith(_cbStart, i)) {
-      final start = i + _cbStart.length;
-      final end = raw.indexOf(_cbEnd, start);
-      if (end < 0) {
-        // 不完整的元数据，按普通文本处理
-        textBuf.write(raw[i]);
-        i++;
-        continue;
-      }
-
-      final bits = raw.substring(start, end);
-      final payload = _tryDecodeClipboardPayload(bits);
-      i = end + _cbEnd.length;
-
-      if (payload == null) {
-        // 解码失败：忽略整段元数据
-        continue;
-      }
-
-      final parts = payload.split('|');
-      // payload: m|label
-      if (parts.length == 2 && parts[0] == 'm') {
-        final label = parts[1];
-
-        // 若当前缓冲结尾正好是 "@label"，则将其替换为 mention
-        final bufStr = textBuf.toString();
-        final needle = '@$label';
-        if (bufStr.endsWith(needle)) {
-          final keep = bufStr.substring(0, bufStr.length - needle.length);
-          textBuf.clear();
-          textBuf.write(keep);
-          flushText();
-          result.add(MentionSegment(label: label));
-          continue;
-        }
-      }
-
-      // payload 不符合预期：忽略
-      continue;
-    }
-
-    textBuf.write(raw[i]);
-    i++;
-  }
-
-  flushText();
-  return result;
+  return MentionSegmentSerializer.decode(raw);
 }
 
 class MentionTextController extends TextEditingController {
   List<Segment> _segments;
   final ValueNotifier<MentionState?> mentionState = ValueNotifier(null);
-  final MentionWidgetBuilder? mentionBuilder;
-  final MentionWidgetBuilderV2? mentionBuilderV2;
 
-  MentionTextController({
-    String? text,
-    String? encodedString,
-    this.mentionBuilder,
-    this.mentionBuilderV2,
-  })  : _segments = encodedString != null
-            ? MentionSegmentSerializer.decode(encodedString)
-            : ((text?.isEmpty ?? true) ? <Segment>[] : <Segment>[TextSegment(text ?? '')]),
+  MentionTextController({String? text})
+      : _segments = text != null ? MentionSegmentSerializer.decode(text) : <Segment>[],
         super(text: '') {
     final initialDriver = _segmentsToDriverString(_segments);
     super.value = TextEditingValue(
@@ -267,11 +127,14 @@ class MentionTextController extends TextEditingController {
 
   List<Segment> get segments => List.unmodifiable(_segments);
 
-  String get driverString => text;
+  String get displayText => MentionSegmentSerializer.encode(_segments);
 
-  String get displayText => _segments.map((s) => s.toDisplayText()).join();
-
-  String toEncodedString() => MentionSegmentSerializer.encode(_segments);
+  @override
+  void clear() {
+    _segments = <Segment>[TextSegment('')];
+    super.value = TextEditingValue(text: '', selection: TextSelection.collapsed(offset: 0), composing: TextRange.empty);
+    _updateMentionState();
+  }
 
   bool removeMention(MentionSegment segment) {
     int driverOffset = 0;
@@ -476,8 +339,6 @@ class MentionTextController extends TextEditingController {
             controller: this,
             segment: segment,
             baseStyle: baseStyle.copyWith(fontWeight: FontWeight.w500),
-            builder: mentionBuilder,
-            builderV2: mentionBuilderV2,
             fallbackLabel: label,
           );
           spans.add(WidgetSpan(
@@ -655,6 +516,9 @@ class MentionTextField extends StatefulWidget {
   final int? minLines;
   final int? maxLines;
   final bool? enabled;
+
+  /// 只读模式，用于展示场景不可编辑
+  final bool readOnly;
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onSubmitted;
   final FocusNode? focusNode;
@@ -674,6 +538,7 @@ class MentionTextField extends StatefulWidget {
     this.minLines,
     this.maxLines,
     this.enabled,
+    this.readOnly = false,
     this.textInputAction,
     this.onSubmitted,
     this.focusNode,
@@ -863,6 +728,7 @@ class _MentionTextFieldState extends State<MentionTextField> {
         minLines: widget.minLines,
         maxLines: widget.maxLines,
         enabled: widget.enabled ?? true,
+        readOnly: widget.readOnly,
         textInputAction: widget.textInputAction,
         onSubmitted: widget.onSubmitted == null ? null : (_) => widget.onSubmitted!(widget.controller.displayText),
       ),
@@ -1129,16 +995,12 @@ class _MentionToken extends StatefulWidget {
   final MentionTextController controller;
   final MentionSegment segment;
   final TextStyle baseStyle;
-  final MentionWidgetBuilder? builder;
-  final MentionWidgetBuilderV2? builderV2;
   final String fallbackLabel;
 
   const _MentionToken({
     required this.controller,
     required this.segment,
     required this.baseStyle,
-    required this.builder,
-    required this.builderV2,
     required this.fallbackLabel,
   });
 
@@ -1158,22 +1020,70 @@ class _MentionTokenState extends State<_MentionToken> {
     widget.controller.removeMention(widget.segment);
   }
 
+  Widget _buildMentionWidget(
+    BuildContext context,
+    MentionSegment segment,
+    TextStyle baseStyle,
+    bool hovering,
+    VoidCallback onDelete,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final cardBg = colorScheme.primaryContainer;
+    final cardFg = colorScheme.onSurface;
+    final fontSize = baseStyle.fontSize ?? 14;
+    // 让 token 的高度尽量贴近 TextField 的行高（selection 背景高度也会更一致）。
+    final heightFactor = baseStyle.height ?? 1.0;
+    final tokenHeight = fontSize * heightFactor;
+    final labelStyle = baseStyle.copyWith(color: cardFg, height: heightFactor);
+    return Container(
+      key: ValueKey('table_mention_${segment.label}'),
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: SizedBox(
+        height: tokenHeight,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (hovering)
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onDelete,
+                child: Icon(
+                  Icons.close_rounded,
+                  size: fontSize,
+                  color: cardFg,
+                ),
+              )
+            else
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedTable,
+                size: fontSize,
+                color: cardFg,
+              ),
+            const SizedBox(width: 4),
+            Center(
+              child: Text(
+                segment.label,
+                style: labelStyle,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final b2 = widget.builderV2;
-    final b1 = widget.builder;
-
-    final child = b2 != null
-        ? b2(context, widget.segment, widget.baseStyle, _hovering, _onDelete)
-        : (b1 != null
-            ? b1(context, widget.segment, widget.baseStyle)
-            : Text('@${widget.fallbackLabel}', style: widget.baseStyle.copyWith(fontWeight: FontWeight.w600)));
-
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => _setHover(true),
       onExit: (_) => _setHover(false),
-      child: child,
+      child: _buildMentionWidget(context, widget.segment, widget.baseStyle, _hovering, _onDelete),
     );
   }
 }

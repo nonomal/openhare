@@ -15,12 +15,10 @@ void main() {
       final textSeg = TextSegment('Hello');
       expect(textSeg.value, 'Hello');
       expect(textSeg.driverLength, 5);
-      expect(textSeg.toDisplayText(), 'Hello');
 
       final mentionSeg1 = MentionSegment(label: 'users');
       expect(mentionSeg1.label, 'users');
       expect(mentionSeg1.driverLength, 1);
-      expect(mentionSeg1.toDisplayText(), '@users');
 
       final mentionSeg2 = MentionSegment(label: 'Alice');
       expect(mentionSeg2.label, 'Alice');
@@ -34,7 +32,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: c1))));
       expect(c1.segments, isEmpty);
       expect(c1.displayText, '');
-      expect(c1.toEncodedString(), isEmpty);
+      expect(c1.displayText, isEmpty);
 
       // 普通文本
       final c2 = MentionTextEditingController(text: 'Hello');
@@ -44,36 +42,36 @@ void main() {
       expect(c2.displayText, 'Hello');
 
       // 编码格式
-      final c3 = MentionTextEditingController(encodedString: 'Hello @Alice$_me world');
+      final c3 = MentionTextEditingController(text:  'Hello @Alice$_me world');
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: c3))));
       expect(c3.segments.length, 3);
-      expect(c3.displayText, 'Hello @Alice world');
+      expect(c3.displayText, 'Hello @Alice$_me world');
       expect(c3.segments.any((s) => s is MentionSegment && s.label == 'Alice'), isTrue);
     });
 
     testWidgets('序列化：encode/decode 往返', (WidgetTester tester) async {
       final original = 'Test @label1$_me end';
-      final c1 = MentionTextEditingController(encodedString: original);
+      final c1 = MentionTextEditingController(text: original);
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: c1))));
 
-      final exported = c1.toEncodedString();
+      final exported = c1.displayText;
       expect(exported, original);
 
-      final c2 = MentionTextEditingController(encodedString: exported);
+      final c2 = MentionTextEditingController(text: exported);
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: c2))));
-      expect(c2.toEncodedString(), original);
+      expect(c2.displayText, original);
       expect(c2.displayText, c1.displayText);
     });
 
     testWidgets('严格格式：@label\\uE000 才解析为 mention', (WidgetTester tester) async {
       // 无结束符 → 纯文本
-      final c1 = MentionTextEditingController(encodedString: 'Hello @Alice world');
+      final c1 = MentionTextEditingController(text: 'Hello @Alice world');
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: c1))));
       expect(c1.segments.length, 1);
       expect((c1.segments[0] as TextSegment).value, 'Hello @Alice world');
 
       // 有结束符 → mention
-      final c2 = MentionTextEditingController(encodedString: 'Hello @Alice$_me world');
+      final c2 = MentionTextEditingController(text: 'Hello @Alice$_me world');
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: c2))));
       expect(c2.segments.length, 3);
       expect(c2.segments.any((s) => s is MentionSegment && s.label == 'Alice'), isTrue);
@@ -104,8 +102,7 @@ void main() {
       controller.insertMention('users');
       await tester.pump();
 
-      expect(controller.toEncodedString(), 'Hello @users$_me');
-      expect(controller.displayText, 'Hello @users');
+      expect(controller.displayText, 'Hello @users$_me');
       expect(controller.segments.length, 2);
       expect((controller.segments[1] as MentionSegment).label, 'users');
 
@@ -160,7 +157,7 @@ void main() {
       expect(controller.displayText, 'Hello world');
 
       // 在 mention 后插入
-      final c2 = MentionTextEditingController(encodedString: 'Hello @Alice$_me');
+      final c2 = MentionTextEditingController(text: 'Hello @Alice$_me');
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: c2))));
       final driverText = c2.text;
       c2.value = TextEditingValue(
@@ -168,11 +165,11 @@ void main() {
         selection: TextSelection.collapsed(offset: driverText.length + 6),
       );
       await tester.pump();
-      expect(c2.displayText, 'Hello @Alice world');
+      expect(c2.displayText, 'Hello @Alice$_me world');
     });
 
     testWidgets('删除 mention', (WidgetTester tester) async {
-      final controller = MentionTextEditingController(encodedString: 'Hello @Alice$_me world');
+      final controller = MentionTextEditingController(text: 'Hello @Alice$_me world');
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: controller))));
 
       final driverText = controller.text;
@@ -223,7 +220,7 @@ void main() {
       expect(controller.displayText, ' worl');
 
       // 删除 mention（模拟删除 placeholder）
-      final c2 = MentionTextEditingController(encodedString: 'Hello @Alice$_me world');
+      final c2 = MentionTextEditingController(text: 'Hello @Alice$_me world');
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: c2))));
       final driverText = c2.text;
       final mentionPos = driverText.indexOf(_me);
@@ -236,7 +233,7 @@ void main() {
       expect(c2.segments.any((s) => s is MentionSegment), isFalse);
 
       // 删除 mention（模拟删除 placeholder）
-      final c3 = MentionTextEditingController(encodedString: 'Hello @Alice$_me world');
+      final c3 = MentionTextEditingController(text: 'Hello @Alice$_me world');
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: c3))));
       final driverText3 = c3.text;
       final mentionPos3 = driverText3.indexOf(_me);
@@ -260,11 +257,7 @@ void main() {
       ));
       expect(find.text('Hello'), findsOneWidget);
 
-      Widget mentionBuilder(BuildContext context, MentionSegment segment, TextStyle baseStyle) {
-        return Container(padding: const EdgeInsets.all(4), child: Text('@${segment.label}'));
-      }
-
-      final c2 = MentionTextEditingController(encodedString: 'Hello @Alice$_me', mentionBuilder: mentionBuilder);
+      final c2 = MentionTextEditingController(text: 'Hello @Alice$_me');
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           body: Builder(
@@ -273,7 +266,8 @@ void main() {
         ),
       ));
       expect(find.textContaining('Hello'), findsOneWidget);
-      expect(find.textContaining('@Alice'), findsOneWidget);
+      // mention 由 WidgetSpan 渲染，显示 segment.label（无 @ 前缀）
+      expect(find.text('Alice'), findsOneWidget);
     });
   });
 
@@ -283,12 +277,12 @@ void main() {
       final c1 = MentionTextEditingController(text: '');
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: c1))));
       expect(c1.segments, isEmpty);
-      expect(c1.toEncodedString(), isEmpty);
+      expect(c1.displayText, isEmpty);
 
       // 只有 mention
-      final c2 = MentionTextEditingController(encodedString: '@Alice$_me');
+      final c2 = MentionTextEditingController(text: '@Alice$_me');
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: c2))));
-      expect(c2.displayText, '@Alice');
+      expect(c2.displayText, '@Alice$_me');
       expect(c2.segments.length, 1);
       expect(c2.segments.any((s) => s is MentionSegment && s.label == 'Alice'), isTrue);
 
@@ -297,12 +291,12 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: c3))));
       c3.loadFromEncodedString('New @Bob$_me');
       await tester.pump();
-      expect(c3.displayText, 'New @Bob');
+      expect(c3.displayText, 'New @Bob$_me');
       expect(c3.segments.length, 2);
     });
 
     testWidgets('光标调整', (WidgetTester tester) async {
-      final controller = MentionTextEditingController(encodedString: 'Hello @Alice$_me world');
+      final controller = MentionTextEditingController(text: 'Hello @Alice$_me world');
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: controller))));
 
       final driverText = controller.text;
@@ -334,7 +328,7 @@ void main() {
     });
 
     testWidgets('composing 时立即处理文本变化', (WidgetTester tester) async {
-      final controller = MentionTextEditingController(encodedString: 'Hello @Alice$_me world');
+      final controller = MentionTextEditingController(text: 'Hello @Alice$_me world');
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: controller))));
 
       final initialLen = controller.segments.length;
@@ -348,7 +342,7 @@ void main() {
 
       // 现在会立即处理，segments 数量会增加
       expect(controller.segments.length, initialLen + 1);
-      expect(controller.displayText, 'Hello @Alice world你好');
+      expect(controller.displayText, 'Hello @Alice$_me world你好');
     });
   });
 
@@ -371,7 +365,7 @@ void main() {
     });
 
     testWidgets('键盘 Backspace 删除 mention（整块删除）', (WidgetTester tester) async {
-      final controller = MentionTextEditingController(encodedString: 'Hello @Alice$_me world');
+      final controller = MentionTextEditingController(text: 'Hello @Alice$_me world');
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: controller))));
 
       await tester.tap(find.byType(TextField));
@@ -391,7 +385,7 @@ void main() {
     });
 
     testWidgets('键盘 Delete 删除 mention（整块删除）', (WidgetTester tester) async {
-      final controller = MentionTextEditingController(encodedString: 'Hello @Alice$_me world');
+      final controller = MentionTextEditingController(text: 'Hello @Alice$_me world');
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: controller))));
 
       await tester.tap(find.byType(TextField));
@@ -445,8 +439,7 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       await tester.pump();
 
-      expect(controller.displayText, '@orders');
-      expect(controller.toEncodedString(), '@orders$_me');
+      expect(controller.displayText, '@orders$_me');
     });
 
     testWidgets('overlay：Esc 关闭候选列表', (WidgetTester tester) async {
@@ -537,36 +530,7 @@ void main() {
     });
 
     testWidgets('表 token：hover 显示删除 icon，点击后从输入中移除', (WidgetTester tester) async {
-      Widget builder(
-        BuildContext context,
-        MentionSegment segment,
-        TextStyle baseStyle,
-        bool hovering,
-        VoidCallback onDelete,
-      ) {
-        return Container(
-          key: const ValueKey('table_mention'),
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              hovering
-                  ? GestureDetector(
-                      onTap: onDelete,
-                      child: const Icon(Icons.close_rounded),
-                    )
-                  : const Icon(Icons.table_chart_rounded),
-              const SizedBox(width: 4),
-              Text(segment.label, style: baseStyle),
-            ],
-          ),
-        );
-      }
-
-      final controller = MentionTextEditingController(
-        encodedString: '@users$_me',
-        mentionBuilderV2: builder,
-      );
+      final controller = MentionTextEditingController(text: '@users$_me');
 
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
@@ -579,13 +543,13 @@ void main() {
       await tester.tap(find.byType(TextField));
       await tester.pump();
 
-      expect(controller.displayText, '@users');
+      expect(controller.displayText, '@users$_me');
       expect(find.byIcon(Icons.close_rounded), findsNothing);
 
-      // 用鼠标移入触发 hover
+      // 用鼠标移入触发 hover，ValueKey 格式为 table_mention_${segment.label}
       final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await mouse.addPointer();
-      await mouse.moveTo(tester.getCenter(find.byKey(const ValueKey('table_mention'))));
+      await mouse.moveTo(tester.getCenter(find.byKey(const ValueKey('table_mention_users'))));
       await tester.pump();
 
       expect(find.byIcon(Icons.close_rounded), findsOneWidget);
@@ -598,7 +562,7 @@ void main() {
     });
 
     testWidgets('选区跨 mention 后 Backspace 删除（mention 作为原子 token）', (WidgetTester tester) async {
-      final controller = MentionTextEditingController(encodedString: 'Hello @Alice$_me world');
+      final controller = MentionTextEditingController(text: 'Hello @Alice$_me world');
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: controller))));
 
       await tester.tap(find.byType(TextField));
@@ -642,7 +606,7 @@ void main() {
         return null;
       });
 
-      final src = MentionTextEditingController(encodedString: 'Hello @Alice$_me world');
+      final src = MentionTextEditingController(text: 'Hello @Alice$_me world');
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: src))));
 
       final driverText = src.text;
@@ -653,9 +617,7 @@ void main() {
       await src.copySelectionToClipboard();
       final copied = clipboardText ?? '';
 
-      // 外部粘贴看到的是类似 displayText 的内容（不包含 \uE000）
-      expect(copied, contains('@Alice'));
-      expect(copied, isNot(contains(_me)));
+      expect(copied, contains('@Alice$_me'));
 
       // 粘贴回输入框应还原为 MentionSegment
       final dst = MentionTextEditingController(text: '');
@@ -663,7 +625,7 @@ void main() {
       await dst.pasteFromClipboard();
       await tester.pump();
 
-      expect(dst.displayText, '@Alice');
+      expect(dst.displayText, '@Alice$_me');
       expect(dst.segments.length, 1);
       expect(dst.segments.first is MentionSegment, isTrue);
       expect((dst.segments.first as MentionSegment).label, 'Alice');
@@ -710,8 +672,7 @@ void main() {
       // 4. 插入 mention
       controller.insertMention('users');
       await tester.pump();
-      expect(controller.displayText, '查询用户表 @users');
-      expect(controller.toEncodedString(), '查询用户表 @users$_me');
+      expect(controller.displayText, '查询用户表 @users$_me');
       expect(controller.mentionState.value, isNull);
       expect(controller.segments.length, 2);
       expect((controller.segments[0] as TextSegment).value, '查询用户表 ');
@@ -721,7 +682,7 @@ void main() {
       final driverText = controller.text;
       controller.value = TextEditingValue(text: '$driverText 的数据', selection: TextSelection.collapsed(offset: driverText.length + 4));
       await tester.pump();
-      expect(controller.displayText, '查询用户表 @users 的数据');
+      expect(controller.displayText, '查询用户表 @users$_me 的数据');
       expect(controller.segments.length, 3);
       expect((controller.segments[2] as TextSegment).value, ' 的数据');
     });
@@ -735,14 +696,14 @@ void main() {
       await tester.pump();
       controller.insertMention('users');
       await tester.pump();
-      expect(controller.displayText, '@users');
+      expect(controller.displayText, '@users$_me');
 
       // 2. 输入连接文本
       final driverText1 = controller.text;
       controller.value =
           TextEditingValue(text: '$driverText1 和 ', selection: TextSelection.collapsed(offset: driverText1.length + 3));
       await tester.pump();
-      expect(controller.displayText, '@users 和 ');
+      expect(controller.displayText, '@users$_me 和 ');
 
       // 3. 插入第二个 mention
       final driverText2 = controller.text;
@@ -751,8 +712,7 @@ void main() {
       await tester.pump();
       controller.insertMention('orders');
       await tester.pump();
-      expect(controller.displayText, '@users 和 @orders');
-      expect(controller.toEncodedString(), '@users$_me 和 @orders$_me');
+      expect(controller.displayText, '@users$_me 和 @orders$_me');
       expect(controller.segments.length, 3);
       expect((controller.segments[0] as MentionSegment).label, 'users');
       expect((controller.segments[1] as TextSegment).value, ' 和 ');
@@ -767,7 +727,7 @@ void main() {
       await tester.pump();
       c1.insertMention('users');
       await tester.pump();
-      expect(c1.displayText, '@users');
+      expect(c1.displayText, '@users$_me');
       expect(c1.segments.length, 1);
       expect((c1.segments[0] as MentionSegment).label, 'users');
 
@@ -783,7 +743,7 @@ void main() {
       final driverText2 = c2.text;
       c2.value = TextEditingValue(text: '$driverText2 的数据', selection: TextSelection.collapsed(offset: driverText2.length + 4));
       await tester.pump();
-      expect(c2.displayText, '查询 @users 的数据');
+      expect(c2.displayText, '查询 @users$_me 的数据');
       expect(c2.segments.length, 3);
 
       // mention 在结尾
@@ -795,16 +755,16 @@ void main() {
       await tester.pump();
       c3.insertMention('users');
       await tester.pump();
-      expect(c3.displayText, '查询 @users');
+      expect(c3.displayText, '查询 @users$_me');
       expect(c3.segments.length, 2);
       expect((c3.segments[1] as MentionSegment).label, 'users');
     });
 
     testWidgets('场景4: 删除 mention 后继续编辑', (WidgetTester tester) async {
-      final controller = MentionTextEditingController(encodedString: '查询 @users$_me 的数据');
+      final controller = MentionTextEditingController(text: '查询 @users$_me 的数据');
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: controller))));
 
-      expect(controller.displayText, '查询 @users 的数据');
+      expect(controller.displayText, '查询 @users$_me 的数据');
       expect(controller.segments.length, 3);
 
       // 删除 mention（使用 deleteBackward 方法）
@@ -834,7 +794,7 @@ void main() {
     });
 
     testWidgets('场景5: 在 mention 前后插入文本', (WidgetTester tester) async {
-      final controller = MentionTextEditingController(encodedString: '查询 @users$_me 的数据');
+      final controller = MentionTextEditingController(text: '查询 @users$_me 的数据');
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: controller))));
 
       // 在 mention 前插入（在"查询"后插入"所有"）
@@ -845,10 +805,7 @@ void main() {
         selection: TextSelection.collapsed(offset: 5), // 在"所有"后
       );
       await tester.pump();
-      expect(controller.displayText, '查询所有 @users 的数据');
-      // 验证所有 segments 组合起来包含正确的文本
-      final allText1 = controller.segments.map((s) => s.toDisplayText()).join();
-      expect(allText1, '查询所有 @users 的数据');
+      expect(controller.displayText, '查询所有 @users$_me 的数据');
 
       // 在 mention 后插入
       final driverText2 = controller.text;
@@ -858,10 +815,7 @@ void main() {
         selection: TextSelection.collapsed(offset: mentionPos + 4),
       );
       await tester.pump();
-      expect(controller.displayText, '查询所有 @users 表 的数据');
-      // 验证所有 segments 组合起来包含正确的文本
-      final allText2 = controller.segments.map((s) => s.toDisplayText()).join();
-      expect(allText2, '查询所有 @users 表 的数据');
+      expect(controller.displayText, '查询所有 @users$_me 表 的数据');
     });
 
     testWidgets('场景6: 替换 mention 中的查询文本', (WidgetTester tester) async {
@@ -890,7 +844,7 @@ void main() {
       // 插入 mention
       controller.insertMention('orders');
       await tester.pump();
-      expect(controller.displayText, '@orders');
+      expect(controller.displayText, '@orders$_me');
       expect((controller.segments[0] as MentionSegment).label, 'orders');
     });
 
@@ -908,18 +862,15 @@ void main() {
       await tester.pump();
       expect(controller.mentionState.value, isNull);
       expect(controller.displayText, '@users ');
-      // 验证所有文本都在一个 TextSegment 中
-      final allText = controller.segments.map((s) => s.toDisplayText()).join();
-      expect(allText, '@users ');
     });
 
     testWidgets('场景8: 从编码字符串恢复并继续编辑', (WidgetTester tester) async {
       // 模拟从服务器加载已保存的内容
       final encoded = '查询 @users$_me 和 @orders$_me 的数据';
-      final controller = MentionTextEditingController(encodedString: encoded);
+      final controller = MentionTextEditingController(text: encoded);
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: controller))));
 
-      expect(controller.displayText, '查询 @users 和 @orders 的数据');
+      expect(controller.displayText, '查询 @users$_me 和 @orders$_me 的数据');
       // segments 数量可能因文本分割而不同，只要包含正确的 mention 即可
       final hasUsersMention = controller.segments.any((s) => s is MentionSegment && s.label == 'users');
       final hasOrdersMention = controller.segments.any((s) => s is MentionSegment && s.label == 'orders');
@@ -930,19 +881,15 @@ void main() {
       final driverText = controller.text;
       controller.value = TextEditingValue(text: '$driverText，按时间排序', selection: TextSelection.collapsed(offset: driverText.length + 6));
       await tester.pump();
-      expect(controller.displayText, '查询 @users 和 @orders 的数据，按时间排序');
-      // segments 数量可能变化，只要包含正确的文本和 mention 即可
-      final allText = controller.segments.map((s) => s.toDisplayText()).join();
-      expect(allText, '查询 @users 和 @orders 的数据，按时间排序');
+      expect(controller.displayText, '查询 @users$_me 和 @orders$_me 的数据，按时间排序');
 
       // 验证编码格式仍然正确
-      final newEncoded = controller.toEncodedString();
-      expect(newEncoded, contains('@users$_me'));
-      expect(newEncoded, contains('@orders$_me'));
+      expect(controller.displayText, contains('@users$_me'));
+      expect(controller.displayText, contains('@orders$_me'));
     });
 
     testWidgets('场景9: 复杂的编辑操作（选中删除、替换）', (WidgetTester tester) async {
-      final controller = MentionTextEditingController(encodedString: '查询 @users$_me 和 @orders$_me');
+      final controller = MentionTextEditingController(text: '查询 @users$_me 和 @orders$_me');
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: MentionTextField(controller: controller))));
 
       // 选中并删除第一个 mention 和中间的文本

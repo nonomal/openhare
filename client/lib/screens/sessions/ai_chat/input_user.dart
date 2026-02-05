@@ -30,20 +30,6 @@ class SessionChatInputCard extends ConsumerStatefulWidget {
 }
 
 class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
-  Set<String> _extractMentionedTables(String encoded) {
-    final segments = MentionSegmentSerializer.decode(encoded);
-    final tableNames = <String>{};
-
-    // 只取“真正的 mention token”
-    for (final s in segments) {
-      if (s is MentionSegment) {
-        tableNames.add(s.label);
-      }
-    }
-
-    return tableNames;
-  }
-
   MetaDataNode? _findSchemaNode(SessionAIChatModel chatModel) {
     if (chatModel.metadata == null || chatModel.currentSchema == null) return null;
     final root = MetaDataNode(MetaType.instance, "", items: chatModel.metadata!.metadata);
@@ -87,13 +73,11 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
 
   Future<void> _sendMessage(AIChatId chatId, SessionAIChatModel chatModel) async {
     final chatInputController = SessionController.sessionController(chatModel.sessionId).chatInputController;
-    final encoded = chatInputController.text.trim();
-    final segments = MentionSegmentSerializer.decode(encoded);
-    final text = segments.map((s) => s.toDisplayText()).join().trim();
+    final text = chatInputController.displayText;
     chatInputController.clear();
 
     // 如果用户通过 @ 提及了表，则把表结构信息放到 ref 里
-    final mentionedTables = _extractMentionedTables(encoded);
+    final mentionedTables = chatInputController.segments.whereType<MentionSegment>().map((s) => s.label).toList();
     final refText = _buildTableRef(chatModel, mentionedTables);
 
     // 调用AIChatService的chat方法
@@ -325,112 +309,6 @@ class ChatInputFieldWidget extends ConsumerStatefulWidget {
 }
 
 class _ChatInputFieldWidgetState extends ConsumerState<ChatInputFieldWidget> {
-  late final MentionTextEditingController _controller;
-  late final SessionController _sessionController;
-  late final VoidCallback _syncFromMention;
-  late final VoidCallback _syncFromSession;
-  bool _syncing = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _sessionController = SessionController.sessionController(widget.model.sessionId);
-    final stored = _sessionController.chatInputController.text;
-    final looksEncoded = stored.contains(MentionSegmentSerializer.mentionEndChar);
-    _controller = MentionTextEditingController(
-      text: looksEncoded ? null : stored,
-      encodedString: looksEncoded ? stored : null,
-      mentionBuilderV2: _buildMentionWidget,
-    );
-
-    _syncFromMention = () {
-      if (_syncing) return;
-      _syncing = true;
-      _sessionController.chatInputController.text = _controller.toEncodedString();
-      _syncing = false;
-    };
-    _syncFromSession = () {
-      if (_syncing) return;
-      _syncing = true;
-      final encoded = _sessionController.chatInputController.text;
-      if (encoded != _controller.toEncodedString()) {
-        _controller.loadFromEncodedString(encoded);
-      }
-      _syncing = false;
-    };
-
-    _controller.addListener(_syncFromMention);
-    _sessionController.chatInputController.addListener(_syncFromSession);
-
-    // 初始化时确保 session 保存的是 encodedString
-    _syncFromMention();
-  }
-
-  @override
-  void dispose() {
-    _controller.removeListener(_syncFromMention);
-    _sessionController.chatInputController.removeListener(_syncFromSession);
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Widget _buildMentionWidget(
-    BuildContext context,
-    MentionSegment segment,
-    TextStyle baseStyle,
-    bool hovering,
-    VoidCallback onDelete,
-  ) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final cardBg = colorScheme.primaryContainer;
-    final cardFg = colorScheme.onSurface;
-    final fontSize = baseStyle.fontSize ?? 14;
-    // 让 token 的高度尽量贴近 TextField 的行高（selection 背景高度也会更一致）。
-    final heightFactor = baseStyle.height ?? 1.0;
-    final tokenHeight = fontSize * heightFactor;
-    final labelStyle = baseStyle.copyWith(color: cardFg, height: heightFactor);
-    return Container(
-      key: ValueKey('table_mention_${segment.label}'),
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(5),
-      ),
-      child: SizedBox(
-        height: tokenHeight,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (hovering)
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: onDelete,
-                child: Icon(
-                  Icons.close_rounded,
-                  size: fontSize,
-                  color: cardFg,
-                ),
-              )
-            else
-              HugeIcon(
-                icon: HugeIcons.strokeRoundedTable,
-                size: fontSize,
-                color: cardFg,
-              ),
-            const SizedBox(width: 4),
-            Center(
-              child: Text(
-                segment.label,
-                style: labelStyle,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   List<String> _getTableNames() {
     if (widget.model.metadata == null || widget.model.currentSchema == null) {
       return [];
@@ -525,9 +403,10 @@ class _ChatInputFieldWidgetState extends ConsumerState<ChatInputFieldWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final controller = SessionController.sessionController(widget.model.sessionId).chatInputController;
     final tokenBg = Theme.of(context).colorScheme.primaryContainer;
     return MentionTextField(
-      controller: _controller,
+      controller: controller,
       style: Theme.of(context).textTheme.bodyMedium,
       textAlignVertical: TextAlignVertical.center,
       minLines: 1,
@@ -545,7 +424,7 @@ class _ChatInputFieldWidgetState extends ConsumerState<ChatInputFieldWidget> {
       mentionItemBuilder: _mentionItemBuilder,
       onSubmitted: (_) {
         widget.onSubmitted?.call();
-        _controller.loadFromEncodedString('');
+        controller.clear();
       },
     );
   }
