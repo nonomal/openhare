@@ -5,6 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+/// 统一的 marker 字符：
+/// - encodedString 中用于标记 mention 结束（@label + marker）
+/// - driverString 中用于 TextField 驱动的 placeholder（mention 视为一个字符）
+const String _marker = '\uE000';
+
 sealed class Segment {
   int get driverLength => switch (this) {
         TextSegment(:final value) => value.length,
@@ -41,11 +46,6 @@ typedef MentionItemBuilder = Widget Function(
   MentionCandidate candidate,
   String query,
 );
-
-/// 统一的 marker 字符：
-/// - encodedString 中用于标记 mention 结束（@label + marker）
-/// - driverString 中用于 TextField 驱动的 placeholder（mention 视为一个字符）
-const String _marker = '\uE000';
 
 class MentionSegmentSerializer {
   static String encode(List<Segment> segments) {
@@ -117,12 +117,17 @@ class MentionTextController extends TextEditingController {
   MentionTextController({String? text})
       : _segments = text != null ? MentionSegmentSerializer.decode(text) : <Segment>[],
         super(text: '') {
-    final initialDriver = _segmentsToDriverString(_segments);
+    final initialDriver = _segmentsToDriverString();
     super.value = TextEditingValue(
       text: initialDriver,
       selection: TextSelection.collapsed(offset: initialDriver.length),
     );
     _updateMentionState();
+  }
+
+  /// 将 segment 转化成 value 给 TextEditingController 使用
+  String _segmentsToDriverString() {
+    return _segments.map((s) => s.toDriverString(_marker)).join();
   }
 
   List<Segment> get segments => List.unmodifiable(_segments);
@@ -150,7 +155,7 @@ class MentionTextController extends TextEditingController {
     if (index < 0) return false;
 
     _segments.removeAt(index);
-    final driver = _segmentsToDriverString(_segments);
+    final driver = _segmentsToDriverString();
     super.value = TextEditingValue(
       text: driver,
       selection: TextSelection.collapsed(offset: driverOffset.clamp(0, driver.length)),
@@ -162,7 +167,7 @@ class MentionTextController extends TextEditingController {
 
   void loadFromEncodedString(String encodedString) {
     _segments = MentionSegmentSerializer.decode(encodedString);
-    final driver = _segmentsToDriverString(_segments);
+    final driver = _segmentsToDriverString();
     super.value = TextEditingValue(
       text: driver,
       selection: TextSelection.collapsed(offset: driver.length),
@@ -179,7 +184,7 @@ class MentionTextController extends TextEditingController {
     final end = selection.extentOffset.clamp(start, driverText.length);
     _replaceRangeInSegments(start, end, [MentionSegment(label: label)]);
     mentionState.value = null;
-    final newDriver = _segmentsToDriverString(_segments);
+    final newDriver = _segmentsToDriverString();
     super.value = TextEditingValue(
       text: newDriver,
       selection: TextSelection.collapsed(offset: (start + 1).clamp(0, newDriver.length)),
@@ -206,7 +211,7 @@ class MentionTextController extends TextEditingController {
     final start = math.min(sel.start, sel.end);
     final end = math.max(sel.start, sel.end);
     _replaceRangeInSegments(start, end, const []);
-    final driver = _segmentsToDriverString(_segments);
+    final driver = _segmentsToDriverString();
     super.value = TextEditingValue(
       text: driver,
       selection: TextSelection.collapsed(offset: start.clamp(0, driver.length)),
@@ -226,7 +231,7 @@ class MentionTextController extends TextEditingController {
     final start = sel.isValid ? math.min(sel.start, sel.end) : text.length;
     final end = sel.isValid ? math.max(sel.start, sel.end) : text.length;
     _replaceRangeInSegments(start, end, inserted);
-    final driver = _segmentsToDriverString(_segments);
+    final driver = _segmentsToDriverString();
     final caret = (start + inserted.fold<int>(0, (a, s) => a + s.driverLength)).clamp(0, driver.length);
     super.value = TextEditingValue(
       text: driver,
@@ -260,7 +265,7 @@ class MentionTextController extends TextEditingController {
 
     _replaceRangeInSegments(delStart, delEnd, inserted.isEmpty ? [] : [TextSegment(inserted)]);
 
-    final driver = _segmentsToDriverString(_segments);
+    final driver = _segmentsToDriverString();
     final clampedSelection = _clampSelection(
       newValue.selection,
       driver.length,
@@ -353,10 +358,6 @@ class MentionTextController extends TextEditingController {
     }
 
     return TextSpan(children: spans, style: baseStyle);
-  }
-
-  static String _segmentsToDriverString(List<Segment> segments) {
-    return segments.map((s) => s.toDriverString(_marker)).join();
   }
 
   List<Segment> _sliceSegments(int start, int end) {

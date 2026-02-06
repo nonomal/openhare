@@ -29,7 +29,9 @@ class UserMessage extends StatelessWidget {
           ),
           child: MentionTextField(
             controller: MentionTextEditingController(text: message.content),
+            style: Theme.of(context).textTheme.bodyMedium,
             readOnly: true,
+            selectionColor: Theme.of(context).colorScheme.primaryContainer,
           ),
         ),
       ),
