@@ -114,12 +114,9 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
   String _buildTableRef(SessionAIChatModel chatModel, Iterable<String> mentionedTables) {
     final schemaNode = _findSchemaNode(chatModel);
     if (schemaNode == null) return '';
-
-    final tables = mentionedTables.toSet().toList()..sort();
-    if (tables.isEmpty) return '';
-
+    if (mentionedTables.isEmpty) return '';
     final b = StringBuffer();
-    for (final tableName in tables) {
+    for (final tableName in mentionedTables) {
       MetaDataNode? tableNode;
       for (final n in (schemaNode.items ?? const <MetaDataNode>[])) {
         if (n.type == MetaType.table && n.value == tableName) {
@@ -127,7 +124,6 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
           break;
         }
       }
-
       // 直接复用 MetaDataNode.toString() 的 JSON 序列化（见 db_driver_metadata.dart）
       if (tableNode != null) {
         b.writeln(tableNode.toString());
@@ -141,7 +137,6 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
     final chatInputController = SessionController.sessionController(chatModel.sessionId).chatInputController;
     final text = chatInputController.displayText;
     if (text.trim().isEmpty) return;
-    chatInputController.clear();
 
     // 如果用户通过 @ 提及了表，则把表结构信息放到 ref 里
     final mentionedTables = chatInputController.segments.whereType<MentionSegment>().map((s) => s.label).toList();
@@ -507,6 +502,7 @@ class _ChatInputFieldWidgetState extends ConsumerState<ChatInputFieldWidget> {
       mentionItemBuilder: _mentionItemBuilder,
       onSubmitted: (_) {
         widget.onSubmitted?.call();
+        controller.clear();
       },
     );
   }
