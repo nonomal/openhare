@@ -287,25 +287,14 @@ class AIChatService extends _$AIChatService {
   }
 
   void retryChat(AIChatId id, LLMAgentId agentId, String systemPrompt, AIChatUserMessageModel retryMessage) {
-    // 先把当前及其后面的message 删除, 然后重新chat
     final messages = _getChatMessage(id);
-    int? index;
-    for (var i = 0; i < messages.length; i++) {
-      final item = messages[i];
-      final found = item.maybeWhen(
-        userMessage: (msg) => msg.id.value == retryMessage.id.value,
-        orElse: () => false,
-      );
-      if (found) {
-        index = i;
-        break;
-      }
-    }
-    if (index == null) {
-      return;
-    }
-    // 更新 message
-    ref.read(aiChatRepoProvider).updateMessages(id, messages.sublist(0, index));
+    final index = messages.indexWhere((item) => item.maybeWhen(
+          userMessage: (msg) => msg.id.value == retryMessage.id.value,
+          orElse: () => false,
+        ));
+    if (index == -1) return;
+    // 保留当前及之前的 message（含当前这条用户消息），然后重新 chat
+    ref.read(aiChatRepoProvider).updateMessages(id, messages.sublist(0, index + 1));
     _invalidateSelf();
     // 重新 chat
     chat(id, agentId, systemPrompt);
