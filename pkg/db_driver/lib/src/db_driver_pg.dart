@@ -188,22 +188,27 @@ class PGConnection extends BaseConnection {
         firstTok.content.toLowerCase() == "select") {
       sql = _wrapLimit(sql, limit);
     }
-    final qs = await _conn.query(query: sql);
-    final columns = qs.schema.columns
-        .map<PGQueryColumn>((qs) => PGQueryColumn(qs))
-        .toList();
-    
-    // 先发送 header
-    yield QueryStreamItemHeader(
-      columns: columns,
-      affectedRows: BigInt.from(qs.affectedRows),
-    );
-    
-    // 然后发送 rows
-    for (final r in qs) {
-      yield QueryStreamItemRow(
-        row: QueryResultRow(columns, r.map((v) => PGQueryValue(v)).toList()),
-      );
+    List<BaseQueryColumn>? columns;
+    await for (final item in _conn.queryStream(query: sql)) {
+      switch (item) {
+        case PGStreamHeader(:final schema, :final affectedRows):
+          columns = schema.columns
+              .map<PGQueryColumn>((c) => PGQueryColumn(c))
+              .toList();
+          yield QueryStreamItemHeader(
+            columns: columns,
+            affectedRows: BigInt.from(affectedRows),
+          );
+        case ResultRow row when columns != null:
+          yield QueryStreamItemRow(
+            row: QueryResultRow(
+              columns,
+              row.map((v) => PGQueryValue(v)).toList(),
+            ),
+          );
+        case ResultRow():
+          throw StateError('Received row before header');
+      }
     }
   }
 
