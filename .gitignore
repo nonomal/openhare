@@ -9,3 +9,4 @@ client/lib/l10n/*.dart
 *.freezed.dart
 .flutter-plugins
 .flutter-plugins-dependencies
+*.dmg
