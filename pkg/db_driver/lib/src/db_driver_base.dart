@@ -2,11 +2,15 @@ import 'db_driver_interface.dart';
 import 'db_driver_conn_meta.dart';
 import 'db_driver_mysql.dart';
 import 'package:mysql/mysql.dart' as mysql_lib;
+import 'db_driver_oracle.dart';
+import 'db_driver_mssql.dart';
+import 'package:mssql/mssql.dart' as mssql_lib;
 import 'db_driver_pg.dart';
 
 class ConnectionFactory {
   static Future<void> init() async {
     await mysql_lib.RustLib.init();
+    await mssql_lib.RustLib.init();
   }
 
   static Future<BaseConnection> open(
@@ -20,6 +24,10 @@ class ConnectionFactory {
         DatabaseType.mysql =>
           await MySQLConnection.open(meta: meta, schema: schema),
         DatabaseType.pg => await PGConnection.open(meta: meta, schema: schema),
+        DatabaseType.oracle =>
+          await OracleConnection.open(meta: meta, schema: schema),
+        DatabaseType.mssql =>
+          await MSSQLConnection.open(meta: meta, schema: schema),
       };
       conn.listen(onSchemaChangedCallback: onSchemaChangedCallback);
 
@@ -88,6 +96,58 @@ List<ConnectionMeta> connectionMetas = [
       initQuerys: [
         "SET client_encoding = 'UTF8';",
       ]),
+  ConnectionMeta(
+    displayName: "Oracle",
+    type: DatabaseType.oracle,
+    logoAssertPath: "assets/icons/oracle_icon.png",
+    connMeta: [
+      NameMeta(),
+      AddressMeta(),
+      PortMeta("1521"),
+      UserMeta(),
+      PasswordMeta(),
+      DescMeta(),
+      CustomMeta(
+          name: "service",
+          type: "text",
+          group: "connection",
+          isRequired: true,
+          defaultValue: "FREEPDB1"),
+    ],
+    initQuerys: const [],
+  ),
+  ConnectionMeta(
+    displayName: "SQL Server",
+    type: DatabaseType.mssql,
+    logoAssertPath: "assets/icons/mssql_icon.png",
+    connMeta: [
+      NameMeta(),
+      AddressMeta(),
+      PortMeta("1433"),
+      UserMeta(),
+      PasswordMeta(),
+      DescMeta(),
+      CustomMeta(
+          name: "database",
+          type: "text",
+          group: "connection",
+          isRequired: true,
+          defaultValue: "master"),
+      CustomMeta(
+        name: "encrypt",
+        type: "text",
+        group: "connection",
+        defaultValue: "true",
+      ),
+      CustomMeta(
+        name: "trustServerCertificate",
+        type: "text",
+        group: "connection",
+        defaultValue: "true",
+      ),
+    ],
+    initQuerys: const [],
+  ),
 ];
 
 List<DatabaseType> allDatabaseType =

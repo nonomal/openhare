@@ -1,4 +1,4 @@
-enum DatabaseType { mysql, pg }
+enum DatabaseType { mysql, pg, oracle, mssql }
 
 const String settingMetaGroupBase = "base";
 
