@@ -148,8 +148,8 @@ class MSSQLConnection extends BaseConnection {
     final dsn = Uri(
       scheme: "mssql",
       userInfo: '${meta.user}:${Uri.encodeComponent(meta.password)}',
-      host: meta.host,
-      port: meta.port ?? 1433,
+      host: meta.getHost(),
+      port: meta.getPort() ?? 1433,
       path: database,
       queryParameters: {
         "encrypt": encrypt,

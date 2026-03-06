@@ -189,7 +189,7 @@ class AddSession extends HookConsumerWidget {
                   width: 200,
                   child: Row(
                     children: [
-                      Text("${inst.connectValue.host}:${inst.connectValue.port}", overflow: TextOverflow.ellipsis),
+                      Text(inst.connectValue.target.toString(), overflow: TextOverflow.ellipsis),
                     ],
                   ),
                 ),

@@ -67,6 +67,10 @@
   "@db_instance_host": {
     "description": "DB instance Host"
   },
+  "db_instance_target": "Target",
+  "@db_instance_target": {
+    "description": "DB instance target address"
+  },
   "db_instance_port": "Port",
   "@db_instance_port": {
     "description": "DB instance Port"

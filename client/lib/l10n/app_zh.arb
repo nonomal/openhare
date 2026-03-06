@@ -16,6 +16,7 @@
     "db_instance_name": "名称",
     "db_instance_type": "类型",
     "db_instance_host": "主机",
+    "db_instance_target": "目标地址",
     "db_instance_port": "端口",
     "db_instance_user": "用户名",
     "db_instance_password": "密码",

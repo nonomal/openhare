@@ -136,8 +136,8 @@ class MySQLConnection extends BaseConnection {
     final dsn = Uri(
       scheme: "mysql",
       userInfo: '${meta.user}:${Uri.encodeComponent(meta.password)}',
-      host: meta.host,
-      port: meta.port ?? 3306,
+      host: meta.getHost(),
+      port: meta.getPort() ?? 3306,
       path: schema ?? "",
     ).toString();
     final conn = await ConnWrapper.open(dsn: dsn);

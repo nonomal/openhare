@@ -25,8 +25,15 @@ class InstanceStorage {
   }
 
   String name;
+
+  /// 目的地址：目前支持 host:port 和 dbFile 两种类型
+  String targetJson;
+  
+  /// 弃用，现在都存在 target 中
   String host;
+  /// 弃用，现在都存在 target 中
   int? port;
+
   String user;
   String password;
   String desc;
@@ -52,17 +59,6 @@ class InstanceStorage {
   DateTime latestOpenAt;
 
   @Transient()
-  ConnectValue get connectValue => ConnectValue(
-      name: name,
-      host: host,
-      port: port,
-      user: user,
-      password: password,
-      desc: desc,
-      custom: custom,
-      initQuerys: initQuerys);
-
-  @Transient()
   ActiveSet<String> activeSchemas;
   List<String> get stActiveSchemas => activeSchemas.toList();
 
@@ -74,7 +70,8 @@ class InstanceStorage {
     this.id = 0,
     required int stDbType,
     required this.name,
-    required this.host,
+    required this.targetJson,
+    required this.host, 
     this.port,
     required this.user,
     required this.password,
@@ -93,8 +90,8 @@ class InstanceStorage {
       : id = model.id.value,
         dbType = model.dbType,
         name = model.name,
-        host = model.host,
-        port = model.port,
+        targetJson = jsonEncode(model.connectValue.target.toJson()),
+        host = "deprecated",
         user = model.user,
         password = model.password,
         desc = model.desc,
@@ -104,21 +101,39 @@ class InstanceStorage {
         createdAt = model.createdAt,
         latestOpenAt = model.latestOpenAt; 
 
-  InstanceModel toModel() => InstanceModel(
-        id: InstanceId(value: id),
-        dbType: dbType,
-        name: name,
-        host: host,
-        port: port,
-        user: user,
-        password: password,
-        desc: desc,
-        custom: custom,
-        initQuerys: initQuerys,
-        activeSchemas: activeSchemas.toList(),
-        createdAt: createdAt,
-        latestOpenAt: latestOpenAt,
-      );
+  ConnectTarget _parseTarget() {
+    if (targetJson.trim().isNotEmpty) {
+      try {
+        return ConnectTarget.fromJson(
+            Map<String, dynamic>.from(jsonDecode(targetJson)));
+      } catch (_) {
+        return ConnectTarget.network(host: "", port: port ?? 0);
+      }
+    }
+    // 兼容旧版本的数据，之前: host 和 port 是单独存储的，现在统一存储在 targetJson 中
+    if (host.isNotEmpty && host != "deprecated") {
+      return ConnectTarget.network(host: host, port: port ?? 0);
+    }
+    return ConnectTarget.network(host: "", port: 0);
+  }
+
+  InstanceModel toModel() {
+    final target = _parseTarget();
+    return InstanceModel(
+      id: InstanceId(value: id),
+      dbType: dbType,
+      name: name,
+      target: target,
+      user: user,
+      password: password,
+      desc: desc,
+      custom: custom,
+      initQuerys: initQuerys,
+      activeSchemas: activeSchemas.toList(),
+      createdAt: createdAt,
+      latestOpenAt: latestOpenAt,
+    );
+  }
 }
 
 class InstanceRepoImpl extends InstanceRepo {

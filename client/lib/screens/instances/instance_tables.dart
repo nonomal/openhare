@@ -48,8 +48,7 @@ class _InstanceTableState extends ConsumerState<InstanceTable> {
           )
         ],
       )),
-      DataCell(Text(instance.connectValue.host)),
-      DataCell(Text("${instance.connectValue.port}")),
+      DataCell(Text(instance.connectValue.target.toString())),
       DataCell(Text(instance.connectValue.user)),
       DataCell(Text(instance.connectValue.desc, overflow: TextOverflow.ellipsis)),
       DataCell(Row(
@@ -84,12 +83,8 @@ class _InstanceTableState extends ConsumerState<InstanceTable> {
         columnWidth: const FlexColumnWidth(2),
       ),
       DataColumn(
-        label: Text(AppLocalizations.of(context)!.db_instance_host),
-        columnWidth: const FlexColumnWidth(2),
-      ),
-      DataColumn(
-        label: Text(AppLocalizations.of(context)!.db_instance_port),
-        columnWidth: const FlexColumnWidth(1),
+        label: Text(AppLocalizations.of(context)!.db_instance_target),
+        columnWidth: const FlexColumnWidth(3),
       ),
       DataColumn(
         label: Text(AppLocalizations.of(context)!.db_instance_user),

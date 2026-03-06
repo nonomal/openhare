@@ -5,12 +5,15 @@ import 'package:mysql/mysql.dart' as mysql_lib;
 import 'db_driver_oracle.dart';
 import 'db_driver_mssql.dart';
 import 'package:mssql/mssql.dart' as mssql_lib;
+import 'db_driver_sqlite.dart';
+import 'package:sqlite/sqlite.dart' as sqlite_lib;
 import 'db_driver_pg.dart';
 
 class ConnectionFactory {
   static Future<void> init() async {
     await mysql_lib.RustLib.init();
     await mssql_lib.RustLib.init();
+    await sqlite_lib.RustLib.init();
   }
 
   static Future<BaseConnection> open(
@@ -28,6 +31,8 @@ class ConnectionFactory {
           await OracleConnection.open(meta: meta, schema: schema),
         DatabaseType.mssql =>
           await MSSQLConnection.open(meta: meta, schema: schema),
+        DatabaseType.sqlite =>
+          await SQLiteConnection.open(meta: meta, schema: schema),
       };
       conn.listen(onSchemaChangedCallback: onSchemaChangedCallback);
 
@@ -49,8 +54,8 @@ List<ConnectionMeta> connectionMetas = [
     logoAssertPath: "assets/icons/mysql_icon.png",
     connMeta: [
       NameMeta(),
-      AddressMeta(),
-      PortMeta("3306"),
+      TargetNetworkHostMeta(),
+      TargetNetworkPortMeta("3306"),
       UserMeta(),
       PasswordMeta(),
       DescMeta(),
@@ -68,8 +73,8 @@ List<ConnectionMeta> connectionMetas = [
       logoAssertPath: "assets/icons/pg_icon.png",
       connMeta: [
         NameMeta(),
-        AddressMeta(),
-        PortMeta("5432"),
+        TargetNetworkHostMeta(),
+        TargetNetworkPortMeta("5432"),
         UserMeta(),
         PasswordMeta(),
         DescMeta(),
@@ -102,8 +107,8 @@ List<ConnectionMeta> connectionMetas = [
     logoAssertPath: "assets/icons/oracle_icon.png",
     connMeta: [
       NameMeta(),
-      AddressMeta(),
-      PortMeta("1521"),
+      TargetNetworkHostMeta(),
+      TargetNetworkPortMeta("1521"),
       UserMeta(),
       PasswordMeta(),
       DescMeta(),
@@ -122,8 +127,8 @@ List<ConnectionMeta> connectionMetas = [
     logoAssertPath: "assets/icons/mssql_icon.png",
     connMeta: [
       NameMeta(),
-      AddressMeta(),
-      PortMeta("1433"),
+      TargetNetworkHostMeta(),
+      TargetNetworkPortMeta("1433"),
       UserMeta(),
       PasswordMeta(),
       DescMeta(),
@@ -147,6 +152,20 @@ List<ConnectionMeta> connectionMetas = [
       ),
     ],
     initQuerys: const [],
+  ),
+  ConnectionMeta(
+    displayName: "SQLite",
+    type: DatabaseType.sqlite,
+    logoAssertPath: "assets/icons/sqlite_icon.png",
+    connMeta: [
+      NameMeta(),
+      TargetDBFileMeta(),
+      DescMeta(),
+    ],
+    initQuerys: const [
+      "PRAGMA temp_store = MEMORY;",
+      "PRAGMA journal_mode = MEMORY;",
+    ],
   ),
 ];
 

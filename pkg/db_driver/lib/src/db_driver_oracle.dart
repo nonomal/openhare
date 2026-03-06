@@ -44,8 +44,8 @@ class OracleConnection extends BaseConnection {
     final dsn = Uri(
       scheme: "oracle",
       userInfo: '${meta.user}:${Uri.encodeComponent(meta.password)}',
-      host: meta.host,
-      port: meta.port ?? 1521,
+      host: meta.getHost(),
+      port: meta.getPort() ?? 1521,
       path: service,
     ).toString();
 
