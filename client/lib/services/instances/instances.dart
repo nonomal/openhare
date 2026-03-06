@@ -1,5 +1,6 @@
 import 'package:client/models/instances.dart';
 import 'package:client/repositories/instances/instances.dart';
+import 'package:client/services/sessions/sessions.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'instances.g.dart';
@@ -32,7 +33,8 @@ class InstancesServices extends _$InstancesServices {
     _invalidateSelf();
   }
 
-  void deleteInstance(InstanceId id) {
+  Future<void> deleteInstance(InstanceId id) async {
+    await ref.read(sessionsServicesProvider.notifier).deleteSessionByInstance(id);
     final repo = ref.read(instanceRepoProvider);
     repo.delete(id);
     _invalidateSelf();

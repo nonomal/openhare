@@ -223,6 +223,14 @@
   "@tip_close_session_desc": {
     "description": "tips when close active session desc"
   },
+  "tip_delete_instance": "Delete data source",
+  "@tip_delete_instance": {
+    "description": "tips when delete instance"
+  },
+  "tip_delete_instance_desc": "Deleting this data source will also delete its associated workspace windows (if opened).",
+  "@tip_delete_instance_desc": {
+    "description": "tips when delete instance desc"
+  },
   "ai_chat_input_tip": "Please enter your question...",
   "@ai_chat_input_tip": {
     "description": "AI chat input tip"

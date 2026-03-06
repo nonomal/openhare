@@ -2,6 +2,7 @@ import 'package:client/models/instances.dart';
 import 'package:client/screens/instances/instance_update.dart';
 import 'package:client/services/instances/instances.dart';
 import 'package:client/widgets/button.dart';
+import 'package:client/widgets/dialog.dart';
 import 'package:client/widgets/const.dart';
 import 'package:client/widgets/paginated_bar.dart';
 import 'package:db_driver/db_driver.dart';
@@ -62,8 +63,16 @@ class _InstanceTableState extends ConsumerState<InstanceTable> {
           ),
           RectangleIconButton.small(
             icon: Icons.delete,
-            onPressed: () async {
-              ref.read(instancesServicesProvider.notifier).deleteInstance(instance.id);
+            onPressed: () {
+              doActionDialog(
+                context,
+                AppLocalizations.of(context)!.tip_delete_instance,
+                AppLocalizations.of(context)!.tip_delete_instance_desc,
+                () async {
+                  await ref.read(instancesServicesProvider.notifier).deleteInstance(instance.id);
+                },
+                icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
+              );
             },
           ),
           RectangleIconButton.small(
