@@ -162,9 +162,15 @@ class TaskRepoImpl implements TaskRepo {
       condition = condition == null ? keyCondition : condition.and(keyCondition);
     }
 
-    final countQuery = _taskBox.query(condition).build();
-    final totalCount = countQuery.count();
+    // 统计总数
+    final countQuery = _taskBox.query().build();
+    final allCount = countQuery.count();
     countQuery.close();
+
+    // 统计筛选后的总数
+    final filteredCountQuery = _taskBox.query(condition).build();
+    final filteredCount = filteredCountQuery.count();
+    filteredCountQuery.close();
 
     // 获取分页数据
     final currentPage = (pageNumber != null && pageNumber > 0) ? pageNumber : 1;
@@ -177,7 +183,8 @@ class TaskRepoImpl implements TaskRepo {
 
     final paginatedTasks = dataQuery.find().map((e) => e.toModel()).toList();
     dataQuery.close();
-    return TaskListResult(tasks: paginatedTasks, count: totalCount);
+
+    return TaskListResult(tasks: paginatedTasks, count: allCount, filteredCount: filteredCount);
   }
 
   @override

@@ -259,5 +259,21 @@
     "ai_chat_budget_context_hard_stopped": "已达到上下文上限；无法继续",
     "@ai_chat_budget_context_hard_stopped": {
       "description": "AI对话上下文已达上限提示"
+    },
+    "paginated_total_filtered": "总数 {filteredCount}/{count}",
+    "@paginated_total_filtered": {
+      "description": "分页栏-总数与筛选后数量",
+      "placeholders": {
+        "count": { "type": "int" },
+        "filteredCount": { "type": "int" }
+      }
+    },
+    "paginated_page": "页数 {current}/{total}",
+    "@paginated_page": {
+      "description": "分页栏-页码",
+      "placeholders": {
+        "current": { "type": "int" },
+        "total": { "type": "int" }
+      }
     }
 }

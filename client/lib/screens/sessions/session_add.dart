@@ -225,6 +225,7 @@ class AddSession extends HookConsumerWidget {
           ),
           TablePaginatedBar(
             count: model.instances.count,
+            filteredCount: model.instances.filteredCount,
             pageSize: model.pageSize,
             pageNumber: model.currentPage,
             onChange: (pageNumber) {

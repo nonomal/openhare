@@ -69,6 +69,7 @@ abstract class InstanceListModel with _$InstanceListModel {
   const factory InstanceListModel({
     required List<InstanceModel> instances,
     required int count,
+    required int filteredCount,
   }) = _InstanceListModel;
 }
 

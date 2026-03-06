@@ -622,5 +622,21 @@
   "ai_chat_budget_context_hard_stopped": "Context limit reached; cannot continue",
   "@ai_chat_budget_context_hard_stopped": {
     "description": "AI chat context limit reached message"
+  },
+  "paginated_total_filtered": "Count {filteredCount}/{count}",
+  "@paginated_total_filtered": {
+    "description": "Paginated bar - total and filtered count",
+    "placeholders": {
+      "count": { "type": "int" },
+      "filteredCount": { "type": "int" }
+    }
+  },
+  "paginated_page": "Page {current}/{total}",
+  "@paginated_page": {
+    "description": "Paginated bar - page indicator",
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
   }
 }

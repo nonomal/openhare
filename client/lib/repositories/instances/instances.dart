@@ -189,11 +189,15 @@ class InstanceRepoImpl extends InstanceRepo {
     if (sanitizedKey.isNotEmpty) {
       condition = InstanceStorage_.name.contains(sanitizedKey, caseSensitive: false);
     }
-
     // 统计总数
-    final countQuery = _instanceBox.query(condition).build();
-    final totalCount = countQuery.count();
-    countQuery.close();
+    final allCountQuery = _instanceBox.query().build();
+    final allCount = allCountQuery.count();
+    allCountQuery.close();
+
+    // 统计筛选后的总数
+    final filteredCountQuery = _instanceBox.query(condition).build();
+    final filteredCount = filteredCountQuery.count();
+    filteredCountQuery.close();
 
     // 分页参数
     final currentPage = (pageNumber != null && pageNumber > 0) ? pageNumber : 1;
@@ -210,7 +214,8 @@ class InstanceRepoImpl extends InstanceRepo {
 
     return InstanceListModel(
       instances: instanceList.map((e) => e.toModel()).toList(),
-      count: totalCount,
+      count: allCount,
+      filteredCount: filteredCount,
     );
   }
 

@@ -76,6 +76,14 @@ class RectangleIconButton extends StatefulWidget {
 class _RectangleIconButtonState extends State<RectangleIconButton> {
   bool _isHovering = false;
 
+  void _handleTap() {
+    if (widget.onPressed != null) {
+      // 点击后若打开 overlay（如下拉菜单），鼠标移到 overlay 上时底层 MouseRegion 收不到 onExit，需主动重置
+      setState(() => _isHovering = false);
+      widget.onPressed!();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final button = MouseRegion(
@@ -95,7 +103,7 @@ class _RectangleIconButtonState extends State<RectangleIconButton> {
           }
         },
         child: GestureDetector(
-          onTap: widget.onPressed,
+          onTap: widget.onPressed != null ? _handleTap : null,
           child: Padding(
             padding: EdgeInsets.only(
               left: widget.padding,
