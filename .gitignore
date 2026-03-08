@@ -10,3 +10,4 @@ client/lib/l10n/*.dart
 .flutter-plugins
 .flutter-plugins-dependencies
 *.dmg
+*.exe
