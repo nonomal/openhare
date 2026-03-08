@@ -14,6 +14,8 @@ import 'package:sql_parser/parser.dart';
 import 'package:client/widgets/sql_highlight.dart';
 import 'package:client/l10n/app_localizations.dart';
 import 'package:client/widgets/loading.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path/path.dart' as p;
 
 class AddInstancePage extends StatefulWidget {
   const AddInstancePage({super.key});
@@ -389,6 +391,22 @@ class AddInstanceForm extends StatelessWidget {
     };
   }
 
+  bool hasField(String fieldName) => infos.containsKey(fieldName);
+
+  Future<void> selectDBFile(BuildContext context, FormInfo addr) async {
+    final currentPath = addr.ctrl.text.trim();
+    final result = await FilePicker.platform.pickFiles(
+      initialDirectory: currentPath.isNotEmpty ? p.dirname(currentPath) : null,
+      type: FileType.custom,
+      allowedExtensions: const ["db", "sqlite", "sqlite3"],
+    );
+    final filePath = result?.files.single.path;
+    if (filePath != null && filePath.isNotEmpty) {
+      addr.ctrl.text = filePath;
+      addr.state.currentState?.validate();
+    }
+  }
+
   int get selectedGroupIndex {
     if (selectedGroup == null) {
       return 0;
@@ -414,8 +432,23 @@ class AddInstanceForm extends StatelessWidget {
   }
 
   Widget buildAddressField(BuildContext context) {
-    FormInfo addr = infos[settingMetaNameAddr]!;
-    FormInfo port = infos[settingMetaNamePort]!;
+    final addr = infos[settingMetaNameTargetNetworkHost];
+    if (addr == null) {
+      return const SizedBox.shrink();
+    }
+    final hasPort = hasField(settingMetaNameTargetNetworkPort);
+    final FormInfo? port = hasPort ? infos[settingMetaNameTargetNetworkPort] : null;
+    final addressLabel = AppLocalizations.of(context)!.db_instance_host;
+
+    if (!hasPort || port == null) {
+      return CommonFormField(
+        label: addressLabel,
+        controller: addr.ctrl,
+        state: addr.state,
+        validator: validatorFn(context, addr, validatorValueRequired(context)),
+      );
+    }
+
     return Container(
       constraints: const BoxConstraints(minHeight: 80),
       child: Row(
@@ -423,7 +456,7 @@ class AddInstanceForm extends StatelessWidget {
         children: [
           Expanded(
             child: CommonFormField(
-              label: AppLocalizations.of(context)!.db_instance_host,
+              label: addressLabel,
               controller: addr.ctrl,
               state: addr.state,
               validator: validatorFn(context, addr, validatorValueRequired(context)),
@@ -446,8 +479,41 @@ class AddInstanceForm extends StatelessWidget {
     );
   }
 
+  Widget buildDBFileField(BuildContext context) {
+    final dbFile = infos[settingMetaNameTargetDBFile];
+    if (dbFile == null) {
+      return const SizedBox.shrink();
+    }
+    return Container(
+      constraints: const BoxConstraints(minHeight: 80),
+      child: TextFormField(
+        key: dbFile.state,
+        autovalidateMode: AutovalidateMode.onUnfocus,
+        controller: dbFile.ctrl,
+        validator: validatorFn(context, dbFile, validatorValueRequired(context)),
+        decoration: InputDecoration(
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(5)),
+          labelText: "Path",
+          contentPadding: const EdgeInsets.all(10),
+          suffixIcon: Padding(
+            padding: const EdgeInsets.only(right: 5),
+            child: RectangleIconButton.medium(
+              icon: Icons.folder_open,
+              tooltip: AppLocalizations.of(context)!.tooltip_select_directory,
+              iconColor: Theme.of(context).colorScheme.primary,
+              onPressed: () => selectDBFile(context, dbFile),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget buildUserField(BuildContext context) {
-    FormInfo user = infos[settingMetaNameUser]!;
+    final user = infos[settingMetaNameUser];
+    if (user == null) {
+      return const SizedBox.shrink();
+    }
     return CommonFormField(
       label: AppLocalizations.of(context)!.db_instance_user,
       controller: user.ctrl,
@@ -457,7 +523,10 @@ class AddInstanceForm extends StatelessWidget {
   }
 
   Widget buildPasswordField(BuildContext context) {
-    FormInfo password = infos[settingMetaNamePassword]!;
+    final password = infos[settingMetaNamePassword];
+    if (password == null) {
+      return const SizedBox.shrink();
+    }
     return CommonFormField(
       label: AppLocalizations.of(context)!.db_instance_password,
       controller: password.ctrl,
@@ -552,11 +621,12 @@ class AddInstanceForm extends StatelessWidget {
               Expanded(
                 child: ListView(
                   children: [
-                    buildNameField(context),
-                    buildAddressField(context),
-                    buildUserField(context),
-                    buildPasswordField(context),
-                    buildDescField(context)
+                    if (hasField(settingMetaNameName)) buildNameField(context),
+                    if (hasField(settingMetaNameTargetNetworkHost)) buildAddressField(context),
+                    if (hasField(settingMetaNameTargetDBFile)) buildDBFileField(context),
+                    if (hasField(settingMetaNameUser)) buildUserField(context),
+                    if (hasField(settingMetaNamePassword)) buildPasswordField(context),
+                    if (hasField(settingMetaNameDesc)) buildDescField(context),
                   ],
                 ),
               )
@@ -633,7 +703,7 @@ class AddInstanceBottomBar extends StatelessWidget {
       status = const Loading.medium();
     } else if (isDatabaseConnectable == null) {
       msg = const Text("");
-      status = const Spacer();
+      status = const SizedBox.shrink();
     } else if (isDatabaseConnectable == true) {
       msg = Text(AppLocalizations.of(context)!.test_success);
       status = const Icon(
@@ -698,24 +768,49 @@ class AddInstanceController extends ChangeNotifier {
     code.text = connectionMetaMap[selectedDatabaseType]!.initQueryText();
   }
 
+  String _fieldText(DatabaseType dbType, String fieldName) {
+    return infos[dbType]?[fieldName]?.ctrl.text ?? "";
+  }
+
+  String _addressFieldText(DatabaseType dbType) {
+    final dbInfos = infos[dbType];
+    if (dbInfos == null) {
+      return "";
+    }
+    return dbInfos[settingMetaNameTargetNetworkHost]?.ctrl.text ??
+        dbInfos[settingMetaNameTargetDBFile]?.ctrl.text ??
+        "";
+  }
+
+  void _setFieldText(DatabaseType dbType, String fieldName, String value) {
+    final field = infos[dbType]?[fieldName];
+    if (field != null) {
+      field.ctrl.text = value;
+    }
+  }
+
   void onDatabaseTypeChange(DatabaseType type) {
-    final isPortChanged = (infos[selectedDatabaseType]![settingMetaNamePort]!.ctrl.text != defaultPort);
-    final name = infos[selectedDatabaseType]![settingMetaNameName]!.ctrl.text;
-    final desc = infos[selectedDatabaseType]![settingMetaNameDesc]!.ctrl.text;
-    final addr = infos[selectedDatabaseType]![settingMetaNameAddr]!.ctrl.text;
-    final user = infos[selectedDatabaseType]![settingMetaNameUser]!.ctrl.text;
-    final password = infos[selectedDatabaseType]![settingMetaNamePassword]!.ctrl.text;
+    final sourceType = selectedDatabaseType;
+    final sourcePortField = infos[sourceType]?[settingMetaNameTargetNetworkPort];
+    final sourceDefaultPort = sourcePortField?.meta.defaultValue ?? "";
+    final isPortChanged = sourcePortField != null && sourcePortField.ctrl.text != sourceDefaultPort;
+    final name = _fieldText(sourceType, settingMetaNameName);
+    final desc = _fieldText(sourceType, settingMetaNameDesc);
+    final addr = _addressFieldText(sourceType);
+    final user = _fieldText(sourceType, settingMetaNameUser);
+    final password = _fieldText(sourceType, settingMetaNamePassword);
 
     selectedDatabaseType = type;
     _selectedGroup = null;
 
-    infos[type]![settingMetaNameName]!.ctrl.text = name;
-    infos[type]![settingMetaNameDesc]!.ctrl.text = desc;
-    infos[type]![settingMetaNameAddr]!.ctrl.text = addr;
-    infos[type]![settingMetaNameUser]!.ctrl.text = user;
-    infos[type]![settingMetaNamePassword]!.ctrl.text = password;
+    _setFieldText(type, settingMetaNameName, name);
+    _setFieldText(type, settingMetaNameDesc, desc);
+    _setFieldText(type, settingMetaNameTargetNetworkHost, addr);
+    _setFieldText(type, settingMetaNameTargetDBFile, addr);
+    _setFieldText(type, settingMetaNameUser, user);
+    _setFieldText(type, settingMetaNamePassword, password);
     // 数据库切换则port 默认值要切换，除非用户自己编辑了特殊端口
-    if (!isPortChanged) {
+    if (!isPortChanged && infos[type]?.containsKey(settingMetaNameTargetNetworkPort) == true) {
       port = defaultPort;
     }
     code.text = connectionMetaMap[selectedDatabaseType]!.initQueryText();
@@ -735,11 +830,14 @@ class AddInstanceController extends ChangeNotifier {
   }
 
   String get defaultPort {
-    return infos[selectedDatabaseType]![settingMetaNamePort]!.meta.defaultValue ?? "";
+    return infos[selectedDatabaseType]?[settingMetaNameTargetNetworkPort]?.meta.defaultValue ?? "";
   }
 
   set port(String port) {
-    infos[selectedDatabaseType]![settingMetaNamePort]!.ctrl.text = port;
+    final portField = infos[selectedDatabaseType]?[settingMetaNameTargetNetworkPort];
+    if (portField != null) {
+      portField.ctrl.text = port;
+    }
   }
 
   bool isGroupValid(String group) {
@@ -813,7 +911,8 @@ class AddInstanceController extends ChangeNotifier {
   ConnectValue getConnectValue() {
     String name = "";
     String addr = "";
-    int? port = 0;
+    String dbFile = "";
+    int? port;
     String user = "";
     String password = "";
     String desc = "";
@@ -823,9 +922,12 @@ class AddInstanceController extends ChangeNotifier {
       switch (info.meta) {
         case NameMeta():
           name = info.ctrl.text;
-        case AddressMeta():
+        case TargetNetworkHostMeta():
           addr = info.ctrl.text;
-        case PortMeta():
+        case TargetDBFileMeta():
+          dbFile = info.ctrl.text;
+          addr = dbFile;
+        case TargetNetworkPortMeta():
           port = int.tryParse(info.ctrl.text);
         case UserMeta():
           user = info.ctrl.text;
@@ -839,10 +941,12 @@ class AddInstanceController extends ChangeNotifier {
     }
     List<String> querys =
         Splitter(code.text.trim(), ";").split().map((e) => e.content.trim()).whereNot((e) => e.trim() == "").toList();
+    final target = dbFile.isNotEmpty
+        ? ConnectTarget.dbFile(dbFile: dbFile)
+        : ConnectTarget.network(host: addr, port: port ?? 0);
     return ConnectValue(
       name: name,
-      host: addr,
-      port: port,
+      target: target,
       user: user,
       password: password,
       desc: desc,
@@ -876,8 +980,7 @@ class AddInstanceController extends ChangeNotifier {
       id: const InstanceId(value: 0),
       dbType: selectedDatabaseType,
       name: connectValue.name,
-      host: connectValue.host,
-      port: connectValue.port,
+      target: connectValue.target,
       user: connectValue.user,
       password: connectValue.password,
       desc: connectValue.desc,

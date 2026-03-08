@@ -226,6 +226,7 @@ class ExportDataTaskPaginationListNotifier extends _$ExportDataTaskPaginationLis
         );
       }).toList(),
       count: result.count,
+      filteredCount: result.filteredCount,
       pageNumber: pageNumber,
       pageSize: pageSize,
       key: key,

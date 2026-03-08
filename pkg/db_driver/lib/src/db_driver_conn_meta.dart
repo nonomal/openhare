@@ -1,12 +1,37 @@
-enum DatabaseType { mysql, pg }
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'db_driver_conn_meta.freezed.dart';
+part 'db_driver_conn_meta.g.dart';
+
+enum DatabaseType { mysql, pg, oracle, mssql, sqlite }
+
+enum ConnectTargetType { network, dbFile }
+
+@Freezed(toStringOverride: false)
+abstract class ConnectTarget with _$ConnectTarget {
+  const ConnectTarget._();
+  const factory ConnectTarget.network({required String host, required int port}) = _ConnectTargetNetwork;
+  const factory ConnectTarget.dbFile({required String dbFile}) = _ConnectTargetDbFile;
+
+  factory ConnectTarget.fromJson(Map<String, dynamic> json) => _$ConnectTargetFromJson(json);
+
+  @override
+  String toString() {
+    return when(
+      dbFile: (dbFile) => dbFile.trim(),
+      network: (host, port) => "${host.trim()}:$port",
+    );
+  }
+}
 
 const String settingMetaGroupBase = "base";
 
 const String settingMetaNameName = "name";
-const String settingMetaNameAddr = "addr";
-const String settingMetaNamePort = "port";
 const String settingMetaNameUser = "user";
 const String settingMetaNamePassword = "password";
+const String settingMetaNameTargetDBFile = "tartget_db_file";
+const String settingMetaNameTargetNetworkHost = "tartget_network_host";
+const String settingMetaNameTargetNetworkPort = "tartget_network_port";
 const String settingMetaNameDesc = "desc";
 
 class ConnectionMeta {
@@ -56,20 +81,19 @@ class NameMeta extends SettingMeta {
   String get name => settingMetaNameName;
 }
 
-class AddressMeta extends SettingMeta {
+class TargetNetworkHostMeta extends SettingMeta {
   @override
-  String get name => settingMetaNameAddr;
-
-  AddressMeta();
+  String get name => settingMetaNameTargetNetworkHost;
 }
 
-class PortMeta extends SettingMeta {
+class TargetNetworkPortMeta extends SettingMeta {
   @override
-  String get name => settingMetaNamePort;
-  @override
-  final String? defaultValue;
+  String get name => settingMetaNameTargetNetworkPort;
 
-  PortMeta(this.defaultValue);
+  @override
+  String? defaultValue; // set default port for host:port
+  
+  TargetNetworkPortMeta(this.defaultValue);
 }
 
 class UserMeta extends SettingMeta {
@@ -80,6 +104,11 @@ class UserMeta extends SettingMeta {
 class PasswordMeta extends SettingMeta {
   @override
   String get name => settingMetaNamePassword;
+}
+
+class TargetDBFileMeta extends SettingMeta {
+  @override
+  String get name => settingMetaNameTargetDBFile;
 }
 
 class DescMeta extends SettingMeta {
@@ -115,8 +144,7 @@ class SettingValue<SettingMeta, E> {
 
 class ConnectValue {
   String name;
-  String host;
-  int? port;
+  ConnectTarget target;
   String user;
   String password;
   String desc;
@@ -125,13 +153,37 @@ class ConnectValue {
 
   ConnectValue(
       {required this.name,
-      required this.host,
-      this.port,
+      required this.target,
       required this.user,
       required this.password,
       required this.desc,
       required this.custom,
       this.initQuerys = const []});
+
+  String getHost() {
+    return target.when(
+      network: (host, port) => host.trim(),
+      dbFile: (dbFile) => "",
+    );
+  }
+
+  int? getPort() {
+    return target.when(
+      network: (host, port) => port,
+      dbFile: (dbFile) => null,
+    );
+  }
+
+  String getDbFile() {
+    return target.when(
+      dbFile: (dbFile) => dbFile.trim(),
+      network: (host, port) => "",
+    );
+  }
+
+  String endpointText() {
+    return target.toString();
+  }
 
   String getValue(String name, [String defaultValue = ""]) {
     return custom[name] ?? defaultValue;

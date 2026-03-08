@@ -2,6 +2,7 @@
     "settings": "设置",
     "preferences": "偏好",
     "llm_api": "大模型API",
+    "llm_api_only_openai_compatible": "暂时仅支持openai兼容接口",
     "update": "更新",
     "create": "创建",
     "language": "语言",
@@ -16,6 +17,7 @@
     "db_instance_name": "名称",
     "db_instance_type": "类型",
     "db_instance_host": "主机",
+    "db_instance_target": "目标地址",
     "db_instance_port": "端口",
     "db_instance_user": "用户名",
     "db_instance_password": "密码",
@@ -54,6 +56,8 @@
     "short_conn": "连接",
     "tip_close_session": "关闭活跃会话",
     "tip_close_session_desc": "此操作将终止查询并关闭连接, 确定关闭活跃会话吗? ",
+    "tip_delete_instance": "删除数据源",
+    "tip_delete_instance_desc": "删除数据源会同时删除关联的工作台窗口（若开启）",
     "ai_chat_input_tip": "请输入你的问题...",
     "ai_chat_table_tip": "请在左上角选择一个 schema 后才可以使用表进行AI问答",
     "ai_chat_guide_tip": "没有添加模型，无法使用对话问答功能",
@@ -258,5 +262,71 @@
     "ai_chat_budget_context_hard_stopped": "已达到上下文上限；无法继续",
     "@ai_chat_budget_context_hard_stopped": {
       "description": "AI对话上下文已达上限提示"
+    },
+    "paginated_total_filtered": "总数 {filteredCount}/{count}",
+    "@paginated_total_filtered": {
+      "description": "分页栏-总数与筛选后数量",
+      "placeholders": {
+        "count": { "type": "int" },
+        "filteredCount": { "type": "int" }
+      }
+    },
+    "paginated_page": "页数 {current}/{total}",
+    "@paginated_page": {
+      "description": "分页栏-页码",
+      "placeholders": {
+        "current": { "type": "int" },
+        "total": { "type": "int" }
+      }
+    },
+    "about_check_update": "检查更新",
+    "@about_check_update": {
+      "description": "关于页检查更新按钮"
+    },
+    "about_update_available": "发现新版本",
+    "@about_update_available": {
+      "description": "发现新版本标题"
+    },
+    "about_update_available_desc": "最新版本 {latest}，当前版本 {current}",
+    "@about_update_available_desc": {
+      "description": "发现新版本描述",
+      "placeholders": {
+        "latest": { "type": "String" },
+        "current": { "type": "String" }
+      }
+    },
+    "about_open_release": "前往下载",
+    "@about_open_release": {
+      "description": "打开 release 页面按钮"
+    },
+    "about_update_already_latest": "当前已经是最新版本",
+    "@about_update_already_latest": {
+      "description": "已经是最新版本提示"
+    },
+    "about_update_check_failed": "检查更新失败，请稍后重试",
+    "@about_update_check_failed": {
+      "description": "检查更新失败提示"
+    },
+    "about_version_info": "版本信息",
+    "@about_version_info": {
+      "description": "版本信息区块标题"
+    },
+    "about_current_version": "当前版本：{version}",
+    "@about_current_version": {
+      "description": "当前版本标签",
+      "placeholders": {
+        "version": { "type": "String" }
+      }
+    },
+    "about_latest_version": "最新版本：{version}",
+    "@about_latest_version": {
+      "description": "最新版本标签",
+      "placeholders": {
+        "version": { "type": "String" }
+      }
+    },
+    "about_more_info": "更多信息",
+    "@about_more_info": {
+      "description": "更多信息区块标题"
     }
 }

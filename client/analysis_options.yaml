@@ -27,6 +27,9 @@ linter:
 analyzer:
   plugins:
     - custom_lint
+  exclude:
+    - "build/**"
+    - "**/.dart_tool/**"
 
 formatter:
   page_width: 120

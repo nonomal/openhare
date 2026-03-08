@@ -11,6 +11,10 @@
   "@llm_api": {
     "description": "LLM API"
   },
+  "llm_api_only_openai_compatible": "OpenAI-compatible only",
+  "@llm_api_only_openai_compatible": {
+    "description": "LLM API support notice"
+  },
   "update": "Update",
   "@update": {
     "description": "Update"
@@ -66,6 +70,10 @@
   "db_instance_host": "Host",
   "@db_instance_host": {
     "description": "DB instance Host"
+  },
+  "db_instance_target": "Target",
+  "@db_instance_target": {
+    "description": "DB instance target address"
   },
   "db_instance_port": "Port",
   "@db_instance_port": {
@@ -218,6 +226,14 @@
   "tip_close_session_desc": "This action will kill the query and close the connection, are you sure you want to close the active session? ",
   "@tip_close_session_desc": {
     "description": "tips when close active session desc"
+  },
+  "tip_delete_instance": "Delete data source",
+  "@tip_delete_instance": {
+    "description": "tips when delete instance"
+  },
+  "tip_delete_instance_desc": "Deleting this data source will also delete its associated workspace windows (if opened).",
+  "@tip_delete_instance_desc": {
+    "description": "tips when delete instance desc"
   },
   "ai_chat_input_tip": "Please enter your question...",
   "@ai_chat_input_tip": {
@@ -618,5 +634,71 @@
   "ai_chat_budget_context_hard_stopped": "Context limit reached; cannot continue",
   "@ai_chat_budget_context_hard_stopped": {
     "description": "AI chat context limit reached message"
+  },
+  "paginated_total_filtered": "Count {filteredCount}/{count}",
+  "@paginated_total_filtered": {
+    "description": "Paginated bar - total and filtered count",
+    "placeholders": {
+      "count": { "type": "int" },
+      "filteredCount": { "type": "int" }
+    }
+  },
+  "paginated_page": "Page {current}/{total}",
+  "@paginated_page": {
+    "description": "Paginated bar - page indicator",
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "about_check_update": "Check for updates",
+  "@about_check_update": {
+    "description": "About page check update button"
+  },
+  "about_update_available": "Update available",
+  "@about_update_available": {
+    "description": "Update available title"
+  },
+  "about_update_available_desc": "Latest version {latest}, current version {current}",
+  "@about_update_available_desc": {
+    "description": "Update available description",
+    "placeholders": {
+      "latest": { "type": "String" },
+      "current": { "type": "String" }
+    }
+  },
+  "about_open_release": "Open release page",
+  "@about_open_release": {
+    "description": "Open release page button"
+  },
+  "about_update_already_latest": "You are already on the latest version",
+  "@about_update_already_latest": {
+    "description": "Already latest version prompt"
+  },
+  "about_update_check_failed": "Failed to check updates. Please try again later.",
+  "@about_update_check_failed": {
+    "description": "Update check failed prompt"
+  },
+  "about_version_info": "Version",
+  "@about_version_info": {
+    "description": "Version info section title"
+  },
+  "about_current_version": "Current version: {version}",
+  "@about_current_version": {
+    "description": "Current version label",
+    "placeholders": {
+      "version": { "type": "String" }
+    }
+  },
+  "about_latest_version": "Latest version: {version}",
+  "@about_latest_version": {
+    "description": "Latest version label",
+    "placeholders": {
+      "version": { "type": "String" }
+    }
+  },
+  "about_more_info": "More info",
+  "@about_more_info": {
+    "description": "More info section title"
   }
 }

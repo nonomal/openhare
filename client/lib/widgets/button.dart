@@ -76,6 +76,14 @@ class RectangleIconButton extends StatefulWidget {
 class _RectangleIconButtonState extends State<RectangleIconButton> {
   bool _isHovering = false;
 
+  void _handleTap() {
+    if (widget.onPressed != null) {
+      // 点击后若打开 overlay（如下拉菜单），鼠标移到 overlay 上时底层 MouseRegion 收不到 onExit，需主动重置
+      setState(() => _isHovering = false);
+      widget.onPressed!();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final button = MouseRegion(
@@ -95,7 +103,7 @@ class _RectangleIconButtonState extends State<RectangleIconButton> {
           }
         },
         child: GestureDetector(
-          onTap: widget.onPressed,
+          onTap: widget.onPressed != null ? _handleTap : null,
           child: Padding(
             padding: EdgeInsets.only(
               left: widget.padding,
@@ -136,12 +144,14 @@ class LinkButton extends StatefulWidget {
   final String text;
   final VoidCallback? onPressed;
   final double? maxWidth;
+  final EdgeInsetsGeometry? padding;
 
   const LinkButton({
     super.key,
     required this.text,
     this.onPressed,
     this.maxWidth,
+    this.padding,
   });
 
   @override
@@ -165,7 +175,7 @@ class _LinkButtonState extends State<LinkButton> {
           constraints: BoxConstraints(
             maxWidth: widget.maxWidth ?? 200,
           ),
-          padding: const EdgeInsets.fromLTRB(kSpacingSmall, 0, kSpacingSmall, 0),
+          padding: widget.padding ?? const EdgeInsets.fromLTRB(kSpacingSmall, 0, kSpacingSmall, 0),
           // 只有当TextOverflow.ellipsis实际发生时才显示tooltip
           child: TooltipText(
             text: widget.text,

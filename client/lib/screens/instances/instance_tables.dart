@@ -2,6 +2,7 @@ import 'package:client/models/instances.dart';
 import 'package:client/screens/instances/instance_update.dart';
 import 'package:client/services/instances/instances.dart';
 import 'package:client/widgets/button.dart';
+import 'package:client/widgets/dialog.dart';
 import 'package:client/widgets/const.dart';
 import 'package:client/widgets/paginated_bar.dart';
 import 'package:db_driver/db_driver.dart';
@@ -48,8 +49,7 @@ class _InstanceTableState extends ConsumerState<InstanceTable> {
           )
         ],
       )),
-      DataCell(Text(instance.connectValue.host)),
-      DataCell(Text("${instance.connectValue.port}")),
+      DataCell(Text(instance.connectValue.target.toString())),
       DataCell(Text(instance.connectValue.user)),
       DataCell(Text(instance.connectValue.desc, overflow: TextOverflow.ellipsis)),
       DataCell(Row(
@@ -63,8 +63,16 @@ class _InstanceTableState extends ConsumerState<InstanceTable> {
           ),
           RectangleIconButton.small(
             icon: Icons.delete,
-            onPressed: () async {
-              ref.read(instancesServicesProvider.notifier).deleteInstance(instance.id);
+            onPressed: () {
+              doActionDialog(
+                context,
+                AppLocalizations.of(context)!.tip_delete_instance,
+                AppLocalizations.of(context)!.tip_delete_instance_desc,
+                () async {
+                  await ref.read(instancesServicesProvider.notifier).deleteInstance(instance.id);
+                },
+                icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
+              );
             },
           ),
           RectangleIconButton.small(
@@ -84,12 +92,8 @@ class _InstanceTableState extends ConsumerState<InstanceTable> {
         columnWidth: const FlexColumnWidth(2),
       ),
       DataColumn(
-        label: Text(AppLocalizations.of(context)!.db_instance_host),
-        columnWidth: const FlexColumnWidth(2),
-      ),
-      DataColumn(
-        label: Text(AppLocalizations.of(context)!.db_instance_port),
-        columnWidth: const FlexColumnWidth(1),
+        label: Text(AppLocalizations.of(context)!.db_instance_target),
+        columnWidth: const FlexColumnWidth(3),
       ),
       DataColumn(
         label: Text(AppLocalizations.of(context)!.db_instance_user),
@@ -187,6 +191,7 @@ class _InstanceTableState extends ConsumerState<InstanceTable> {
           ),
           TablePaginatedBar(
             count: model.instances.count,
+            filteredCount: model.instances.filteredCount,
             pageSize: model.pageSize,
             pageNumber: model.currentPage,
             onChange: (pageNumber) {

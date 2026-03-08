@@ -417,6 +417,7 @@ class _TaskTableState extends ConsumerState<TaskTable> {
           ),
           TablePaginatedBar(
             count: model.count,
+            filteredCount: model.filteredCount,
             pageSize: model.pageSize,
             pageNumber: model.pageNumber,
             onChange: (pageNumber) {

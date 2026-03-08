@@ -2,7 +2,9 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "OpenHare"
-#define MyAppVersion "0.5.0"
+#ifndef MyAppVersion
+#define MyAppVersion "0.0.0"
+#endif
 #define MyAppPublisher "openhare"
 #define MyAppURL "https://github.com/sjjian/openhare"
 #define MyAppExeName "openhare.exe"
@@ -49,8 +51,8 @@ DisableProgramGroupPage=yes
 LicenseFile={#LicensePath}
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
 ;PrivilegesRequired=lowest
-OutputDir={#BuildPath}
-OutputBaseFilename={#MyAppName}-{#MyAppVersion}
+OutputDir={#ProjectRoot}
+OutputBaseFilename=openhare-{#MyAppVersion}-windows-arm64-setup
 SetupIconFile={#IconPath}
 SolidCompression=yes
 WizardStyle=modern
@@ -62,20 +64,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "{#BuildPath}\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#BuildPath}\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "{#BuildPath}\bitsdojo_window_windows_plugin.lib"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#BuildPath}\flutter_windows.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#BuildPath}\mysql.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#BuildPath}\objectbox.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#BuildPath}\objectbox_sync_flutter_libs_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#BuildPath}\openhare.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#BuildPath}\openhare.exp"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#BuildPath}\openhare.lib"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#BuildPath}\screen_retriever_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#BuildPath}\url_launcher_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#BuildPath}\window_manager_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#BuildPath}\windows_single_instance_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+; 递归打包 Release 目录下的全部产物，避免每次新增文件都手工维护
+Source: "{#BuildPath}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "{#MyAppName}-*.exe,openhare-*-windows-arm64-setup.exe"
 Source: "{#VCLibsPath}\msvcp140.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#VCLibsPath}\msvcp140_1.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#VCLibsPath}\msvcp140_2.dll"; DestDir: "{app}"; Flags: ignoreversion

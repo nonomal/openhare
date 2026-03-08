@@ -38,8 +38,7 @@ abstract class InstanceModel with _$InstanceModel {
     required InstanceId id,
     required DatabaseType dbType,
     required String name,
-    required String host,
-    int? port,
+    required ConnectTarget target,
     required String user,
     required String password,
     required String desc,
@@ -52,15 +51,17 @@ abstract class InstanceModel with _$InstanceModel {
 
   const InstanceModel._();
 
-  ConnectValue get connectValue => ConnectValue(
+  ConnectValue get connectValue {
+    return ConnectValue(
       name: name,
-      host: host,
-      port: port,
+      target: target,
       user: user,
       password: password,
       desc: desc,
       custom: custom,
-      initQuerys: initQuerys);
+      initQuerys: initQuerys,
+    );
+  }
 }
 
 @freezed
@@ -68,6 +69,7 @@ abstract class InstanceListModel with _$InstanceListModel {
   const factory InstanceListModel({
     required List<InstanceModel> instances,
     required int count,
+    required int filteredCount,
   }) = _InstanceListModel;
 }
 

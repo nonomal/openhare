@@ -200,10 +200,12 @@ class UpdateInstanceController extends AddInstanceController {
         switch (info.meta) {
           case NameMeta():
             info.ctrl.text = connectValue.name;
-          case AddressMeta():
-            info.ctrl.text = connectValue.host;
-          case PortMeta():
-            info.ctrl.text = connectValue.port.toString();
+          case TargetNetworkHostMeta():
+            info.ctrl.text = connectValue.getHost();
+          case TargetDBFileMeta():
+            info.ctrl.text = connectValue.getDbFile();
+          case TargetNetworkPortMeta():
+            info.ctrl.text = connectValue.getPort()?.toString() ?? "";
           case UserMeta():
             info.ctrl.text = connectValue.user;
           case PasswordMeta():
@@ -231,8 +233,7 @@ class UpdateInstanceController extends AddInstanceController {
       id: instance!.id,
       dbType: selectedDatabaseType,
       name: connectValue.name,
-      host: connectValue.host,
-      port: connectValue.port,
+      target: connectValue.target,
       user: connectValue.user,
       password: connectValue.password,
       desc: connectValue.desc,

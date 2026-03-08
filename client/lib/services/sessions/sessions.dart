@@ -69,6 +69,13 @@ class SessionsServices extends _$SessionsServices {
     _invalidateSelf();
   }
 
+  Future<void> deleteSessionByInstance(InstanceId instanceId) async {
+    final sessions = getSessions().sessions.where((s) => s.instanceId?.value == instanceId.value).toList();
+    for (final session in sessions) {
+      await deleteSession(session.sessionId);
+    }
+  }
+
   Future<void> deleteSession(SessionId sessionId) async {
     SessionModel? session = ref.read(sessionRepoProvider).getSession(sessionId);
     if (session == null) {

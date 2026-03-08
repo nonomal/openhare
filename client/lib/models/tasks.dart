@@ -38,10 +38,12 @@ abstract class TaskId with _$TaskId {
 class TaskListResult {
   final List<TaskModel> tasks;
   final int count;
+  final int filteredCount;
 
   const TaskListResult({
     required this.tasks,
     required this.count,
+    required this.filteredCount,
   });
 }
 
@@ -198,6 +200,7 @@ abstract class ExportDataTaskPaginationListModel with _$ExportDataTaskPagination
   const factory ExportDataTaskPaginationListModel({
     required List<ExportDataTaskListItemModel> tasks,
     required int count,
+    required int filteredCount, // todo: 实现要与InstanceListModel一样定义，保持统一
     // param for 分页.
     required int pageNumber,
     required int pageSize,
