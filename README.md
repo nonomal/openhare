@@ -22,6 +22,9 @@ openhare is an AI-powered, cross-platform desktop SQL client with multi-database
   <strong>English</strong> | <a href="./README.zh-CN.md">简体中文</a>
 </p>
 
+## Support
+1. [How to Install and Update the Application](https://github.com/sjjian/openhare/discussions/76)
+
 ## Key Features
 - **AI-Powered Assistance**: Now with enhanced AI features to help you write, optimize, and understand SQL queries.
 - **Cross-Platform**: Seamlessly runs on Windows, macOS, and Linux.
