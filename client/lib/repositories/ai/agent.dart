@@ -30,8 +30,8 @@ class LLMApiSettingStorage {
     required this.modelName,
     DateTime? createdAt,
     DateTime? lastChatUsedAt,
-  })  : createdAt = createdAt ?? DateTime.now(),
-        lastChatUsedAt = lastChatUsedAt ?? DateTime(1970, 1, 1);
+  }) : createdAt = createdAt ?? DateTime.now(),
+       lastChatUsedAt = lastChatUsedAt ?? DateTime(1970, 1, 1);
 }
 
 class LLMAgentRepoImpl implements LLMAgentRepo {
@@ -50,16 +50,17 @@ class LLMAgentRepoImpl implements LLMAgentRepo {
 
   LLMAgentModel _toModel(LLMApiSettingStorage setting) {
     return LLMAgentModel(
-        id: LLMAgentId(value: setting.id),
-        setting: LLMAgentSettingModel(
-          name: setting.name,
-          baseUrl: setting.baseUrl,
-          apiKey: setting.apiKey,
-          modelName: setting.modelName,
-        ),
-        status: _getStatus(
-          LLMAgentId(value: setting.id),
-        ));
+      id: LLMAgentId(value: setting.id),
+      setting: LLMAgentSettingModel(
+        name: setting.name,
+        baseUrl: setting.baseUrl,
+        apiKey: setting.apiKey,
+        modelName: setting.modelName,
+      ),
+      status: _getStatus(
+        LLMAgentId(value: setting.id),
+      ),
+    );
   }
 
   @override
@@ -93,12 +94,14 @@ class LLMAgentRepoImpl implements LLMAgentRepo {
 
   @override
   void create(LLMAgentSettingModel setting) {
-    final model = _llmAgentSettingBox.put(LLMApiSettingStorage(
-      name: setting.name,
-      baseUrl: setting.baseUrl,
-      apiKey: setting.apiKey,
-      modelName: setting.modelName,
-    ));
+    final model = _llmAgentSettingBox.put(
+      LLMApiSettingStorage(
+        name: setting.name,
+        baseUrl: setting.baseUrl,
+        apiKey: setting.apiKey,
+        modelName: setting.modelName,
+      ),
+    );
 
     _status[LLMAgentId(value: model)] = const LLMAgentStatusModel(state: LLMAgentState.unknown);
   }
@@ -125,12 +128,15 @@ class LLMAgentRepoImpl implements LLMAgentRepo {
 
   @override
   void updateSetting(LLMAgentId id, LLMAgentSettingModel setting) {
-    _llmAgentSettingBox.put(LLMApiSettingStorage(
+    _llmAgentSettingBox.put(
+      LLMApiSettingStorage(
         id: id.value,
         name: setting.name,
         baseUrl: setting.baseUrl,
         apiKey: setting.apiKey,
-        modelName: setting.modelName));
+        modelName: setting.modelName,
+      ),
+    );
 
     // 更新setting后，状态重置为unknown
     _status[id] = const LLMAgentStatusModel(state: LLMAgentState.unknown);

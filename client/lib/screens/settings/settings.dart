@@ -27,7 +27,7 @@ class SettingsPage extends ConsumerWidget {
               AppLocalizations.of(context)!.settings,
               style: Theme.of(context).textTheme.titleLarge,
               overflow: TextOverflow.ellipsis,
-            )
+            ),
           ],
         ),
         child: Column(
@@ -86,7 +86,7 @@ class SystemSettingPage extends ConsumerWidget {
                 children: [
                   const Icon(Icons.language),
                   const SizedBox(width: kSpacingSmall),
-                  Text(AppLocalizations.of(context)!.language)
+                  Text(AppLocalizations.of(context)!.language),
                 ],
               ),
             ),
@@ -132,7 +132,7 @@ class SystemSettingPage extends ConsumerWidget {
                 children: [
                   const Icon(Icons.color_lens),
                   const SizedBox(width: kSpacingSmall),
-                  Text(AppLocalizations.of(context)!.theme)
+                  Text(AppLocalizations.of(context)!.theme),
                 ],
               ),
             ),
@@ -196,16 +196,22 @@ class LLMApiSettingPage extends ConsumerWidget {
               ref.read(lLMAgentServiceProvider.notifier).delete(m);
             },
           ),
-        AddLLMApiSettingItem(onAdd: (m) {
-          ref.read(lLMAgentServiceProvider.notifier).create(m);
-        }),
+        AddLLMApiSettingItem(
+          onAdd: (m) {
+            ref.read(lLMAgentServiceProvider.notifier).create(m);
+          },
+        ),
       ],
     );
   }
 }
 
 void showLLMApiSettingDialog(
-    BuildContext context, String title, LLMAgentModel? model, Function(LLMAgentSettingModel) onSubmit) {
+  BuildContext context,
+  String title,
+  LLMAgentModel? model,
+  Function(LLMAgentSettingModel) onSubmit,
+) {
   final nameController = TextEditingController(text: model?.setting.name);
   final baseUrlController = TextEditingController(text: model?.setting.baseUrl);
   final apiKeyController = TextEditingController(text: model?.setting.apiKey);
@@ -273,12 +279,14 @@ void showLLMApiSettingDialog(
                   const SizedBox(width: kSpacingSmall),
                   TextButton(
                     onPressed: () {
-                      onSubmit(LLMAgentSettingModel(
-                        name: nameController.text,
-                        baseUrl: baseUrlController.text,
-                        apiKey: apiKeyController.text,
-                        modelName: modelNameController.text,
-                      ));
+                      onSubmit(
+                        LLMAgentSettingModel(
+                          name: nameController.text,
+                          baseUrl: baseUrlController.text,
+                          apiKey: apiKeyController.text,
+                          modelName: modelNameController.text,
+                        ),
+                      );
                       Navigator.of(context).pop();
                     },
                     child: Text(AppLocalizations.of(context)!.submit),
@@ -338,7 +346,7 @@ class LLMApiSettingItem extends ConsumerWidget {
                   onPressed: () {
                     onDelete(model.id); // todo: 需要二次确认
                   },
-                )
+                ),
               ],
             ),
             const SizedBox(height: kSpacingTiny),
@@ -364,28 +372,28 @@ class LLMApiSettingItem extends ConsumerWidget {
                 switch (status.state) {
                   LLMAgentState.testing => const Loading.small(),
                   LLMAgentState.available => RectangleIconButton.small(
-                      tooltip: AppLocalizations.of(context)!.button_tooltip_ai_test,
-                      icon: Icons.check_circle_outline,
-                      iconColor: Colors.green,
-                      onPressed: () {
-                        ref.read(lLMAgentServiceProvider.notifier).ping(model.id);
-                      },
-                    ),
+                    tooltip: AppLocalizations.of(context)!.button_tooltip_ai_test,
+                    icon: Icons.check_circle_outline,
+                    iconColor: Colors.green,
+                    onPressed: () {
+                      ref.read(lLMAgentServiceProvider.notifier).ping(model.id);
+                    },
+                  ),
                   LLMAgentState.unavailable => RectangleIconButton.small(
-                      tooltip: status.error ?? "",
-                      icon: Icons.error_outline,
-                      iconColor: Colors.red,
-                      onPressed: () {
-                        ref.read(lLMAgentServiceProvider.notifier).ping(model.id);
-                      },
-                    ),
+                    tooltip: status.error ?? "",
+                    icon: Icons.error_outline,
+                    iconColor: Colors.red,
+                    onPressed: () {
+                      ref.read(lLMAgentServiceProvider.notifier).ping(model.id);
+                    },
+                  ),
                   LLMAgentState.unknown => RectangleIconButton.small(
-                      tooltip: AppLocalizations.of(context)!.button_tooltip_ai_test,
-                      icon: Icons.flash_on,
-                      onPressed: () {
-                        ref.read(lLMAgentServiceProvider.notifier).ping(model.id);
-                      },
-                    ),
+                    tooltip: AppLocalizations.of(context)!.button_tooltip_ai_test,
+                    icon: Icons.flash_on,
+                    onPressed: () {
+                      ref.read(lLMAgentServiceProvider.notifier).ping(model.id);
+                    },
+                  ),
                 },
                 RectangleIconButton.small(
                   icon: Icons.edit,
@@ -482,8 +490,8 @@ class _OnlyOpenAICompatibleTip extends StatelessWidget {
       child: Text(
         AppLocalizations.of(context)!.llm_api_only_openai_compatible,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
+          color: colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }

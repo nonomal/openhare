@@ -96,9 +96,9 @@ class ExportDataTaskOverviewItem extends ConsumerWidget {
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.primary,
-                                decoration: TextDecoration.underline,
-                              ),
+                            color: colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                          ),
                         ),
                       )
                     : Text(
@@ -117,21 +117,21 @@ class ExportDataTaskOverviewItem extends ConsumerWidget {
                             child: Text(
                               _getStatusText(context),
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: _getStatusColor(context, exportData.status),
-                                  ),
+                                color: _getStatusColor(context, exportData.status),
+                              ),
                             ),
                           )
                         : Text(
                             _getStatusText(context),
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: _getStatusColor(context, exportData.status),
-                                ),
+                              color: _getStatusColor(context, exportData.status),
+                            ),
                           ),
                     Text(
                       '・${exportData.createdAt.formatDateTime(context)}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     // 当状态为 running 时，显示 progressMessage；否则显示 desc
                     if (exportData.status == TaskStatus.running &&
@@ -143,8 +143,8 @@ class ExportDataTaskOverviewItem extends ConsumerWidget {
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant.withOpacity(0.6),
-                              ),
+                            color: colorScheme.onSurfaceVariant.withOpacity(0.6),
+                          ),
                         ),
                       )
                     else if (exportData.desc != null && exportData.desc!.isNotEmpty)
@@ -154,8 +154,8 @@ class ExportDataTaskOverviewItem extends ConsumerWidget {
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant.withOpacity(0.6),
-                              ),
+                            color: colorScheme.onSurfaceVariant.withOpacity(0.6),
+                          ),
                         ),
                       ),
                   ],
@@ -228,21 +228,21 @@ class TaskOverviewMenu extends ConsumerWidget {
                 child: Text(
                   l10n.task_no_tasks,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ),
           ]
         : allTasks
-            .map(
-              (task) => OverlayMenuItem(
-                height: itemHeight,
-                hoverColor: colorScheme.surfaceContainerLow,
-                child: TaskOverviewItem.fromTask(task),
-              ),
-            )
-            .toList();
+              .map(
+                (task) => OverlayMenuItem(
+                  height: itemHeight,
+                  hoverColor: colorScheme.surfaceContainerLow,
+                  child: TaskOverviewItem.fromTask(task),
+                ),
+              )
+              .toList();
 
     final header = OverlayMenuHeader(
       height: headerHeight,
@@ -258,8 +258,8 @@ class TaskOverviewMenu extends ConsumerWidget {
           child: Text(
             l10n.task_recent_tasks,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                ),
+              color: colorScheme.onSurface,
+            ),
           ),
         ),
       ),
@@ -284,8 +284,8 @@ class TaskOverviewMenu extends ConsumerWidget {
             Text(
               l10n.task_view_more,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurface,
-                  ),
+                color: colorScheme.onSurface,
+              ),
             ),
             RectangleIconButton.small(
               icon: Icons.open_in_new,

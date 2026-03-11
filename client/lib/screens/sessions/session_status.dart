@@ -47,16 +47,20 @@ class SessionStatusTab extends ConsumerWidget {
                         Text("${AppLocalizations.of(context)!.short_conn}:"),
                         const SizedBox(width: kSpacingSmall),
                         Expanded(
-                            child: switch (model.connState) {
-                          SQLConnectState.connected ||
-                          SQLConnectState.executing =>
-                            const Icon(Icons.check_circle, size: kIconSizeSmall, color: Colors.green),
-                          SQLConnectState.failed ||
-                          SQLConnectState.unHealth =>
-                            const Icon(Icons.error, size: kIconSizeSmall, color: Colors.red),
-                          _ => const Text("-"),
-                        } // 根据model.state展示不同的图标
+                          child: switch (model.connState) {
+                            SQLConnectState.connected || SQLConnectState.executing => const Icon(
+                              Icons.check_circle,
+                              size: kIconSizeSmall,
+                              color: Colors.green,
                             ),
+                            SQLConnectState.failed || SQLConnectState.unHealth => const Icon(
+                              Icons.error,
+                              size: kIconSizeSmall,
+                              color: Colors.red,
+                            ),
+                            _ => const Text("-"),
+                          }, // 根据model.state展示不同的图标
+                        ),
                       ],
                     ),
                   ),

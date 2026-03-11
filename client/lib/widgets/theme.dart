@@ -166,8 +166,8 @@ class MaterialTheme {
   );
 
   List<ExtendedColor> get extendedColors => [
-        customColor1,
-      ];
+    customColor1,
+  ];
 }
 
 class ExtendedColor {

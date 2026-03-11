@@ -38,7 +38,7 @@ class _UpdateInstancePageState extends State<UpdateInstancePage> {
           RectangleIconButton.medium(
             icon: Icons.arrow_back,
             onPressed: () => GoRouter.of(context).go('/instances/list'),
-          )
+          ),
         ],
       ),
       bottomBar: AddInstanceBottomBar(
@@ -97,53 +97,61 @@ class _UpdateInstanceState extends ConsumerState<UpdateInstance> {
           ),
           const Spacer(),
           TextButton(
-              onPressed: updateInstanceController.isDatabasePingDoing
-                  ? null
-                  : () {
-                      updateInstanceController.databasePing();
-                    },
-              child: Text(AppLocalizations.of(context)!.db_instance_test)),
+            onPressed: updateInstanceController.isDatabasePingDoing
+                ? null
+                : () {
+                    updateInstanceController.databasePing();
+                  },
+            child: Text(AppLocalizations.of(context)!.db_instance_test),
+          ),
           TextButton(
-              onPressed: () {
-                if (updateInstanceController.validate()) {
-                  ref.read(instancesServicesProvider.notifier).updateInstance(
-                        updateInstanceController.getInstanceModel(),
-                      );
-                  updateInstanceController.clear();
-                  GoRouter.of(context).go('/instances/list');
-                }
-              },
-              child: Text(AppLocalizations.of(context)!.submit)),
+            onPressed: () {
+              if (updateInstanceController.validate()) {
+                ref
+                    .read(instancesServicesProvider.notifier)
+                    .updateInstance(
+                      updateInstanceController.getInstanceModel(),
+                    );
+                updateInstanceController.clear();
+                GoRouter.of(context).go('/instances/list');
+              }
+            },
+            child: Text(AppLocalizations.of(context)!.submit),
+          ),
         ],
       ),
       child: Column(
         children: [
           Expanded(
-              child: SizedBox(
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(0, kSpacingSmall, 0, 0),
-              child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-                DatabaseTypeCardList(
-                  connectionMetas: [connectionMetaMap[updateInstanceController.selectedDatabaseType]!],
-                  selectedColor: selectedColor(updateInstanceController),
+            child: SizedBox(
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(0, kSpacingSmall, 0, 0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    DatabaseTypeCardList(
+                      connectionMetas: [connectionMetaMap[updateInstanceController.selectedDatabaseType]!],
+                      selectedColor: selectedColor(updateInstanceController),
+                    ),
+                    const SizedBox(height: kSpacingMedium),
+                    Expanded(
+                      child: UpdateInstanceForm(
+                        infos: updateInstanceController.dbInfos,
+                        selectedGroup: updateInstanceController.selectedGroup,
+                        onValid: (info, isValid) {
+                          updateInstanceController.updateValidState(info, isValid);
+                        },
+                        onGroupChange: (group) {
+                          updateInstanceController.onGroupChange(group);
+                        },
+                        codeController: updateInstanceController.code,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: kSpacingMedium),
-                Expanded(
-                  child: UpdateInstanceForm(
-                    infos: updateInstanceController.dbInfos,
-                    selectedGroup: updateInstanceController.selectedGroup,
-                    onValid: (info, isValid) {
-                      updateInstanceController.updateValidState(info, isValid);
-                    },
-                    onGroupChange: (group) {
-                      updateInstanceController.onGroupChange(group);
-                    },
-                    codeController: updateInstanceController.code,
-                  ),
-                )
-              ]),
+              ),
             ),
-          )),
+          ),
         ],
       ),
     );
@@ -151,13 +159,14 @@ class _UpdateInstanceState extends ConsumerState<UpdateInstance> {
 }
 
 class UpdateInstanceForm extends AddInstanceForm {
-  const UpdateInstanceForm(
-      {super.key,
-      required super.infos,
-      required super.selectedGroup,
-      super.onGroupChange,
-      super.onValid,
-      required super.codeController});
+  const UpdateInstanceForm({
+    super.key,
+    required super.infos,
+    required super.selectedGroup,
+    super.onGroupChange,
+    super.onValid,
+    required super.codeController,
+  });
   @override
   FormFieldValidator validatorName(BuildContext context) {
     return (value) {

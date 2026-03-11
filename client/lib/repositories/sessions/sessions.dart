@@ -45,9 +45,7 @@ class SessionRepoImpl extends SessionRepo {
 
   final Map<int, ConnId> _connIdMap = {};
 
-  SessionRepoImpl(this.ob)
-      : _sessionBox = ob.store.box(),
-        _sessionCodeBox = ob.store.box();
+  SessionRepoImpl(this.ob) : _sessionBox = ob.store.box(), _sessionCodeBox = ob.store.box();
 
   void _initSessionCache() {
     _sessionCache = ReorderSelectedList(data: _sessionBox.getAll());

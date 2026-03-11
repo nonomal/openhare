@@ -66,7 +66,8 @@ class SessionTabs extends ConsumerWidget {
                           selected: model.sessions[i].sessionId == model.selectedSession?.sessionId,
                         )
                       : CommonTabWrap(
-                          avatar: (model.sessions[i].sessionId != model.selectedSession?.sessionId &&
+                          avatar:
+                              (model.sessions[i].sessionId != model.selectedSession?.sessionId &&
                                   SQLConnectState.isBusy(model.sessions[i].connState))
                               ? const Loading.small()
                               : Image.asset(connectionMetaMap[model.sessions[i].dbType!]!.logoAssertPath),
@@ -87,7 +88,7 @@ class SessionTabs extends ConsumerWidget {
                             closeSessionDialog(context, ref, model.sessions[i]);
                           },
                           selected: model.sessions[i].sessionId == model.selectedSession?.sessionId,
-                        )
+                        ),
               ],
             ),
           ),

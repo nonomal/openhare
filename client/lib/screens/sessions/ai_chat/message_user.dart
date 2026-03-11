@@ -29,7 +29,9 @@ class _UserMessageState extends ConsumerState<UserMessage> {
   void _onRetry() {
     final model = widget.sessionChatModel;
     if (model == null || model.llmAgents.lastUsedLLMAgent == null) return;
-    ref.read(aIChatServiceProvider.notifier).retryChat(
+    ref
+        .read(aIChatServiceProvider.notifier)
+        .retryChat(
           model.chatModel.id,
           model.llmAgents.lastUsedLLMAgent!.id,
           genChatSystemPrompt(model),

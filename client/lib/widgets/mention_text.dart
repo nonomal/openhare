@@ -12,14 +12,14 @@ const String _marker = '\uE000';
 
 sealed class Segment {
   int get driverLength => switch (this) {
-        TextSegment(:final value) => value.length,
-        MentionSegment() => 1,
-      };
+    TextSegment(:final value) => value.length,
+    MentionSegment() => 1,
+  };
 
   String toDriverString(String placeholder) => switch (this) {
-        TextSegment(:final value) => value,
-        MentionSegment() => placeholder,
-      };
+    TextSegment(:final value) => value,
+    MentionSegment() => placeholder,
+  };
 }
 
 class TextSegment extends Segment {
@@ -41,19 +41,22 @@ class MentionCandidate {
 
 typedef MentionCandidatesBuilder = FutureOr<List<MentionCandidate>> Function(String query);
 
-typedef MentionItemBuilder = Widget Function(
-  BuildContext context,
-  MentionCandidate candidate,
-  String query,
-);
+typedef MentionItemBuilder =
+    Widget Function(
+      BuildContext context,
+      MentionCandidate candidate,
+      String query,
+    );
 
 class MentionSegmentSerializer {
   static String encode(List<Segment> segments) {
     return segments
-        .map((s) => switch (s) {
-              TextSegment(:final value) => value,
-              MentionSegment(:final label) => '@$label$_marker',
-            })
+        .map(
+          (s) => switch (s) {
+            TextSegment(:final value) => value,
+            MentionSegment(:final label) => '@$label$_marker',
+          },
+        )
         .join();
   }
 
@@ -115,8 +118,8 @@ class MentionTextController extends TextEditingController {
   final ValueNotifier<MentionState?> mentionState = ValueNotifier(null);
 
   MentionTextController({String? text})
-      : _segments = text != null ? MentionSegmentSerializer.decode(text) : <Segment>[],
-        super(text: '') {
+    : _segments = text != null ? MentionSegmentSerializer.decode(text) : <Segment>[],
+      super(text: '') {
     final initialDriver = _segmentsToDriverString();
     super.value = TextEditingValue(
       text: initialDriver,
@@ -331,10 +334,12 @@ class MentionTextController extends TextEditingController {
             spans.add(TextSpan(text: value.substring(0, beforeLen), style: baseStyle));
           }
           if (composingLen > 0) {
-            spans.add(TextSpan(
-              text: value.substring(beforeLen, beforeLen + composingLen),
-              style: composingStyle,
-            ));
+            spans.add(
+              TextSpan(
+                text: value.substring(beforeLen, beforeLen + composingLen),
+                style: composingStyle,
+              ),
+            );
           }
           if (afterStart < value.length) {
             spans.add(TextSpan(text: value.substring(afterStart), style: baseStyle));
@@ -346,13 +351,15 @@ class MentionTextController extends TextEditingController {
             baseStyle: baseStyle.copyWith(fontWeight: FontWeight.w500),
             fallbackLabel: label,
           );
-          spans.add(WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2),
-              child: mentionWidget,
+          spans.add(
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: mentionWidget,
+              ),
             ),
-          ));
+          );
           driverOffset += 1;
       }
     }

@@ -21,7 +21,9 @@ class SessionAIChatNotifier extends _$SessionAIChatNotifier {
 
     ref.watch(aIChatServiceProvider);
 
-    AIChatModel? aiChatModel = ref.read(aIChatServiceProvider.notifier).getAIChatById(
+    AIChatModel? aiChatModel = ref
+        .read(aIChatServiceProvider.notifier)
+        .getAIChatById(
           AIChatId(value: session.sessionId.value),
         );
 

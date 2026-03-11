@@ -78,7 +78,9 @@ class InstancesNotifier extends _$InstancesNotifier {
   }
 
   PaginationInstanceListModel instances(String key, {int pageNumber = 1, int pageSize = 10}) {
-    final instances = ref.read(instancesServicesProvider.notifier).instances(
+    final instances = ref
+        .read(instancesServicesProvider.notifier)
+        .instances(
           key,
           pageNumber: pageNumber,
           pageSize: pageSize,

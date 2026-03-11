@@ -168,8 +168,8 @@ class _TaskTableState extends ConsumerState<TaskTable> {
     final colorScheme = Theme.of(context).colorScheme;
     final style = isPlaceholder
         ? Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            )
+            color: colorScheme.onSurfaceVariant,
+          )
         : Theme.of(context).textTheme.bodyMedium;
     final displayText = text ?? '-';
     return Tooltip(
@@ -218,9 +218,9 @@ class _TaskTableState extends ConsumerState<TaskTable> {
                           fileName,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: fileColor,
-                                decoration: TextDecoration.underline,
-                              ),
+                            color: fileColor,
+                            decoration: TextDecoration.underline,
+                          ),
                         ),
                       ),
                     ],
@@ -258,19 +258,23 @@ class _TaskTableState extends ConsumerState<TaskTable> {
         DataCell(_buildText(task.desc)),
         DataCell(_buildText(instanceName, isPlaceholder: instanceName == null)),
         DataCell(_buildText(schema, isPlaceholder: schema == null)),
-        DataCell(Tooltip(
-          message: task.createdAt.formatFullDateTime(context),
-          child: Text(
-            task.createdAt.formatDateTime(context),
-            style: Theme.of(context).textTheme.bodySmall,
+        DataCell(
+          Tooltip(
+            message: task.createdAt.formatFullDateTime(context),
+            child: Text(
+              task.createdAt.formatDateTime(context),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ),
-        )),
-        DataCell(Text(
-          task.duration?.format() ?? '-',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-        )),
+        ),
+        DataCell(
+          Text(
+            task.duration?.format() ?? '-',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
         DataCell(_buildStatusChip(context, task)),
         DataCell(
           Row(
@@ -392,8 +396,8 @@ class _TaskTableState extends ConsumerState<TaskTable> {
                     child: Text(
                       AppLocalizations.of(context)!.task_no_tasks,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   )
                 : Scrollbar(

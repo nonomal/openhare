@@ -118,7 +118,9 @@ class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogConte
 
     final parameters = _getExportDataParameters();
 
-    ref.read(exportDataTasksServicesProvider.notifier).exportData(
+    ref
+        .read(exportDataTasksServicesProvider.notifier)
+        .exportData(
           parameters,
           desc: descController.text,
         );
@@ -147,7 +149,9 @@ class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogConte
       final parameters = _getExportDataParameters();
 
       // 调用AI生成文件名和描述
-      final result = await ref.read(lLMAgentServiceProvider.notifier).generateExportFileName(
+      final result = await ref
+          .read(lLMAgentServiceProvider.notifier)
+          .generateExportFileName(
             lastUsedAgent.id,
             parameters,
           );

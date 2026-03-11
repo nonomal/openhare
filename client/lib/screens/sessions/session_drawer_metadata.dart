@@ -32,7 +32,7 @@ class SessionDrawerMetadata extends ConsumerWidget {
           onPressed: () {
             ref.read(selectedSessionMetadataProvider.notifier).refreshMetadata();
           },
-        )
+        ),
       ],
     );
   }
@@ -52,12 +52,15 @@ class SessionDrawerMetadata extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-              child: model.when(
-            data: (value) => bodyPage(value.metadataTreeCtrl,
-                SessionController.sessionController(value.sessionId).metadataTreeScrollController),
-            error: (error, trace) => errorPage(context, ref, error.toString()),
-            loading: () => loadingPage(),
-          )),
+            child: model.when(
+              data: (value) => bodyPage(
+                value.metadataTreeCtrl,
+                SessionController.sessionController(value.sessionId).metadataTreeScrollController,
+              ),
+              error: (error, trace) => errorPage(context, ref, error.toString()),
+              loading: () => loadingPage(),
+            ),
+          ),
         ],
       ),
     );

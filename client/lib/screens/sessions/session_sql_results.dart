@@ -30,44 +30,47 @@ class SqlResultTables extends ConsumerWidget {
       hoverColor: Theme.of(context).colorScheme.surfaceContainerLow, // sql result tab 的鼠标移入色
     );
 
-    Widget tab = Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-      Expanded(
-        child: CommonTabBar(
-          height: 36,
-          tabStyle: style,
-          onReorder: (oldIndex, newIndex) {
-            final sqlResultsServices = ref.read(sQLResultsServicesProvider.notifier);
+    Widget tab = Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Expanded(
+          child: CommonTabBar(
+            height: 36,
+            tabStyle: style,
+            onReorder: (oldIndex, newIndex) {
+              final sqlResultsServices = ref.read(sQLResultsServicesProvider.notifier);
 
-            sqlResultsServices.reorderSQLResult(model!.sessionId, oldIndex, newIndex);
-          },
-          tabs: (model != null)
-              ? [
-                  for (var i = 0; i < model.results.length; i++)
-                    CommonTabWrap(
-                      label: "${model.results[i].resultId.value}",
-                      selected: model.results[i] == model.selected,
-                      onTap: () {
-                        final sqlResultsServices = ref.read(sQLResultsServicesProvider.notifier);
+              sqlResultsServices.reorderSQLResult(model!.sessionId, oldIndex, newIndex);
+            },
+            tabs: (model != null)
+                ? [
+                    for (var i = 0; i < model.results.length; i++)
+                      CommonTabWrap(
+                        label: "${model.results[i].resultId.value}",
+                        selected: model.results[i] == model.selected,
+                        onTap: () {
+                          final sqlResultsServices = ref.read(sQLResultsServicesProvider.notifier);
 
-                        sqlResultsServices.selectSQLResult(model.results[i].resultId);
-                      },
-                      onDeleted: () {
-                        final sqlResultsServices = ref.read(sQLResultsServicesProvider.notifier);
-                        sqlResultsServices.deleteSQLResult(model.results[i].resultId);
-                      },
-                      avatar: (model.results[i] != model.selected && model.results[i].state == SQLExecuteState.init)
-                          ? const Loading.small()
-                          : const Icon(
-                              size: kIconSizeSmall,
-                              Icons.grid_on,
-                            ),
-                    ),
-                ]
-              : [],
+                          sqlResultsServices.selectSQLResult(model.results[i].resultId);
+                        },
+                        onDeleted: () {
+                          final sqlResultsServices = ref.read(sQLResultsServicesProvider.notifier);
+                          sqlResultsServices.deleteSQLResult(model.results[i].resultId);
+                        },
+                        avatar: (model.results[i] != model.selected && model.results[i].state == SQLExecuteState.init)
+                            ? const Loading.small()
+                            : const Icon(
+                                size: kIconSizeSmall,
+                                Icons.grid_on,
+                              ),
+                      ),
+                  ]
+                : [],
+          ),
         ),
-      ),
-      const SizedBox(width: kSpacingTiny / 2),
-    ]);
+        const SizedBox(width: kSpacingTiny / 2),
+      ],
+    );
 
     return Row(
       children: [
@@ -83,7 +86,7 @@ class SqlResultTables extends ConsumerWidget {
               ),
               const SizedBox(height: kSpacingTiny),
               const PixelDivider(),
-              const Expanded(child: SqlResultTable())
+              const Expanded(child: SqlResultTable()),
             ],
           ),
         ),
@@ -103,17 +106,19 @@ class SqlResultTable extends ConsumerWidget {
     List<DataGridColumn> result = [];
     for (int i = 0; i < columns.length; i++) {
       final column = columns[i];
-      result.add(DataGridColumn.autoSize(
-        context: context,
-        name: column.name,
-        dataType: column.dataType(),
-        cells: <DataGridCell>[
-          for (int j = 0; j < rows.length; j++)
-            DataGridCell(
-              data: rows[j].values[i].getSummary() ?? '',
-            ),
-        ],
-      ));
+      result.add(
+        DataGridColumn.autoSize(
+          context: context,
+          name: column.name,
+          dataType: column.dataType(),
+          cells: <DataGridCell>[
+            for (int j = 0; j < rows.length; j++)
+              DataGridCell(
+                data: rows[j].values[i].getSummary() ?? '',
+              ),
+          ],
+        ),
+      );
     }
     return result;
   }
@@ -181,17 +186,20 @@ class SqlResultTable extends ConsumerWidget {
                 const Loading.large(),
                 const SizedBox(height: kSpacingMedium),
                 FilledButton(
-                    onPressed: () async {
-                      SessionModel? sessionModel = ref.read(sessionsServicesProvider.notifier).getSession(
-                            model.resultId.sessionId,
-                          );
+                  onPressed: () async {
+                    SessionModel? sessionModel = ref
+                        .read(sessionsServicesProvider.notifier)
+                        .getSession(
+                          model.resultId.sessionId,
+                        );
 
-                      if (sessionModel == null || sessionModel.connId == null) {
-                        return;
-                      }
-                      await ref.read(sessionConnsServicesProvider.notifier).killQuery(sessionModel.connId!);
-                    },
-                    child: Text(AppLocalizations.of(context)!.cancel))
+                    if (sessionModel == null || sessionModel.connId == null) {
+                      return;
+                    }
+                    await ref.read(sessionConnsServicesProvider.notifier).killQuery(sessionModel.connId!);
+                  },
+                  child: Text(AppLocalizations.of(context)!.cancel),
+                ),
               ],
             ),
           ),
@@ -219,7 +227,9 @@ class SqlResultTable extends ConsumerWidget {
         horizontalScrollGroup: controller.horizontalScrollGroup,
         verticalScrollGroup: controller.verticalScrollGroup,
         onCellTap: (postion) {
-          ref.read(sessionDrawerServicesProvider(model.resultId.sessionId).notifier).showSQLResult(
+          ref
+              .read(sessionDrawerServicesProvider(model.resultId.sessionId).notifier)
+              .showSQLResult(
                 result: model.data!.rows[postion.rowIndex].values[postion.columnIndex],
                 column: model.data!.rows[postion.rowIndex].columns[postion.columnIndex],
               );

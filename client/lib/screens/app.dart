@@ -205,7 +205,7 @@ class _ScaffoldWithNavRailState extends State<ScaffoldWithNavRail> {
             ],
           ),
         ),
-        Expanded(child: widget.child)
+        Expanded(child: widget.child),
       ],
     );
   }

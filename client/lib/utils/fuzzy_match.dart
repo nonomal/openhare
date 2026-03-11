@@ -37,18 +37,10 @@ class FuzzyMatchResult {
   });
 
   /// 创建无匹配的结果。
-  const FuzzyMatchResult.noMatch()
-      : matched = false,
-        matchType = MatchType.none,
-        score = 0.0,
-        matchPositions = null;
+  const FuzzyMatchResult.noMatch() : matched = false, matchType = MatchType.none, score = 0.0, matchPositions = null;
 
   /// 创建完全匹配的结果。
-  const FuzzyMatchResult.exact()
-      : matched = false,
-        matchType = MatchType.exact,
-        score = 1.0,
-        matchPositions = null;
+  const FuzzyMatchResult.exact() : matched = false, matchType = MatchType.exact, score = 1.0, matchPositions = null;
 
   @override
   String toString() => 'FuzzyMatchResult(matched: $matched, type: $matchType, score: $score)';
@@ -226,7 +218,8 @@ class FuzzyMatch {
     final double lengthCoverage = input.length / target.length;
 
     // 加权组合所有因子，确保结果在有效范围内
-    final double finalScore = prefixBonus * _prefixMatchWeight +
+    final double finalScore =
+        prefixBonus * _prefixMatchWeight +
         positionScore * _positionPreferenceWeight +
         continuityScore * _continuityWeight +
         lengthCoverage * _lengthCoverageWeight;
@@ -255,7 +248,8 @@ class FuzzyMatch {
     }
 
     // 检查部分前缀匹配：匹配位置连续且从开头开始
-    final isPrefixMatch = positions.isNotEmpty &&
+    final isPrefixMatch =
+        positions.isNotEmpty &&
         positions[0] == 0 && // 从开头开始
         _isConsecutive(positions); // 连续
 

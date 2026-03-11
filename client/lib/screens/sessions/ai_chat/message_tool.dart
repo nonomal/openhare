@@ -125,8 +125,8 @@ class _ToolCallWidgetState extends ConsumerState<ToolCallWidget> {
       child: SelectableText(
         error,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onErrorContainer,
-            ),
+          color: Theme.of(context).colorScheme.onErrorContainer,
+        ),
       ),
     );
   }
@@ -190,8 +190,8 @@ class _ToolCallWidgetState extends ConsumerState<ToolCallWidget> {
     final baseColor = Theme.of(context).colorScheme.surfaceContainerLow;
     final hoverColor = Theme.of(context).colorScheme.surfaceContainer;
     final statusStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        );
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+    );
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,

@@ -82,8 +82,9 @@ class SQLEditor extends ConsumerWidget {
                 promptsBuilder: SQLEditorAutocompletePromptsBuilder(
                   keywordPrompts: keywordPrompt,
                   directPrompts: [],
-                  relatedPrompts:
-                      (model.metadata != null) ? buildRelatePrompts(model.metadata!, model.currentSchema) : const {},
+                  relatedPrompts: (model.metadata != null)
+                      ? buildRelatePrompts(model.metadata!, model.currentSchema)
+                      : const {},
                 ),
                 child: CodeEditor(
                   wordWrap: false,
@@ -93,16 +94,18 @@ class SQLEditor extends ConsumerWidget {
                   ),
                   controller: codeController,
                   indicatorBuilder: (context, editingController, chunkController, notifier) {
-                    return Row(children: [
-                      const SizedBox(width: kSpacingTiny),
-                      CodeLineNumber(
-                        textStyle: textStyle,
-                        totalHeight: constraints.maxHeight,
-                        notifier: notifier,
-                        codeController: codeController,
-                      ),
-                      const PixelVerticalDivider(),
-                    ]);
+                    return Row(
+                      children: [
+                        const SizedBox(width: kSpacingTiny),
+                        CodeLineNumber(
+                          textStyle: textStyle,
+                          totalHeight: constraints.maxHeight,
+                          notifier: notifier,
+                          codeController: codeController,
+                        ),
+                        const PixelVerticalDivider(),
+                      ],
+                    );
                   },
                 ),
               ),
@@ -214,11 +217,12 @@ class _CodeLineNumberState extends State<CodeLineNumber> {
           for (int i = 0; i < ps.length; i++)
             SizedBox(
               height: max(
-                  0,
-                  min(
-                    ps[i].preferredLineHeight,
-                    widget.totalHeight - paddingSize - i * ps[i].preferredLineHeight - 1,
-                  )), // 减去1是为了让文字和下划线对齐
+                0,
+                min(
+                  ps[i].preferredLineHeight,
+                  widget.totalHeight - paddingSize - i * ps[i].preferredLineHeight - 1,
+                ),
+              ), // 减去1是为了让文字和下划线对齐
               child: Row(
                 children: [
                   Expanded(

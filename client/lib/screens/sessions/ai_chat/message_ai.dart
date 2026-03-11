@@ -26,8 +26,8 @@ class _AIMessageState extends State<AIMessage> {
     return Text(
       widget.message.error ?? "",
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.error,
-          ),
+        color: Theme.of(context).colorScheme.error,
+      ),
     );
   }
 
@@ -44,9 +44,7 @@ class _AIMessageState extends State<AIMessage> {
           child: Row(
             children: [
               Icon(
-                _isThinkingExpanded
-                    ? Icons.keyboard_arrow_down
-                    : Icons.keyboard_arrow_right,
+                _isThinkingExpanded ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right,
                 size: 16,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -62,33 +60,31 @@ class _AIMessageState extends State<AIMessage> {
                     ),
                   ),
                 ),
-              if (isThinking && !_isThinkingExpanded)
-                const SizedBox(width: kSpacingTiny),
+              if (isThinking && !_isThinkingExpanded) const SizedBox(width: kSpacingTiny),
               Text(
                 isThinking
                     ? AppLocalizations.of(context)!.ai_chat_thinking
                     : AppLocalizations.of(context)!.ai_chat_thinking_process,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontStyle: FontStyle.italic,
-                    ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
             ],
           ),
         ),
-        if (_isThinkingExpanded)
-          ...[
-            SizedBox(height: kSpacingTiny),
-            RichText(
+        if (_isThinkingExpanded) ...[
+          SizedBox(height: kSpacingTiny),
+          RichText(
             text: TextSpan(
               text: widget.message.thinking?.trim() ?? "",
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontStyle: FontStyle.italic,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontStyle: FontStyle.italic,
+              ),
             ),
-          )
-          ]
+          ),
+        ],
       ],
     );
   }
@@ -131,7 +127,7 @@ class _AIMessageState extends State<AIMessage> {
     final hasThinking = widget.message.thinking != null && widget.message.thinking!.isNotEmpty;
     // 当 content 有值时，思考结束
     final isThinking = !widget.message.isThinkingCompleted;
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: kSpacingMedium),
       child: Container(
@@ -142,19 +138,15 @@ class _AIMessageState extends State<AIMessage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (widget.message.error != null)
-              _buildError(context),
-            if (hasThinking)
-              _buildThinking(context, isThinking),
-            if (content.isNotEmpty && content.trim() != "")
-              ...[
-                SizedBox(height: kSpacingSmall),
-                _buildContent(context, content),
-              ]
+            if (widget.message.error != null) _buildError(context),
+            if (hasThinking) _buildThinking(context, isThinking),
+            if (content.isNotEmpty && content.trim() != "") ...[
+              SizedBox(height: kSpacingSmall),
+              _buildContent(context, content),
+            ],
           ],
         ),
       ),
     );
   }
 }
-

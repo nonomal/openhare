@@ -146,23 +146,26 @@ class SessionOpBar extends ConsumerWidget {
   }
 
   Widget executeAddWidget(BuildContext context, WidgetRef ref, SessionOpBarModel model) {
-    return Stack(alignment: Alignment.center, children: [
-      RectangleIconButton.medium(
-        tooltip: AppLocalizations.of(context)!.button_tooltip_run_sql_new_tab,
-        icon: Icons.not_started_outlined,
-        iconColor: SQLConnectState.isIdle(model.state) ? Colors.green : Colors.grey,
-        onPressed: SQLConnectState.isIdle(model.state)
-            ? () {
-                String query = getQuery();
-                if (query.isNotEmpty) {
-                  ref.read(sQLResultsServicesProvider.notifier).queryAddResult(model.sessionId, query);
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        RectangleIconButton.medium(
+          tooltip: AppLocalizations.of(context)!.button_tooltip_run_sql_new_tab,
+          icon: Icons.not_started_outlined,
+          iconColor: SQLConnectState.isIdle(model.state) ? Colors.green : Colors.grey,
+          onPressed: SQLConnectState.isIdle(model.state)
+              ? () {
+                  String query = getQuery();
+                  if (query.isNotEmpty) {
+                    ref.read(sQLResultsServicesProvider.notifier).queryAddResult(model.sessionId, query);
+                  }
                 }
-              }
-            : () {
-                connectDialog(context, ref, model);
-              },
-      ),
-    ]);
+              : () {
+                  connectDialog(context, ref, model);
+                },
+        ),
+      ],
+    );
   }
 
   Widget explainWidget(BuildContext context, WidgetRef ref, SessionOpBarModel model) {
@@ -338,7 +341,9 @@ class _SchemaBarState extends ConsumerState<SchemaBar> {
   @override
   Widget build(BuildContext context) {
     final color = (isEnter && !widget.disable)
-        ? Theme.of(context).colorScheme.primary // schema 鼠标移入的颜色
+        ? Theme.of(context)
+              .colorScheme
+              .primary // schema 鼠标移入的颜色
         : Theme.of(context).colorScheme.onSurface;
 
     final schemaBarContent = Padding(
@@ -403,7 +408,10 @@ class _SchemaBarState extends ConsumerState<SchemaBar> {
                       ),
                       const SizedBox(width: kSpacingTiny),
                       Expanded(
-                        child: TooltipText(text: schema, style: TextStyle(color: color)),
+                        child: TooltipText(
+                          text: schema,
+                          style: TextStyle(color: color),
+                        ),
                       ),
                     ],
                   ),
@@ -470,31 +478,37 @@ class SessionDrawerBar extends ConsumerWidget {
         const Spacer(),
         if (model.isRightPageOpen) ...[
           RectangleIconButton.medium(
-              tooltip: AppLocalizations.of(context)!.button_tooltip_metadata_tree,
-              icon: Icons.account_tree_outlined,
-              backgroundColor:
-                  (model.drawerPage == DrawerPage.metadataTree) ? Theme.of(context).colorScheme.primaryContainer : null,
-              onPressed: () {
-                services.goToTree();
-              }),
+            tooltip: AppLocalizations.of(context)!.button_tooltip_metadata_tree,
+            icon: Icons.account_tree_outlined,
+            backgroundColor: (model.drawerPage == DrawerPage.metadataTree)
+                ? Theme.of(context).colorScheme.primaryContainer
+                : null,
+            onPressed: () {
+              services.goToTree();
+            },
+          ),
           RectangleIconButton.medium(
-              tooltip: AppLocalizations.of(context)!.button_tooltip_sql_result,
-              icon: Icons.article_outlined,
-              backgroundColor:
-                  (model.drawerPage == DrawerPage.sqlResult) ? Theme.of(context).colorScheme.primaryContainer : null,
-              onPressed: () {
-                services.showSQLResult();
-              }),
+            tooltip: AppLocalizations.of(context)!.button_tooltip_sql_result,
+            icon: Icons.article_outlined,
+            backgroundColor: (model.drawerPage == DrawerPage.sqlResult)
+                ? Theme.of(context).colorScheme.primaryContainer
+                : null,
+            onPressed: () {
+              services.showSQLResult();
+            },
+          ),
           // AI chat
           RectangleIconButton.medium(
-              tooltip: AppLocalizations.of(context)!.button_tooltip_ai_chat,
-              icon: Icons.auto_awesome,
-              iconColor: Colors.purple[600]!,
-              backgroundColor:
-                  (model.drawerPage == DrawerPage.aiChat) ? Theme.of(context).colorScheme.primaryContainer : null,
-              onPressed: () {
-                services.showChat();
-              }),
+            tooltip: AppLocalizations.of(context)!.button_tooltip_ai_chat,
+            icon: Icons.auto_awesome,
+            iconColor: Colors.purple[600]!,
+            backgroundColor: (model.drawerPage == DrawerPage.aiChat)
+                ? Theme.of(context).colorScheme.primaryContainer
+                : null,
+            onPressed: () {
+              services.showChat();
+            },
+          ),
           const SizedBox(width: kSpacingSmall),
           RectangleIconButton.medium(
             icon: model.isRightPageOpen ? Icons.menu : Icons.menu_open,
@@ -507,7 +521,7 @@ class SessionDrawerBar extends ConsumerWidget {
             icon: model.isRightPageOpen ? Icons.menu : Icons.menu_open,
             iconColor: Theme.of(context).colorScheme.onSurface,
             onPressed: () => services.showRightPage(),
-          )
+          ),
       ],
     );
   }

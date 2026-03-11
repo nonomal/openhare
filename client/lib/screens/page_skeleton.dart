@@ -90,33 +90,35 @@ class PageSkeleton extends StatelessWidget {
           children: [
             const PixelVerticalDivider(),
             Expanded(
-              child: Column(children: [
-                MoveWindows(
-                  child: Container(
-                    color: Theme.of(context).colorScheme.surfaceContainerLowest, // header 背景色
-                    height: tabbarHeight,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: topBar ?? const SizedBox.expand(),
-                        ),
-                        const SizedBox(width: kSpacingLarge), // 顶部 tab 空部分空间, 防止无法拖动窗口.
-                        if (!kIsMacOS) const WindowButtons(),
-                      ],
+              child: Column(
+                children: [
+                  MoveWindows(
+                    child: Container(
+                      color: Theme.of(context).colorScheme.surfaceContainerLowest, // header 背景色
+                      height: tabbarHeight,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: topBar ?? const SizedBox.expand(),
+                          ),
+                          const SizedBox(width: kSpacingLarge), // 顶部 tab 空部分空间, 防止无法拖动窗口.
+                          if (!kIsMacOS) const WindowButtons(),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const PixelDivider(),
-                Expanded(
-                  child: child,
-                ),
-                const PixelDivider(),
-                Container(
-                  height: bottomBarHeight,
-                  color: Theme.of(context).colorScheme.surfaceContainerLowest, // bottom 背景色
-                  child: bottomBar,
-                )
-              ]),
+                  const PixelDivider(),
+                  Expanded(
+                    child: child,
+                  ),
+                  const PixelDivider(),
+                  Container(
+                    height: bottomBarHeight,
+                    color: Theme.of(context).colorScheme.surfaceContainerLowest, // bottom 背景色
+                    child: bottomBar,
+                  ),
+                ],
+              ),
             ),
           ],
         ),

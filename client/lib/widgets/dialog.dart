@@ -89,7 +89,8 @@ class CustomDialog extends StatelessWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: maxWidth ?? 640,
-          maxHeight: maxHeight ??
+          maxHeight:
+              maxHeight ??
               min(
                 MediaQuery.of(context).size.height - tabbarHeight - bottomBarHeight - 10,
                 800,

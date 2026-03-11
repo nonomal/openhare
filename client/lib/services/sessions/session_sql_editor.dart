@@ -38,8 +38,9 @@ class SelectedSessionSQLEditorNotifier extends _$SelectedSessionSQLEditorNotifie
       return const SessionSQLEditorModel(sessionId: SessionId(value: 0));
     }
     if (sessionModel.instanceId != null) {
-      AsyncValue<InstanceMetadataModel>? sessionMeta =
-          ref.watch(instanceMetadataServicesProvider(sessionModel.instanceId!));
+      AsyncValue<InstanceMetadataModel>? sessionMeta = ref.watch(
+        instanceMetadataServicesProvider(sessionModel.instanceId!),
+      );
       return SessionSQLEditorModel(
         sessionId: sessionModel.sessionId,
         currentSchema: sessionModel.currentSchema,

@@ -49,7 +49,7 @@ class AddSession extends HookConsumerWidget {
           Text(
             AppLocalizations.of(context)!.recently_used_db_instance,
             style: Theme.of(context).textTheme.titleLarge,
-          )
+          ),
         ],
       ),
       child: Column(
@@ -58,8 +58,9 @@ class AddSession extends HookConsumerWidget {
             children: [
               SizedBox(width: 200, child: Text(AppLocalizations.of(context)!.db_instance_name)),
               Container(
-                  padding: EdgeInsets.only(left: paddingButtonLeftSize),
-                  child: Text(AppLocalizations.of(context)!.recently_used_schema))
+                padding: EdgeInsets.only(left: paddingButtonLeftSize),
+                child: Text(AppLocalizations.of(context)!.recently_used_schema),
+              ),
             ],
           ),
           const SizedBox(height: kSpacingSmall),
@@ -83,10 +84,11 @@ class AddSession extends HookConsumerWidget {
                             height: 24,
                           ),
                           LinkButton(
-                              onPressed: () {
-                                ref.read(sessionsServicesProvider.notifier).addSession(inst);
-                              },
-                              text: inst.connectValue.name),
+                            onPressed: () {
+                              ref.read(sessionsServicesProvider.notifier).addSession(inst);
+                            },
+                            text: inst.connectValue.name,
+                          ),
                         ],
                       ),
                     ),
@@ -117,11 +119,12 @@ class AddSession extends HookConsumerWidget {
                     children: [
                       SearchBarTheme(
                         data: const SearchBarThemeData(
-                            elevation: WidgetStatePropertyAll(0),
-                            constraints: BoxConstraints(
-                              minHeight: kIconSizeLarge,
-                              maxWidth: 200,
-                            )),
+                          elevation: WidgetStatePropertyAll(0),
+                          constraints: BoxConstraints(
+                            minHeight: kIconSizeLarge,
+                            maxWidth: 200,
+                          ),
+                        ),
                         child: SearchBar(
                           controller: instanceSearchTextController,
                           backgroundColor: WidgetStatePropertyAll(
@@ -134,7 +137,9 @@ class AddSession extends HookConsumerWidget {
                             ),
                           ),
                           onChanged: (value) {
-                            ref.read(instancesProvider.notifier).changePage(
+                            ref
+                                .read(instancesProvider.notifier)
+                                .changePage(
                                   value,
                                   pageNumber: model.currentPage,
                                   pageSize: model.pageSize,
@@ -228,7 +233,9 @@ class AddSession extends HookConsumerWidget {
             pageSize: model.pageSize,
             pageNumber: model.currentPage,
             onChange: (pageNumber) {
-              ref.read(instancesProvider.notifier).changePage(
+              ref
+                  .read(instancesProvider.notifier)
+                  .changePage(
                     instanceSearchTextController.text,
                     pageNumber: pageNumber,
                     pageSize: model.pageSize,

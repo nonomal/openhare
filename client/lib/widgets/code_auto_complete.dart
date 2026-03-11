@@ -46,15 +46,17 @@ class FuzzyMatchCodePrompt extends CodeKeywordPrompt {
     // Build TextSpan by checking each character's position
     for (int i = 0; i < word.length; i++) {
       final isMatch = matchPositionsSet.contains(i);
-      spans.add(TextSpan(
-        text: word[i],
-        style: isMatch
-            ? baseStyle.copyWith(
-                color: SQLHighlightColor.keyword,
-                fontWeight: FontWeight.bold,
-              )
-            : baseStyle,
-      ));
+      spans.add(
+        TextSpan(
+          text: word[i],
+          style: isMatch
+              ? baseStyle.copyWith(
+                  color: SQLHighlightColor.keyword,
+                  fontWeight: FontWeight.bold,
+                )
+              : baseStyle,
+        ),
+      );
     }
 
     return TextSpan(children: spans);
@@ -387,59 +389,61 @@ class _SQLEditorAutoCompleteListViewState extends State<SQLEditorAutoCompleteLis
     final selectedBackgroundColor = Theme.of(context).colorScheme.surfaceContainer; // 代码补全提示窗口选中项的背景色
 
     return Container(
-        constraints: BoxConstraints.loose(widget.preferredSize),
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: Theme.of(context).dividerColor, // 提示窗边框颜色
-            width: 1,
-          ),
+      constraints: BoxConstraints.loose(widget.preferredSize),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: Theme.of(context).dividerColor, // 提示窗边框颜色
+          width: 1,
         ),
-        child: SQLEditorAutoCompleteScrollListView(
-          controller: ScrollController(),
-          initialIndex: widget.notifier.value.index,
-          scrollDirection: Axis.vertical,
-          itemCount: widget.notifier.value.prompts.length,
-          itemBuilder: (context, index) {
-            final CodePrompt prompt = widget.notifier.value.prompts[index];
-            final BorderRadius radius = BorderRadius.only(
-              topLeft: index == 0 ? const Radius.circular(5) : Radius.zero,
-              topRight: index == 0 ? const Radius.circular(5) : Radius.zero,
-              bottomLeft: index == widget.notifier.value.prompts.length - 1 ? const Radius.circular(5) : Radius.zero,
-              bottomRight: index == widget.notifier.value.prompts.length - 1 ? const Radius.circular(5) : Radius.zero,
-            );
-            return InkWell(
+      ),
+      child: SQLEditorAutoCompleteScrollListView(
+        controller: ScrollController(),
+        initialIndex: widget.notifier.value.index,
+        scrollDirection: Axis.vertical,
+        itemCount: widget.notifier.value.prompts.length,
+        itemBuilder: (context, index) {
+          final CodePrompt prompt = widget.notifier.value.prompts[index];
+          final BorderRadius radius = BorderRadius.only(
+            topLeft: index == 0 ? const Radius.circular(5) : Radius.zero,
+            topRight: index == 0 ? const Radius.circular(5) : Radius.zero,
+            bottomLeft: index == widget.notifier.value.prompts.length - 1 ? const Radius.circular(5) : Radius.zero,
+            bottomRight: index == widget.notifier.value.prompts.length - 1 ? const Radius.circular(5) : Radius.zero,
+          );
+          return InkWell(
+            borderRadius: radius,
+            onTap: () {
+              widget.onSelected(widget.notifier.value.copyWith(index: index).autocomplete);
+            },
+            child: Container(
+              width: double.infinity,
+              height: SQLEditorAutoCompleteListView.kItemHeight,
+              padding: const EdgeInsets.only(left: 5, right: 5),
+              alignment: Alignment.centerLeft,
+              decoration: BoxDecoration(
+                color: index == widget.notifier.value.index ? selectedBackgroundColor : null,
                 borderRadius: radius,
-                onTap: () {
-                  widget.onSelected(widget.notifier.value.copyWith(index: index).autocomplete);
-                },
-                child: Container(
-                  width: double.infinity,
-                  height: SQLEditorAutoCompleteListView.kItemHeight,
-                  padding: const EdgeInsets.only(left: 5, right: 5),
-                  alignment: Alignment.centerLeft,
-                  decoration: BoxDecoration(
-                    color: index == widget.notifier.value.index ? selectedBackgroundColor : null,
-                    borderRadius: radius,
-                  ),
-                  child: Row(
-                    children: [
-                      getIcon(context, prompt),
-                      const SizedBox(width: kSpacingTiny),
-                      Expanded(child: _buildPromptText(context, prompt)),
-                      const SizedBox(width: kSpacingTiny),
-                      if (prompt is DBObjectPrompt && prompt.type == MetaType.column)
-                        DataTypeIcon(
-                          size: 16,
-                          type: prompt.props?[MetaDataPropType.dataType]?.value as DataType? ?? DataType.blob,
-                        ),
-                      const SizedBox(width: kSpacingTiny),
-                    ],
-                  ),
-                ));
-          },
-        ));
+              ),
+              child: Row(
+                children: [
+                  getIcon(context, prompt),
+                  const SizedBox(width: kSpacingTiny),
+                  Expanded(child: _buildPromptText(context, prompt)),
+                  const SizedBox(width: kSpacingTiny),
+                  if (prompt is DBObjectPrompt && prompt.type == MetaType.column)
+                    DataTypeIcon(
+                      size: 16,
+                      type: prompt.props?[MetaDataPropType.dataType]?.value as DataType? ?? DataType.blob,
+                    ),
+                  const SizedBox(width: kSpacingTiny),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   void _onValueChanged() {
@@ -496,10 +500,12 @@ class _SQLEditorAutoCompleteScrollListViewState extends State<SQLEditorAutoCompl
   Widget build(BuildContext context) {
     final List<Widget> widgets = [];
     for (int i = 0; i < widget.itemCount; i++) {
-      widgets.add(Container(
-        key: _keys[i],
-        child: widget.itemBuilder(context, i),
-      ));
+      widgets.add(
+        Container(
+          key: _keys[i],
+          child: widget.itemBuilder(context, i),
+        ),
+      );
     }
     return SingleChildScrollView(
       controller: widget.controller,

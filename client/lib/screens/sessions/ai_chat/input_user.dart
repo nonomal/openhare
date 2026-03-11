@@ -143,7 +143,9 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
     final refText = _buildTableRef(chatModel, mentionedTables);
 
     // 调用AIChatService的chat方法
-    await ref.read(aIChatServiceProvider.notifier).chat(
+    await ref
+        .read(aIChatServiceProvider.notifier)
+        .chat(
           chatId,
           chatModel.llmAgents.lastUsedLLMAgent!.id,
           genChatSystemPrompt(chatModel),
@@ -212,8 +214,9 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
                 RectangleIconButton.small(
                   tooltip: AppLocalizations.of(context)!.button_tooltip_clear_chat,
                   icon: Icons.cleaning_services,
-                  onPressed:
-                      widget.model.canClearMessage() ? () => services.cleanMessages(widget.model.chatModel.id) : null,
+                  onPressed: widget.model.canClearMessage()
+                      ? () => services.cleanMessages(widget.model.chatModel.id)
+                      : null,
                 ),
 
                 // 发送消息 / 中止生成
@@ -272,8 +275,9 @@ class _ModelSelectorWidgetState extends ConsumerState<ModelSelectorWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final modelSearchTextController =
-        SessionController.sessionController(widget.model.sessionId).aiChatModelSearchTextController;
+    final modelSearchTextController = SessionController.sessionController(
+      widget.model.sessionId,
+    ).aiChatModelSearchTextController;
 
     // 模型选择工具栏
     final modelToolWidget = Container(
@@ -340,23 +344,25 @@ class _ModelSelectorWidgetState extends ConsumerState<ModelSelectorWidget> {
           padding: const EdgeInsets.fromLTRB(kSpacingSmall, kSpacingTiny, kSpacingSmall, kSpacingTiny),
           child: SearchBarTheme(
             data: SearchBarThemeData(
-                textStyle: WidgetStatePropertyAll(Theme.of(context).textTheme.bodySmall),
-                backgroundColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.surfaceContainer),
-                elevation: const WidgetStatePropertyAll(0),
-                constraints: const BoxConstraints(
-                  minHeight: 24,
-                )),
+              textStyle: WidgetStatePropertyAll(Theme.of(context).textTheme.bodySmall),
+              backgroundColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.surfaceContainer),
+              elevation: const WidgetStatePropertyAll(0),
+              constraints: const BoxConstraints(
+                minHeight: 24,
+              ),
+            ),
             child: SearchBar(
-                controller: modelSearchTextController,
-                onChanged: (value) {
-                  _onModelSearchChanged();
-                },
-                trailing: const [
-                  Icon(
-                    Icons.search,
-                    size: kIconSizeSmall,
-                  ),
-                ]),
+              controller: modelSearchTextController,
+              onChanged: (value) {
+                _onModelSearchChanged();
+              },
+              trailing: const [
+                Icon(
+                  Icons.search,
+                  size: kIconSizeSmall,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -417,9 +423,9 @@ class _ChatInputFieldWidgetState extends ConsumerState<ChatInputFieldWidget> {
   }
 
   static TextStyle _tableTextBaseStyle(BuildContext context) => GoogleFonts.robotoMono(
-        textStyle: Theme.of(context).textTheme.bodySmall,
-        color: Theme.of(context).colorScheme.onSurface,
-      );
+    textStyle: Theme.of(context).textTheme.bodySmall,
+    color: Theme.of(context).colorScheme.onSurface,
+  );
 
   Widget _buildTableText(BuildContext context, String table, String query) {
     final baseStyle = _tableTextBaseStyle(context);

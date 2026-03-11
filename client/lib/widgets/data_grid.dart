@@ -668,8 +668,8 @@ class _SelectionLayerPainter extends CustomPainter {
     required this.rowHeight,
     required this.colorScheme,
   }) : super(
-          repaint: controller,
-        );
+         repaint: controller,
+       );
 
   @override
   void paint(Canvas canvas, Size size) {
