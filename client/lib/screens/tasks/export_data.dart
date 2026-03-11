@@ -196,7 +196,6 @@ class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogConte
               vertical: kSpacingMedium,
             ),
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(
                 color: colorScheme.outline,

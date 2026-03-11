@@ -236,13 +236,11 @@ class SessionOpBar extends ConsumerWidget {
 
     if (model == null) {
       return Container(
-        color: Theme.of(context).colorScheme.surfaceContainerLowest, // op bar 背景色
         constraints: BoxConstraints(maxHeight: height),
         child: const Spacer(),
       );
     }
     return Container(
-      color: Theme.of(context).colorScheme.surfaceContainerLowest, // op bar 背景色
       constraints: BoxConstraints(maxHeight: height),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,

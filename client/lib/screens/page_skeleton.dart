@@ -72,7 +72,6 @@ class PageSkeleton extends StatelessWidget {
   final Widget? bottomBar;
   final Widget child;
   final Widget? drawer;
-  final Color? backgroundColor;
 
   const PageSkeleton({
     super.key,
@@ -80,14 +79,13 @@ class PageSkeleton extends StatelessWidget {
     this.bottomBar,
     this.drawer,
     required this.child,
-    this.backgroundColor,
   });
 
   @override
   Widget build(BuildContext context) {
     return ScaffoldWithNavRail(
       child: Material(
-        color: backgroundColor ?? Theme.of(context).colorScheme.surfaceContainerLowest, // 全局背景色
+        color: Theme.of(context).colorScheme.surfaceContainerLowest, // 全局背景色
         child: Row(
           children: [
             const PixelVerticalDivider(),
@@ -95,7 +93,7 @@ class PageSkeleton extends StatelessWidget {
               child: Column(children: [
                 MoveWindows(
                   child: Container(
-                    color: Theme.of(context).colorScheme.surfaceContainerLow, // header 背景色
+                    color: Theme.of(context).colorScheme.surfaceContainerLowest, // header 背景色
                     height: tabbarHeight,
                     child: Row(
                       children: [
@@ -115,7 +113,7 @@ class PageSkeleton extends StatelessWidget {
                 const PixelDivider(),
                 Container(
                   height: bottomBarHeight,
-                  color: Theme.of(context).colorScheme.surfaceContainerLow, // bottom 背景色
+                  color: Theme.of(context).colorScheme.surfaceContainerLowest, // bottom 背景色
                   child: bottomBar,
                 )
               ]),

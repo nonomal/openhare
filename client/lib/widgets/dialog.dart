@@ -97,7 +97,7 @@ class CustomDialog extends StatelessWidget {
         ),
         child: Container(
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerLowest,
+            color: colorScheme.surfaceContainerLowest, // 对话框默认背景色
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.fromLTRB(

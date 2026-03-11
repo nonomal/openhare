@@ -282,7 +282,7 @@ class _ModelSelectorWidgetState extends ConsumerState<ModelSelectorWidget> {
       ),
       padding: const EdgeInsets.fromLTRB(kSpacingSmall, kSpacingTiny, kSpacingSmall, kSpacingTiny),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLowest,
+        color: Theme.of(context).colorScheme.surfaceContainerLowest, // 模型选择工具栏背景色, 父组件背景色是 surfaceContainer
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           width: 1,

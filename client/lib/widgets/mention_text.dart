@@ -840,7 +840,7 @@ class _MentionTextFieldState extends State<MentionTextField> {
             child: Container(
               constraints: const BoxConstraints(maxWidth: menuWidth, maxHeight: maxHeight),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerLowest,
+                color: theme.colorScheme.surfaceContainerLowest, // mention text 提示窗口默认背景色
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(

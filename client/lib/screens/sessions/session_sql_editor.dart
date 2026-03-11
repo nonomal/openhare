@@ -89,7 +89,6 @@ class SQLEditor extends ConsumerWidget {
                   wordWrap: false,
                   scrollController: scrollController,
                   style: CodeEditorStyle(
-                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest, // SQL 编辑器背景色
                     textStyle: textStyle, // SQL 编辑器文字颜色
                   ),
                   controller: codeController,

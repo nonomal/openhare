@@ -133,7 +133,7 @@ class _ScaffoldWithNavRailState extends State<ScaffoldWithNavRail> {
         MoveWindows(
           child: NavigationRail(
             minWidth: navigationRailWidth,
-            backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow, // navigation color
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest, // navigation color
             useIndicator: true,
             selectedIndex: _calculateSelectedIndex(context),
             onDestinationSelected: (value) {

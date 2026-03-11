@@ -27,7 +27,6 @@ class SqlResultTables extends ConsumerWidget {
       minWidth: 90,
       labelAlign: TextAlign.center,
       selectedColor: Theme.of(context).colorScheme.surfaceContainer, // sql result tab 的选中颜色
-      color: Theme.of(context).colorScheme.surfaceContainerLowest, // sql result tab 的背景色
       hoverColor: Theme.of(context).colorScheme.surfaceContainerLow, // sql result tab 的鼠标移入色
     );
 

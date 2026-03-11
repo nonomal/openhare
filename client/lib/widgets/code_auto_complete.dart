@@ -383,8 +383,8 @@ class _SQLEditorAutoCompleteListViewState extends State<SQLEditorAutoCompleteLis
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = Theme.of(context).colorScheme.surfaceContainerLowest; // 提示窗口的背景色
-    final selectedBackgroundColor = Theme.of(context).colorScheme.surfaceContainer; // 提示窗口选中项的背景色
+    final backgroundColor = Theme.of(context).colorScheme.surfaceContainerLowest; // 代码补全提示窗口的背景色
+    final selectedBackgroundColor = Theme.of(context).colorScheme.surfaceContainer; // 代码补全提示窗口选中项的背景色
 
     return Container(
         constraints: BoxConstraints.loose(widget.preferredSize),
