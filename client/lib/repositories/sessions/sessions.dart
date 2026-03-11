@@ -1,7 +1,8 @@
 import 'package:client/models/instances.dart';
 import 'package:client/models/sessions.dart';
 import 'package:client/repositories/instances/instances.dart';
-import 'package:objectbox/objectbox.dart';
+// ignore: unnecessary_import
+import 'package:objectbox/objectbox.dart'; // 必须引入, 不然objectbox不能正常使用
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:client/repositories/repo.dart';
 import 'package:client/utils/reorder_list.dart';

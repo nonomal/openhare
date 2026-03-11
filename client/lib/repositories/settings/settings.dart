@@ -2,7 +2,8 @@ import 'package:client/models/settings.dart';
 import 'package:client/repositories/repo.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:client/repositories/objectbox.g.dart';
-import 'package:objectbox/objectbox.dart';
+// ignore: unnecessary_import
+import 'package:objectbox/objectbox.dart'; // 必须引入, 不然objectbox不能正常使用
 
 part 'settings.g.dart';
 
