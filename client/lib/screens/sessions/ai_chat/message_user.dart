@@ -54,13 +54,16 @@ class _UserMessageState extends ConsumerState<UserMessage> {
           onEnter: (_) => setState(() => _hovering = true),
           onExit: (_) => setState(() => _hovering = false),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: kSpacingSmall),
-            height: 42,
+            padding: const EdgeInsets.all(kSpacingSmall),
+            constraints: const BoxConstraints(
+              maxHeight: 300,
+              minHeight: 54, // 最小行高, icon + panding + outline height
+            ),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainer,
+              color: Theme.of(context).colorScheme.surfaceContainer, // 用户消息卡片背景颜色
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                color: Theme.of(context).colorScheme.outlineVariant, // 用户消息卡片边框颜色
                 width: 0.5,
               ),
             ),
@@ -74,7 +77,6 @@ class _UserMessageState extends ConsumerState<UserMessage> {
                     controller: MentionTextEditingController(text: widget.message.content),
                     style: Theme.of(context).textTheme.bodyMedium,
                     readOnly: true,
-                    selectionColor: Theme.of(context).colorScheme.primaryContainer,
                   ),
                 ),
                 if (showRetry) ...[

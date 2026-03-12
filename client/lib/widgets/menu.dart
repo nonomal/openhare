@@ -70,9 +70,9 @@ class _OverlayMenuState extends State<OverlayMenu> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Theme.of(context).colorScheme.outlineVariant, // 菜单阴影颜色
+            blurRadius: 5,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
@@ -189,9 +189,8 @@ class OverlayMenuItem extends StatefulWidget {
   final double height;
   final Widget child;
   final void Function()? onTabSelected;
-  final Color? hoverColor;
 
-  const OverlayMenuItem({super.key, required this.height, required this.child, this.onTabSelected, this.hoverColor});
+  const OverlayMenuItem({super.key, required this.height, required this.child, this.onTabSelected});
 
   @override
   State<OverlayMenuItem> createState() => _OverlayMenuItemState();
@@ -202,7 +201,7 @@ class _OverlayMenuItemState extends State<OverlayMenuItem> {
 
   @override
   Widget build(BuildContext context) {
-    final hoverColor = widget.hoverColor ?? Theme.of(context).colorScheme.surfaceContainer;
+    final hoverColor = Theme.of(context).colorScheme.surfaceContainerLow; // 菜单列鼠标移入的颜色
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovering = true),
@@ -231,9 +230,8 @@ class OverlayMenuFooter extends StatefulWidget {
   final double height;
   final Widget child;
   final VoidCallback? onTap;
-  final Color? hoverColor;
 
-  const OverlayMenuFooter({super.key, required this.height, required this.child, this.onTap, this.hoverColor});
+  const OverlayMenuFooter({super.key, required this.height, required this.child, this.onTap});
 
   @override
   State<OverlayMenuFooter> createState() => _OverlayMenuFooterState();
@@ -246,9 +244,8 @@ class _OverlayMenuFooterState extends State<OverlayMenuFooter> {
   Widget build(BuildContext context) {
     final base = SizedBox(height: widget.height, child: widget.child);
 
-    final colorScheme = Theme.of(context).colorScheme;
     const radius = BorderRadius.only(bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12));
-    final hoverColor = widget.hoverColor ?? colorScheme.surfaceContainerLow;
+    final hoverColor = Theme.of(context).colorScheme.surfaceContainerLow; // 菜单footer鼠标移入的颜色
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovering = true),
@@ -256,7 +253,7 @@ class _OverlayMenuFooterState extends State<OverlayMenuFooter> {
       child: GestureDetector(
         onTap: widget.onTap,
         child: Container(
-          decoration: BoxDecoration(color: _hovering ? hoverColor : Colors.transparent, borderRadius: radius),
+          decoration: BoxDecoration(color: _hovering ? hoverColor : null, borderRadius: radius),
           child: base,
         ),
       ),

@@ -254,7 +254,7 @@ class _DataGridState extends State<DataGrid> {
       name: '',
       resizable: false,
       dataAlignment: Alignment.center,
-      textColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+      textColor: Theme.of(context).colorScheme.onSurfaceVariant, // line number 字体颜色
       cells: <DataGridCell>[
         for (int i = 0; i < widget.controller.columns[0].cells.length; i++) DataGridCell(data: '${i + 1}'),
       ],
@@ -617,7 +617,7 @@ class DataGridCellWidget extends StatelessWidget {
     return RepaintBoundary(
       child: CustomPaint(
         painter: _DataGridCellPainter(
-          borderColor: borderColor ?? Theme.of(context).colorScheme.surfaceContainerHigh,
+          borderColor: borderColor ?? Theme.of(context).colorScheme.surfaceContainerHigh, //todo: 需要换成 outlineVariant 颜色
         ),
         child: child,
       ),

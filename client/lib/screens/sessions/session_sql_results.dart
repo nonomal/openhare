@@ -134,7 +134,7 @@ class SqlResultTable extends ConsumerWidget {
         return EmptyPage(
           child: Text(
             AppLocalizations.of(context)!.display_msg_no_data,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.surfaceDim),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
         );
       },

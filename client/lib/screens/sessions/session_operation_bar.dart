@@ -206,7 +206,6 @@ class SessionOpBar extends ConsumerWidget {
         : RectangleIconButton.medium(
             tooltip: l10n.scheduled_task,
             icon: Icons.schedule,
-            iconColor: Theme.of(context).colorScheme.onSurface,
             onPressed: null,
           );
 
@@ -219,7 +218,6 @@ class SessionOpBar extends ConsumerWidget {
     return RectangleIconButton.medium(
       tooltip: AppLocalizations.of(context)!.button_tooltip_save,
       icon: Icons.save,
-      iconColor: Theme.of(context).colorScheme.onSurface,
       onPressed: () {
         ref.read(sessionSQLEditorServiceProvider(model.sessionId).notifier).saveCode();
       },
@@ -341,10 +339,8 @@ class _SchemaBarState extends ConsumerState<SchemaBar> {
   @override
   Widget build(BuildContext context) {
     final color = (isEnter && !widget.disable)
-        ? Theme.of(context)
-              .colorScheme
-              .primary // schema 鼠标移入的颜色
-        : Theme.of(context).colorScheme.onSurface;
+        ? Theme.of(context).colorScheme.primary
+        : Theme.of(context).colorScheme.onSurface; // schema 框鼠标移入的颜色
 
     final schemaBarContent = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -392,7 +388,10 @@ class _SchemaBarState extends ConsumerState<SchemaBar> {
           ]
         : filteredSchemas.map((schema) {
             final isSelected = schema == widget.currentSchema;
-            final color = isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface;
+            final color = isSelected
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.onSurface; // schema list 里当前schema的颜色
+
             return OverlayMenuItem(
               height: 30,
               child: Padding(

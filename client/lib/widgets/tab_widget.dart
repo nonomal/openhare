@@ -304,7 +304,7 @@ class _CommonTabState extends State<CommonTab> {
                     color: color(),
                     borderRadius: widget.style?.borderRadius ?? const BorderRadius.all(Radius.circular(10)),
                     border: Border.all(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color: Theme.of(context).colorScheme.outlineVariant,
                       width: 0.5,
                     ),
                   ),

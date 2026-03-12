@@ -171,7 +171,12 @@ class SessionChatGuide extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(AppLocalizations.of(context)!.ai_chat_guide_tip),
+          Text(
+            AppLocalizations.of(context)!.ai_chat_guide_tip,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+          ),
           const SizedBox(height: kSpacingSmall),
           LinkButton(
             text: AppLocalizations.of(context)!.ai_chat_guide_tip_add_model,

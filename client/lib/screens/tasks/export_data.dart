@@ -182,14 +182,8 @@ class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogConte
     }
   }
 
-  Widget _buildTaskInfoCard(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    final colorScheme = theme.colorScheme;
-    final textStyle = GoogleFonts.robotoMono(
-      textStyle: textTheme.bodySmall,
-      color: colorScheme.onSurfaceVariant,
-    );
+  Widget _buildTaskInfoCard() {
+    final textStyle = Theme.of(context).textTheme.bodyMedium;
 
     return Row(
       children: [
@@ -201,10 +195,7 @@ class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogConte
             ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6),
-              border: Border.all(
-                color: colorScheme.outline,
-                width: 0.5,
-              ),
+              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,17 +203,14 @@ class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogConte
               children: [
                 RichText(
                   text: TextSpan(
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
+                    style: textStyle,
                     children: [
                       TextSpan(text: AppLocalizations.of(context)!.export_data_exporting),
                       const TextSpan(text: ' '),
                       TextSpan(
-                        text: widget.schema,
-                        style: textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurface,
+                        text: '`${widget.schema}`',
+                        style: textStyle?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                       TextSpan(text: ' ${AppLocalizations.of(context)!.export_data_schema_sql}'),
@@ -240,7 +228,7 @@ class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogConte
                         child: SelectableText.rich(
                           getSQLHighlightTextSpan(
                             widget.query,
-                            defalutStyle: textStyle,
+                            defalutStyle: GoogleFonts.robotoMono(textStyle: Theme.of(context).textTheme.bodySmall),
                           ),
                         ),
                       ),
@@ -255,7 +243,7 @@ class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogConte
     );
   }
 
-  Widget _buildFileNameSuffixIcons(BuildContext context, ColorScheme colorScheme) {
+  Widget _buildFileNameSuffixIcons() {
     return Container(
       padding: const EdgeInsets.only(right: kSpacingTiny),
       width: kIconButtonSizeSmall + kIconButtonSizeMedium + kSpacingTiny,
@@ -265,7 +253,7 @@ class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogConte
           if (_errorMessage != null)
             RectangleIconButton.small(
               icon: Icons.error_outline,
-              iconColor: colorScheme.error,
+              iconColor: Theme.of(context).colorScheme.error,
               tooltip: _errorMessage!,
             ),
           (_isGenerating)
@@ -281,22 +269,19 @@ class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogConte
     );
   }
 
-  InputDecoration _buildInputDecoration(
-    ColorScheme colorScheme, {
+  InputDecoration _buildInputDecoration({
     required String labelText,
     Widget? suffixIcon,
     bool required = false,
   }) {
     final defaultBorder = OutlineInputBorder(
       borderSide: BorderSide(
-        color: colorScheme.outline,
-        width: 0.5,
+        color: Theme.of(context).colorScheme.outlineVariant,
       ),
     );
     final errorBorderStyle = OutlineInputBorder(
       borderSide: BorderSide(
-        color: colorScheme.error,
-        width: 0.5,
+        color: Theme.of(context).colorScheme.error,
       ),
     );
 
@@ -306,7 +291,7 @@ class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogConte
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(labelText),
-                Text('*', style: TextStyle(color: colorScheme.error)),
+                Text('*', style: TextStyle(color: Theme.of(context).colorScheme.error)),
               ],
             )
           : Text(labelText),
@@ -322,9 +307,6 @@ class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogConte
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return CustomDialog(
       title: AppLocalizations.of(context)!.export_data_title,
       titleIcon: const RectangleIconButton.medium(
@@ -367,7 +349,6 @@ class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogConte
                 }
               },
               decoration: _buildInputDecoration(
-                colorScheme,
                 labelText: AppLocalizations.of(context)!.export_data_directory_label,
                 required: true,
                 suffixIcon: Padding(
@@ -375,7 +356,7 @@ class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogConte
                   child: RectangleIconButton.medium(
                     icon: Icons.folder_open,
                     tooltip: AppLocalizations.of(context)!.tooltip_select_directory,
-                    iconColor: colorScheme.primary,
+                    iconColor: Theme.of(context).colorScheme.primary,
                     onPressed: _selectDirectory,
                   ),
                 ),
@@ -394,10 +375,9 @@ class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogConte
                 return null;
               },
               decoration: _buildInputDecoration(
-                colorScheme,
                 labelText: AppLocalizations.of(context)!.task_column_file_name,
                 required: true,
-                suffixIcon: _buildFileNameSuffixIcons(context, colorScheme),
+                suffixIcon: _buildFileNameSuffixIcons(),
               ),
             ),
             const SizedBox(height: kSpacingMedium),
@@ -406,14 +386,13 @@ class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogConte
               controller: descController,
               enabled: !_isGenerating,
               decoration: _buildInputDecoration(
-                colorScheme,
                 labelText: AppLocalizations.of(context)!.db_instance_desc,
               ),
               maxLines: 2,
             ),
             const SizedBox(height: kSpacingMedium),
             // 任务信息卡片
-            Expanded(child: _buildTaskInfoCard(context)),
+            Expanded(child: _buildTaskInfoCard()),
           ],
         ),
       ),

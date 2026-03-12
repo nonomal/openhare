@@ -5,6 +5,7 @@ import 'package:client/services/ai/agent.dart';
 import 'package:client/services/settings/settings.dart';
 import 'package:client/widgets/button.dart';
 import 'package:client/widgets/const.dart';
+import 'package:client/widgets/dialog.dart';
 import 'package:client/widgets/divider.dart';
 import 'package:client/widgets/loading.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +36,7 @@ class SettingsPage extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.settings, color: Theme.of(context).colorScheme.primary),
+                Icon(Icons.settings, color: Theme.of(context).colorScheme.primary), // 个性化设置的标题icon颜色
                 const SizedBox(width: kSpacingSmall),
                 Text(
                   AppLocalizations.of(context)!.preferences,
@@ -50,7 +51,7 @@ class SettingsPage extends ConsumerWidget {
             const SizedBox(height: kSpacingMedium),
             Row(
               children: [
-                Icon(Icons.api, color: Theme.of(context).colorScheme.primary),
+                Icon(Icons.api, color: Theme.of(context).colorScheme.primary), // LLM API的标题icon颜色
                 const SizedBox(width: kSpacingSmall),
                 Text(
                   AppLocalizations.of(context)!.llm_api,
@@ -58,7 +59,7 @@ class SettingsPage extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: kSpacingSmall),
+            const SizedBox(height: kSpacingMedium),
             const Expanded(
               child: LLMApiSettingPage(),
             ),
@@ -220,81 +221,59 @@ void showLLMApiSettingDialog(
   showDialog(
     context: context,
     builder: (context) {
-      return Dialog(
-        child: Container(
-          width: 600,
-          height: 400,
-          padding: const EdgeInsets.fromLTRB(kSpacingMedium, kSpacingLarge, kSpacingMedium, kSpacingMedium),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleLarge,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  if (model == null) ...[
-                    const SizedBox(width: kSpacingSmall),
-                    const _OnlyOpenAICompatibleTip(),
-                  ],
-                ],
-              ),
-              const SizedBox(height: kSpacingMedium),
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Description'),
-              ),
-              const SizedBox(height: kSpacingSmall),
-              TextField(
-                controller: baseUrlController,
-                decoration: const InputDecoration(labelText: 'Base URL'),
-              ),
-              const SizedBox(height: kSpacingSmall),
-              TextField(
-                controller: apiKeyController,
-                decoration: const InputDecoration(labelText: 'API Key'),
-              ),
-              const SizedBox(height: kSpacingSmall),
-              TextField(
-                controller: modelNameController,
-                decoration: const InputDecoration(labelText: 'Model'),
-              ),
-              const Spacer(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(
-                      AppLocalizations.of(context)!.cancel,
-                    ),
-                  ),
-                  const SizedBox(width: kSpacingSmall),
-                  TextButton(
-                    onPressed: () {
-                      onSubmit(
-                        LLMAgentSettingModel(
-                          name: nameController.text,
-                          baseUrl: baseUrlController.text,
-                          apiKey: apiKeyController.text,
-                          modelName: modelNameController.text,
-                        ),
-                      );
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(AppLocalizations.of(context)!.submit),
-                  ),
-                ],
-              ),
-            ],
+      return CustomDialog(
+        title: title,
+        maxWidth: 600,
+        maxHeight: 380,
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text(
+              AppLocalizations.of(context)!.cancel,
+            ),
           ),
+          const SizedBox(width: kSpacingSmall),
+          TextButton(
+            onPressed: () {
+              onSubmit(
+                LLMAgentSettingModel(
+                  name: nameController.text,
+                  baseUrl: baseUrlController.text,
+                  apiKey: apiKeyController.text,
+                  modelName: modelNameController.text,
+                ),
+              );
+              Navigator.of(context).pop();
+            },
+            child: Text(AppLocalizations.of(context)!.submit),
+          ),
+        ],
+        content: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(labelText: 'Description'),
+            ),
+            const SizedBox(height: kSpacingSmall),
+            TextField(
+              controller: baseUrlController,
+              decoration: const InputDecoration(labelText: 'Base URL'),
+            ),
+            const SizedBox(height: kSpacingSmall),
+            TextField(
+              controller: apiKeyController,
+              decoration: const InputDecoration(labelText: 'API Key'),
+            ),
+            const SizedBox(height: kSpacingSmall),
+            TextField(
+              controller: modelNameController,
+              decoration: const InputDecoration(labelText: 'Model'),
+            ),
+          ],
         ),
       );
     },
@@ -320,24 +299,21 @@ class LLMApiSettingItem extends ConsumerWidget {
     return Container(
       constraints: const BoxConstraints(),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
+        color: Theme.of(context).colorScheme.surfaceContainerLow, // LLM API配置卡片的背景颜色
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).colorScheme.surfaceContainerHigh, width: 1),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant, width: 0.5),
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(kSpacingMedium, kSpacingSmall, kSpacingMedium, kSpacingSmall),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: kSpacingTiny),
             Row(
               children: [
-                Icon(Icons.api, color: Theme.of(context).colorScheme.primary),
-                const SizedBox(width: kSpacingTiny),
                 Expanded(
                   child: Text(
                     model.setting.name,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleMedium,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -349,7 +325,7 @@ class LLMApiSettingItem extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: kSpacingTiny),
+            const SizedBox(height: kSpacingSmall),
             _InfoRow(label: "Base URL", value: model.setting.baseUrl),
             const SizedBox(height: kSpacingTiny),
             _InfoRow(
@@ -424,9 +400,9 @@ class AddLLMApiSettingItem extends StatelessWidget {
     return Container(
       constraints: const BoxConstraints(),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
+        color: Theme.of(context).colorScheme.surfaceContainerLow, // 添加模型的卡片的背景颜色
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).colorScheme.surfaceContainerHigh, width: 1),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant, width: 0.5), // 添加模型的卡片边框颜色
       ),
       child: Center(
         child: IconButton(
@@ -479,18 +455,16 @@ class _OnlyOpenAICompatibleTip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: kSpacingSmall, vertical: kSpacingTiny),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Text(
         AppLocalizations.of(context)!.llm_api_only_openai_compatible,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: colorScheme.onSurfaceVariant,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       ),
     );

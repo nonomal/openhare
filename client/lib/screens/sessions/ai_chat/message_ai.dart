@@ -35,7 +35,7 @@ class _AIMessageState extends State<AIMessage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        InkWell(
+        GestureDetector(
           onTap: () {
             setState(() {
               _isThinkingExpanded = !_isThinkingExpanded;
@@ -46,7 +46,7 @@ class _AIMessageState extends State<AIMessage> {
               Icon(
                 _isThinkingExpanded ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right,
                 size: 16,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurface, // 思考过程下拉按钮的颜色
               ),
               const SizedBox(width: kSpacingTiny),
               if (isThinking && !_isThinkingExpanded)
@@ -56,7 +56,7 @@ class _AIMessageState extends State<AIMessage> {
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      Theme.of(context).colorScheme.onSurfaceVariant,
+                      Theme.of(context).colorScheme.onSurfaceVariant, // 思考过程 loading 颜色
                     ),
                   ),
                 ),
@@ -66,7 +66,7 @@ class _AIMessageState extends State<AIMessage> {
                     ? AppLocalizations.of(context)!.ai_chat_thinking
                     : AppLocalizations.of(context)!.ai_chat_thinking_process,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant, // 思考过程文字颜色
                   fontStyle: FontStyle.italic,
                 ),
               ),
@@ -79,7 +79,7 @@ class _AIMessageState extends State<AIMessage> {
             text: TextSpan(
               text: widget.message.thinking?.trim() ?? "",
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant, // 思考过程文字颜色
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -101,13 +101,13 @@ class _AIMessageState extends State<AIMessage> {
           h5: Theme.of(context).textTheme.bodyMedium,
           h6: Theme.of(context).textTheme.bodySmall,
           hrLineThickness: 0.2,
-          highlightColor: Theme.of(context).colorScheme.surfaceContainerLowest,
+          highlightColor: Theme.of(context).colorScheme.surfaceContainerLowest, // 高亮色设置成和背景色一致，等于取消高亮
         ),
         child: GptMarkdown(
           key: ValueKey(widget.message.id.value),
           content,
           style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
+            color: Theme.of(context).colorScheme.onSurface, // 内容文字颜色
           ),
           codeBuilder: (context, name, code, closed) {
             return SqlChatField(
@@ -130,22 +130,16 @@ class _AIMessageState extends State<AIMessage> {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: kSpacingMedium),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (widget.message.error != null) _buildError(context),
-            if (hasThinking) _buildThinking(context, isThinking),
-            if (content.isNotEmpty && content.trim() != "") ...[
-              SizedBox(height: kSpacingSmall),
-              _buildContent(context, content),
-            ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (widget.message.error != null) _buildError(context),
+          if (hasThinking) _buildThinking(context, isThinking),
+          if (content.isNotEmpty && content.trim() != "") ...[
+            SizedBox(height: kSpacingSmall),
+            _buildContent(context, content),
           ],
-        ),
+        ],
       ),
     );
   }

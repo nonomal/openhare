@@ -32,7 +32,7 @@ class DataTypeIcon extends StatelessWidget {
       ),
       DataType.blob => Icon(
         Icons.insert_drive_file_outlined,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
+        color: Theme.of(context).colorScheme.onSurfaceVariant, // todo: 换一个固定颜色
         size: size,
       ),
       DataType.json => Icon(

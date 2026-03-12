@@ -513,7 +513,7 @@ class AddInstanceForm extends StatelessWidget {
             child: RectangleIconButton.medium(
               icon: Icons.folder_open,
               tooltip: AppLocalizations.of(context)!.tooltip_select_directory,
-              iconColor: Theme.of(context).colorScheme.primary,
+              iconColor: Theme.of(context).colorScheme.primary, // file 按钮颜色
               onPressed: () => selectDBFile(context, dbFile),
             ),
           ),
@@ -566,9 +566,8 @@ class AddInstanceForm extends StatelessWidget {
           style: CodeEditorStyle(
             backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow, // SQL 编辑器背景色
             textStyle: GoogleFonts.robotoMono(
-              textStyle: Theme.of(context).textTheme.bodyMedium,
-              color: Theme.of(context).colorScheme.onSurface,
-            ), // SQL 编辑器文字颜色
+              color: Theme.of(context).colorScheme.onSurface, // SQL 编辑器文字颜色
+            ),
           ),
           indicatorBuilder: (context, editingController, chunkController, notifier) {
             return Row(

@@ -15,7 +15,7 @@ void doActionDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest, // 对话框默认背景色
         title: Row(
           children: [
             if (icon != null) ...[
@@ -81,10 +81,6 @@ class CustomDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    final colorScheme = theme.colorScheme;
-
     return Dialog(
       child: ConstrainedBox(
         constraints: BoxConstraints(
@@ -98,7 +94,7 @@ class CustomDialog extends StatelessWidget {
         ),
         child: Container(
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerLowest, // 对话框默认背景色
+            color: Theme.of(context).colorScheme.surfaceContainerLowest, // 对话框默认背景色
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.fromLTRB(
@@ -113,7 +109,7 @@ class CustomDialog extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   if (titleIcon != null) titleIcon!,
-                  Text(title, style: textTheme.titleLarge, textAlign: TextAlign.center),
+                  Text(title, style: Theme.of(context).textTheme.titleLarge, textAlign: TextAlign.center),
                 ],
               ),
               const SizedBox(height: kSpacingMedium),

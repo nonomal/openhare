@@ -341,7 +341,7 @@ class _SQLEditorAutoCompleteListViewState extends State<SQLEditorAutoCompleteLis
     if (prompt is KeywordPrompt) {
       return const HugeIcon(
         icon: HugeIcons.strokeRoundedTag01,
-        color: SQLHighlightColor.keyword,
+        color: SQLHighlightColor.keyword, // todo: 颜色需要抽取到 theme 中
         size: 16,
       );
     }
@@ -394,7 +394,7 @@ class _SQLEditorAutoCompleteListViewState extends State<SQLEditorAutoCompleteLis
         color: backgroundColor,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: Theme.of(context).dividerColor, // 提示窗边框颜色
+          color: Theme.of(context).colorScheme.outlineVariant, // 提示窗边框颜色
           width: 1,
         ),
       ),

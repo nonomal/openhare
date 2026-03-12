@@ -55,7 +55,7 @@ class _TaskTableState extends ConsumerState<TaskTable> {
     final colorScheme = Theme.of(context).colorScheme;
     switch (status) {
       case TaskStatus.pending:
-        return colorScheme.outline;
+        return colorScheme.onSurface;
       case TaskStatus.running:
         return colorScheme.primary;
       case TaskStatus.completed:
@@ -63,7 +63,7 @@ class _TaskTableState extends ConsumerState<TaskTable> {
       case TaskStatus.failed:
         return colorScheme.error;
       case TaskStatus.cancelled:
-        return colorScheme.outlineVariant;
+        return colorScheme.onSurface;
     }
   }
 
@@ -109,9 +109,8 @@ class _TaskTableState extends ConsumerState<TaskTable> {
     final statusWidget = Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Theme.of(context).colorScheme.surfaceContainerHighest, width: 1),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant, width: 0.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -165,19 +164,12 @@ class _TaskTableState extends ConsumerState<TaskTable> {
   }
 
   Widget _buildText(String? text, {bool isPlaceholder = false}) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final style = isPlaceholder
-        ? Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          )
-        : Theme.of(context).textTheme.bodyMedium;
     final displayText = text ?? '-';
     return Tooltip(
       message: displayText,
       child: Text(
         displayText,
         overflow: TextOverflow.ellipsis,
-        style: style,
       ),
     );
   }
@@ -242,7 +234,6 @@ class _TaskTableState extends ConsumerState<TaskTable> {
     final exportPath = task.exportFilePath;
     final instanceName = task.instanceName;
     final schema = task.schema;
-    final colorScheme = Theme.of(context).colorScheme;
 
     return DataRow(
       cells: [
@@ -261,20 +252,10 @@ class _TaskTableState extends ConsumerState<TaskTable> {
         DataCell(
           Tooltip(
             message: task.createdAt.formatFullDateTime(context),
-            child: Text(
-              task.createdAt.formatDateTime(context),
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+            child: Text(task.createdAt.formatDateTime(context)),
           ),
         ),
-        DataCell(
-          Text(
-            task.duration?.format() ?? '-',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
+        DataCell(Text(task.duration?.format() ?? '-')),
         DataCell(_buildStatusChip(context, task)),
         DataCell(
           Row(
@@ -365,11 +346,11 @@ class _TaskTableState extends ConsumerState<TaskTable> {
                   child: SearchBar(
                     controller: _searchTextController,
                     backgroundColor: WidgetStatePropertyAll(
-                      Theme.of(context).colorScheme.surfaceContainerLow,
+                      Theme.of(context).colorScheme.surfaceContainer,
                     ),
                     side: WidgetStatePropertyAll(
                       BorderSide(
-                        color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                        color: Theme.of(context).colorScheme.outlineVariant, // task 页面搜索框颜色. // todo: 抽取搜索框, 哪里都一样重复的代码
                         width: 0.5,
                       ),
                     ),
@@ -395,7 +376,7 @@ class _TaskTableState extends ConsumerState<TaskTable> {
                 ? EmptyPage(
                     child: Text(
                       AppLocalizations.of(context)!.task_no_tasks,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),

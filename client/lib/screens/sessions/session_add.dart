@@ -29,7 +29,9 @@ class AddSession extends HookConsumerWidget {
           children: [
             Text(
               AppLocalizations.of(context)!.display_no_instance_and_add_instance,
-              style: Theme.of(context).textTheme.bodySmall,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: kSpacingSmall),
             LinkButton(
@@ -128,11 +130,11 @@ class AddSession extends HookConsumerWidget {
                         child: SearchBar(
                           controller: instanceSearchTextController,
                           backgroundColor: WidgetStatePropertyAll(
-                            Theme.of(context).colorScheme.surfaceContainerLow,
+                            Theme.of(context).colorScheme.surfaceContainer,
                           ),
                           side: WidgetStatePropertyAll(
                             BorderSide(
-                              color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                              color: Theme.of(context).colorScheme.outlineVariant,
                               width: 0.5,
                             ),
                           ),

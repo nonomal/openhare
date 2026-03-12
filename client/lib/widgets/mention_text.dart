@@ -710,45 +710,42 @@ class _MentionTextFieldState extends State<MentionTextField> {
   Widget build(BuildContext context) {
     final useOverlay = widget.mentionCandidatesBuilder != null;
 
-    Widget textField = Actions(
-      actions: <Type, Action<Intent>>{
-        CopySelectionTextIntent: CallbackAction<CopySelectionTextIntent>(
-          onInvoke: (intent) {
-            widget.controller.copySelectionToClipboard();
-            return null;
-          },
+    final textField = TextSelectionTheme(
+      data: TextSelectionTheme.of(context).copyWith(
+        selectionColor: widget.selectionColor ?? Theme.of(context).colorScheme.primaryContainer,
+      ), // 文字选择背景色
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          CopySelectionTextIntent: CallbackAction<CopySelectionTextIntent>(
+            onInvoke: (intent) {
+              widget.controller.copySelectionToClipboard();
+              return null;
+            },
+          ),
+          PasteTextIntent: CallbackAction<PasteTextIntent>(
+            onInvoke: (intent) {
+              widget.controller.pasteFromClipboard();
+              return null;
+            },
+          ),
+        },
+        child: TextField(
+          key: _inputKey,
+          controller: widget.controller,
+          focusNode: _effectiveFocusNode,
+          decoration: widget.decoration,
+          style: widget.style,
+          strutStyle: widget.strutStyle,
+          textAlignVertical: widget.textAlignVertical,
+          minLines: widget.minLines,
+          maxLines: widget.maxLines,
+          enabled: widget.enabled ?? true,
+          readOnly: widget.readOnly,
+          textInputAction: widget.textInputAction,
+          onSubmitted: widget.onSubmitted == null ? null : (_) => widget.onSubmitted!(widget.controller.displayText),
         ),
-        PasteTextIntent: CallbackAction<PasteTextIntent>(
-          onInvoke: (intent) {
-            widget.controller.pasteFromClipboard();
-            return null;
-          },
-        ),
-      },
-      child: TextField(
-        key: _inputKey,
-        controller: widget.controller,
-        focusNode: _effectiveFocusNode,
-        decoration: widget.decoration,
-        style: widget.style,
-        strutStyle: widget.strutStyle,
-        textAlignVertical: widget.textAlignVertical,
-        minLines: widget.minLines,
-        maxLines: widget.maxLines,
-        enabled: widget.enabled ?? true,
-        readOnly: widget.readOnly,
-        textInputAction: widget.textInputAction,
-        onSubmitted: widget.onSubmitted == null ? null : (_) => widget.onSubmitted!(widget.controller.displayText),
       ),
     );
-
-    if (widget.selectionColor != null) {
-      final theme = TextSelectionTheme.of(context);
-      textField = TextSelectionTheme(
-        data: theme.copyWith(selectionColor: widget.selectionColor),
-        child: textField,
-      );
-    }
 
     final shortcuts = <LogicalKeySet, Intent>{
       // 剪切：桌面端 Ctrl/⌘ + X
@@ -843,7 +840,6 @@ class _MentionTextFieldState extends State<MentionTextField> {
           left: left,
           top: top,
           child: Material(
-            color: Colors.transparent,
             child: Container(
               constraints: const BoxConstraints(maxWidth: menuWidth, maxHeight: maxHeight),
               decoration: BoxDecoration(

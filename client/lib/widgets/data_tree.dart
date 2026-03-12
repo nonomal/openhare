@@ -70,7 +70,7 @@ class RootNode implements DataNode {
     return HugeIcon(
       size: kIconSizeSmall,
       icon: HugeIcons.strokeRoundedFolder02,
-      color: Theme.of(context).colorScheme.tertiary,
+      color: Theme.of(context).colorScheme.tertiary, // todo: 需要描述为什么用这个颜色
     );
   }
 

@@ -76,9 +76,9 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
   }
 
   Widget _buildBudgetIndicator(BuildContext context, AIChatProgressModel b) {
-    final scheme = Theme.of(context).colorScheme;
-    final bg = scheme.surfaceContainerHighest;
-    final contextColor = b.contextHardStopped ? scheme.error : scheme.primary;
+    final contextColor = b.contextHardStopped
+        ? Theme.of(context).colorScheme.error
+        : Theme.of(context).colorScheme.primary; // 上下文进度条颜色
 
     return Tooltip(
       message: _buildBudgetTooltip(context, b),
@@ -89,7 +89,7 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
         child: CircularProgressIndicator(
           value: b.contextProgress,
           strokeWidth: 3,
-          backgroundColor: bg,
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest, // 上下文进度条背景色
           valueColor: AlwaysStoppedAnimation(contextColor),
         ),
       ),
@@ -179,10 +179,10 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
         padding: const EdgeInsets.fromLTRB(kSpacingSmall, kSpacingSmall, kSpacingSmall, kSpacingTiny),
         // 设置一个圆角
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainer,
+          color: Theme.of(context).colorScheme.surfaceContainer, // 输入框背景色
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            color: Theme.of(context).colorScheme.outlineVariant, // 输入框边框颜色
             width: 0.5,
           ),
         ),
@@ -289,8 +289,8 @@ class _ModelSelectorWidgetState extends ConsumerState<ModelSelectorWidget> {
         color: Theme.of(context).colorScheme.surfaceContainerLowest, // 模型选择工具栏背景色, 父组件背景色是 surfaceContainer
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          width: 1,
-          color: Theme.of(context).colorScheme.surfaceContainerHigh,
+          width: 0.5,
+          color: Theme.of(context).colorScheme.outlineVariant, // 模型选择工具栏边框颜色
         ),
       ),
       child: Text(
@@ -489,7 +489,7 @@ class _ChatInputFieldWidgetState extends ConsumerState<ChatInputFieldWidget> {
   @override
   Widget build(BuildContext context) {
     final controller = SessionController.sessionController(widget.model.sessionId).chatInputController;
-    final tokenBg = Theme.of(context).colorScheme.primaryContainer;
+
     return MentionTextField(
       controller: controller,
       style: Theme.of(context).textTheme.bodyMedium,
@@ -498,7 +498,6 @@ class _ChatInputFieldWidgetState extends ConsumerState<ChatInputFieldWidget> {
       maxLines: 5,
       enabled: widget.enabled && widget.model.chatModel.state != AIChatState.waiting,
       textInputAction: TextInputAction.done,
-      selectionColor: tokenBg,
       decoration: InputDecoration(
         hintText: AppLocalizations.of(context)!.ai_chat_input_tip,
         border: InputBorder.none,
