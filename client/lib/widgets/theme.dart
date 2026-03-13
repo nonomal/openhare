@@ -1,6 +1,14 @@
 import "package:flutter/material.dart";
 import "package:google_fonts/google_fonts.dart";
 
+/*
+颜色使用规范：
+1. 全局背景色：surfaceContainerLowest
+2. 边框都用outlineVariant颜色
+3. 一般的块状都使用surfaceContainerLow 颜色（比背景深一点）
+4. 需要突出的选中状态的高亮色都用primary颜色，比如按钮、tab、菜单等
+*/
+
 ThemeData defaultTheme(String theme) {
   final baseTextTheme = theme == "dark" ? ThemeData.dark().textTheme : ThemeData.light().textTheme;
   final textTheme = GoogleFonts.notoSansScTextTheme(baseTextTheme);
@@ -10,7 +18,10 @@ ThemeData defaultTheme(String theme) {
     useMaterial3: true,
     fontFamily: GoogleFonts.notoSansSc().fontFamily,
     colorScheme: theme == "dark" ? MaterialTheme.darkScheme() : MaterialTheme.lightScheme(),
-    dividerColor: theme == "dark" ? MaterialTheme.darkScheme().onSurfaceVariant : const Color(0xffD3D9DF),
+    dividerColor: theme == "dark" ? MaterialTheme.darkScheme().outlineVariant : const Color(0xffD3D9DF),
+    iconTheme: IconThemeData(
+      color: theme == "dark" ? MaterialTheme.darkScheme().onSurface : MaterialTheme.lightScheme().onSurface,
+    ),
     textTheme: textTheme,
     primaryTextTheme: primaryTextTheme,
   );
@@ -75,32 +86,32 @@ class MaterialTheme {
   static ColorScheme darkScheme() {
     return const ColorScheme(
       brightness: Brightness.dark,
-      primary: Color(0xff9fcafd),
-      surfaceTint: Color(0xff9fcafd),
-      onPrimary: Color(0xff003257),
-      primaryContainer: Color(0xff184974),
-      onPrimaryContainer: Color(0xffd1e4ff),
-      secondary: Color(0xffbac8db),
-      onSecondary: Color(0xff253140),
-      secondaryContainer: Color(0xff3b4858),
-      onSecondaryContainer: Color(0xffd6e4f7),
-      tertiary: Color(0xffd6bee5),
-      onTertiary: Color(0xff3a2948),
-      tertiaryContainer: Color(0xff524060),
-      onTertiaryContainer: Color(0xfff2daff),
+      primary: Color(0xff56a0d6),
+      surfaceTint: Color(0xff56a0d6),
+      onPrimary: Color(0xff0b2233),
+      primaryContainer: Color(0xff15354a),
+      onPrimaryContainer: Color(0xffb3cfe4),
+      secondary: Color(0xffa6b1be),
+      onSecondary: Color(0xff1c2732),
+      secondaryContainer: Color(0xff2a3540),
+      onSecondaryContainer: Color(0xffb7c2ce),
+      tertiary: Color(0xffb8a9c8),
+      onTertiary: Color(0xff2f243a),
+      tertiaryContainer: Color(0xff43364e),
+      onTertiaryContainer: Color(0xffc7b9d5),
       error: Color(0xffffb4ab),
       onError: Color(0xff690005),
       errorContainer: Color(0xff93000a),
       onErrorContainer: Color(0xffffdad6),
-      surface: Color(0xff101418),
-      onSurface: Color(0xffe1e2e8),
-      onSurfaceVariant: Color(0xffc3c7cf),
-      outline: Color(0xff8d9199),
-      outlineVariant: Color(0xff42474e),
+      surface: Color(0xff20232a),
+      onSurface: Color(0xffb2b6bc),
+      onSurfaceVariant: Color(0xff878e98),
+      outline: Color(0xff4b535e),
+      outlineVariant: Color(0xff3a414b),
       shadow: Color(0xff000000),
       scrim: Color(0xff000000),
       inverseSurface: Color(0xffe1e2e8),
-      inversePrimary: Color(0xff35618e),
+      inversePrimary: Color(0xff285f84),
       primaryFixed: Color(0xffd1e4ff),
       onPrimaryFixed: Color(0xff001d35),
       primaryFixedDim: Color(0xff9fcafd),
@@ -113,13 +124,13 @@ class MaterialTheme {
       onTertiaryFixed: Color(0xff251432),
       tertiaryFixedDim: Color(0xffd6bee5),
       onTertiaryFixedVariant: Color(0xff524060),
-      surfaceDim: Color(0xff101418),
-      surfaceBright: Color(0xff36393e),
-      surfaceContainerLowest: Color(0xff0b0e13),
-      surfaceContainerLow: Color(0xff191c20),
-      surfaceContainer: Color(0xff1d2024),
-      surfaceContainerHigh: Color(0xff272a2f),
-      surfaceContainerHighest: Color(0xff32353a),
+      surfaceDim: Color(0xff1b1e24),
+      surfaceBright: Color(0xff3f4651),
+      surfaceContainerLowest: Color(0xff1a1d22),
+      surfaceContainerLow: Color(0xff232830),
+      surfaceContainer: Color(0xff282d36),
+      surfaceContainerHigh: Color(0xff303640),
+      surfaceContainerHighest: Color(0xff39414c),
     );
   }
 
