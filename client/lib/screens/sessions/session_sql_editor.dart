@@ -64,7 +64,7 @@ class SQLEditor extends ConsumerWidget {
 
     final textStyle = GoogleFonts.robotoMono(
       textStyle: Theme.of(context).textTheme.bodyMedium,
-      color: Theme.of(context).colorScheme.onSurface,
+      color: Theme.of(context).colorScheme.onSurface, // SQL 编辑器文字颜色
     );
 
     return LayoutBuilder(
@@ -233,7 +233,7 @@ class _CodeLineNumberState extends State<CodeLineNumber> {
                         softWrap: false,
                         textAlign: TextAlign.right,
                         style: widget.textStyle.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant, // SQL 编辑器行号文字颜色
                         ),
                       ),
                     ),

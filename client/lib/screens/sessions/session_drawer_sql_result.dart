@@ -21,7 +21,9 @@ class SessionDrawerSqlResult extends ConsumerWidget {
       return EmptyPage(
         child: Text(
           AppLocalizations.of(context)!.display_msg_no_result,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant), // 没有结果时显示的文字颜色
         ),
       );
     }

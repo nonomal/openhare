@@ -179,11 +179,10 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
         padding: const EdgeInsets.fromLTRB(kSpacingSmall, kSpacingSmall, kSpacingSmall, kSpacingTiny),
         // 设置一个圆角
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainer, // 输入框背景色
+          color: Theme.of(context).colorScheme.surfaceContainerLow, // 输入框背景色
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: Theme.of(context).colorScheme.outlineVariant, // 输入框边框颜色
-            width: 0.5,
           ),
         ),
         child: Column(
@@ -289,7 +288,6 @@ class _ModelSelectorWidgetState extends ConsumerState<ModelSelectorWidget> {
         color: Theme.of(context).colorScheme.surfaceContainerLowest, // 模型选择工具栏背景色, 父组件背景色是 surfaceContainer
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          width: 0.5,
           color: Theme.of(context).colorScheme.outlineVariant, // 模型选择工具栏边框颜色
         ),
       ),
@@ -345,13 +343,16 @@ class _ModelSelectorWidgetState extends ConsumerState<ModelSelectorWidget> {
           child: SearchBarTheme(
             data: SearchBarThemeData(
               textStyle: WidgetStatePropertyAll(Theme.of(context).textTheme.bodySmall),
-              backgroundColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.surfaceContainer),
+              backgroundColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.surfaceContainerLowest), // 模型选择工具栏搜索框背景色
               elevation: const WidgetStatePropertyAll(0),
-              constraints: const BoxConstraints(
-                minHeight: 24,
-              ),
+              constraints: const BoxConstraints(minHeight: 24),
             ),
             child: SearchBar(
+              side: WidgetStatePropertyAll(
+                BorderSide(
+                  color: Theme.of(context).colorScheme.outlineVariant, // 模型选择工具栏搜索框边框颜色
+                ),
+              ),
               controller: modelSearchTextController,
               onChanged: (value) {
                 _onModelSearchChanged();

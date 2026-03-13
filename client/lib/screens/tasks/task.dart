@@ -52,18 +52,17 @@ class _TaskTableState extends ConsumerState<TaskTable> {
   }
 
   Color _statusColor(BuildContext context, TaskStatus status) {
-    final colorScheme = Theme.of(context).colorScheme;
     switch (status) {
       case TaskStatus.pending:
-        return colorScheme.onSurface;
+        return Theme.of(context).colorScheme.onSurface; // 导出任务状态为 pending 时，文字颜色
       case TaskStatus.running:
-        return colorScheme.primary;
+        return Theme.of(context).colorScheme.primary; // 导出任务状态为 running 时，文字颜色
       case TaskStatus.completed:
         return Colors.green.shade200; // todo: 颜色统一放
       case TaskStatus.failed:
-        return colorScheme.error;
+        return Theme.of(context).colorScheme.error;
       case TaskStatus.cancelled:
-        return colorScheme.onSurface;
+        return Theme.of(context).colorScheme.onSurface; // 导出任务状态为 cancelled 时，文字颜色
     }
   }
 
@@ -110,7 +109,7 @@ class _TaskTableState extends ConsumerState<TaskTable> {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant, width: 0.5),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant), // 状态 chip 边框颜色
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -181,15 +180,15 @@ class _TaskTableState extends ConsumerState<TaskTable> {
     String? errorMessage,
     VoidCallback? onFileTap,
   }) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     if (fileName == null) {
       return _buildText(null, isPlaceholder: true);
     }
 
     if (exportPath != null && onFileTap != null) {
       final hasError = errorMessage != null;
-      final fileColor = hasError ? colorScheme.error : colorScheme.primary;
+      final fileColor = hasError
+          ? Theme.of(context).colorScheme.error
+          : Theme.of(context).colorScheme.primary; // 文件名文字颜色, 有错误时是error色
       final tooltipMessage = errorMessage ?? exportPath;
 
       return Row(
@@ -346,12 +345,11 @@ class _TaskTableState extends ConsumerState<TaskTable> {
                   child: SearchBar(
                     controller: _searchTextController,
                     backgroundColor: WidgetStatePropertyAll(
-                      Theme.of(context).colorScheme.surfaceContainer,
+                      Theme.of(context).colorScheme.surfaceContainerLow, // 导出任务页面搜索框背景色
                     ),
                     side: WidgetStatePropertyAll(
                       BorderSide(
-                        color: Theme.of(context).colorScheme.outlineVariant, // task 页面搜索框颜色. // todo: 抽取搜索框, 哪里都一样重复的代码
-                        width: 0.5,
+                        color: Theme.of(context).colorScheme.outlineVariant, // 导出任务页面搜索框颜色. // todo: 抽取搜索框, 哪里都一样重复的代码
                       ),
                     ),
                     onChanged: (value) {
@@ -377,7 +375,7 @@ class _TaskTableState extends ConsumerState<TaskTable> {
                     child: Text(
                       AppLocalizations.of(context)!.task_no_tasks,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant, // 没有任务时显示的文字颜色
                       ),
                     ),
                   )

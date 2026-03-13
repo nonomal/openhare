@@ -31,7 +31,7 @@ class AddSession extends HookConsumerWidget {
               AppLocalizations.of(context)!.display_no_instance_and_add_instance,
               style: Theme.of(
                 context,
-              ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+              ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant), // 没有实例时显示的文字颜色
             ),
             const SizedBox(height: kSpacingSmall),
             LinkButton(
@@ -130,12 +130,11 @@ class AddSession extends HookConsumerWidget {
                         child: SearchBar(
                           controller: instanceSearchTextController,
                           backgroundColor: WidgetStatePropertyAll(
-                            Theme.of(context).colorScheme.surfaceContainer,
+                            Theme.of(context).colorScheme.surfaceContainerLow, // session 页面搜索框背景色
                           ),
                           side: WidgetStatePropertyAll(
                             BorderSide(
-                              color: Theme.of(context).colorScheme.outlineVariant,
-                              width: 0.5,
+                              color: Theme.of(context).colorScheme.outlineVariant, // session 页面搜索框边框颜色
                             ),
                           ),
                           onChanged: (value) {

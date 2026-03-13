@@ -60,11 +60,10 @@ class _UserMessageState extends ConsumerState<UserMessage> {
               minHeight: 54, // 最小行高, icon + panding + outline height
             ),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainer, // 用户消息卡片背景颜色
+              color: Theme.of(context).colorScheme.surfaceContainerLow, // 用户消息卡片背景颜色
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: Theme.of(context).colorScheme.outlineVariant, // 用户消息卡片边框颜色
-                width: 0.5,
               ),
             ),
             child: Row(

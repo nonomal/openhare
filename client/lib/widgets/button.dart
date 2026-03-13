@@ -166,8 +166,8 @@ class _LinkButtonState extends State<LinkButton> {
 
   @override
   Widget build(BuildContext context) {
-    final Color normalColor = Theme.of(context).colorScheme.primary;
-    final Color hoverColor = Theme.of(context).colorScheme.inversePrimary;
+    final Color normalColor = Theme.of(context).colorScheme.primary; // 链接按钮文字颜色
+    final Color hoverColor = Theme.of(context).colorScheme.inversePrimary; // 链接按钮鼠标悬浮颜色
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovering = true),

@@ -175,7 +175,7 @@ class SessionChatGuide extends ConsumerWidget {
             AppLocalizations.of(context)!.ai_chat_guide_tip,
             style: Theme.of(
               context,
-            ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant), // 没有模型时显示的文字颜色
           ),
           const SizedBox(height: kSpacingSmall),
           LinkButton(

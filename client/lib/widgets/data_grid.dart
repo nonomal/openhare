@@ -617,7 +617,7 @@ class DataGridCellWidget extends StatelessWidget {
     return RepaintBoundary(
       child: CustomPaint(
         painter: _DataGridCellPainter(
-          borderColor: borderColor ?? Theme.of(context).colorScheme.surfaceContainerHigh, //todo: 需要换成 outlineVariant 颜色
+          borderColor: borderColor ?? Theme.of(context).colorScheme.outlineVariant, // 表格网格颜色
         ),
         child: child,
       ),
@@ -687,7 +687,7 @@ class _SelectionLayerPainter extends CustomPainter {
 
     // 绘制选中行的背景色（覆盖所有列）
     final rowBackgroundPaint = Paint()
-      ..color = colorScheme.surfaceContainerLow
+      ..color = colorScheme.surfaceContainerLow // 选中行背景色
       ..style = PaintingStyle.fill
       ..isAntiAlias = false;
 
@@ -705,7 +705,7 @@ class _SelectionLayerPainter extends CustomPainter {
 
     // 绘制选中单元格的内边框
     final selectedBorderPaint = Paint()
-      ..color = colorScheme.primary
+      ..color = colorScheme.primary // 选中单元格内边框颜色
       ..strokeWidth = borderWidth
       ..style = PaintingStyle.stroke
       ..isAntiAlias = false;

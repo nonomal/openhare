@@ -43,10 +43,9 @@ class ExportDataTaskOverviewItem extends ConsumerWidget {
   }
 
   Color _getStatusColor(BuildContext context, TaskStatus status) {
-    final colorScheme = Theme.of(context).colorScheme;
     switch (status) {
       case TaskStatus.running:
-        return colorScheme.primary;
+        return Theme.of(context).colorScheme.primary; // 任务状态为 running 时，文字颜色
       case TaskStatus.completed:
         return Colors.green;
       default:
@@ -60,8 +59,6 @@ class ExportDataTaskOverviewItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: kSpacingSmall,
@@ -73,8 +70,10 @@ class ExportDataTaskOverviewItem extends ConsumerWidget {
           // 左侧：导出图标
           RectangleIconButton.medium(
             icon: Icons.file_download,
-            iconColor: colorScheme.surfaceContainerLowest, // 导出图标颜色, 背景色是下面这行的 `导出图标背景色`(primaryContainer)
-            backgroundColor: colorScheme.primaryContainer, // 导出图标背景色
+            iconColor: Theme.of(
+              context,
+            ).colorScheme.surfaceContainerLowest, // 导出图标颜色, 背景色是下面这行的 `导出图标背景色`(primaryContainer)
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer, // 导出图标背景色
             onPressed: null,
           ),
           const SizedBox(width: kSpacingSmall),
@@ -96,7 +95,7 @@ class ExportDataTaskOverviewItem extends ConsumerWidget {
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.primary,
+                            color: Theme.of(context).colorScheme.primary, // 导出任务文件名文字颜色
                             decoration: TextDecoration.underline,
                           ),
                         ),
@@ -141,7 +140,7 @@ class ExportDataTaskOverviewItem extends ConsumerWidget {
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant, // 任务进度字体颜色
+                            color: Theme.of(context).colorScheme.onSurfaceVariant, // 导出任务进度字体颜色
                           ),
                         ),
                       )
@@ -152,7 +151,7 @@ class ExportDataTaskOverviewItem extends ConsumerWidget {
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant, // 任务详情字体颜色
+                            color: Theme.of(context).colorScheme.onSurfaceVariant, // 导出任务详情字体颜色
                           ),
                         ),
                       ),
@@ -210,7 +209,6 @@ class TaskOverviewMenu extends ConsumerWidget {
 
     final overview = ref.watch(taskOverviewServiceProvider);
     final l10n = AppLocalizations.of(context)!;
-    final colorScheme = Theme.of(context).colorScheme;
 
     final allTasks = [
       ...overview.runningTasks,
@@ -226,7 +224,7 @@ class TaskOverviewMenu extends ConsumerWidget {
                 child: Text(
                   l10n.task_no_tasks,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant, // 没有任务时显示的文字颜色
                   ),
                 ),
               ),

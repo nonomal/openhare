@@ -433,11 +433,18 @@ class _SchemaBarState extends ConsumerState<SchemaBar> {
         child: SearchBarTheme(
           data: SearchBarThemeData(
             textStyle: WidgetStatePropertyAll(Theme.of(context).textTheme.bodySmall),
-            backgroundColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.surfaceContainer),
+            backgroundColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.surfaceContainerLowest), // schema 页面搜索框背景色
             elevation: const WidgetStatePropertyAll(0),
             constraints: const BoxConstraints(minHeight: 24),
           ),
           child: SearchBar(
+            // todo: 抽取搜索框, 哪里都一样重复的代码
+            side: WidgetStatePropertyAll(
+              BorderSide(
+                color: Theme.of(context).colorScheme.outlineVariant, // session 页面搜索框边框颜色
+                // width: 0.5,
+              ),
+            ),
             controller: _schemaSearchController,
             onChanged: (_) => _onSchemaSearchChanged(),
             trailing: const [Icon(Icons.search, size: kIconSizeSmall)],
@@ -480,7 +487,7 @@ class SessionDrawerBar extends ConsumerWidget {
             tooltip: AppLocalizations.of(context)!.button_tooltip_metadata_tree,
             icon: Icons.account_tree_outlined,
             backgroundColor: (model.drawerPage == DrawerPage.metadataTree)
-                ? Theme.of(context).colorScheme.primaryContainer
+                ? Theme.of(context).colorScheme.primaryContainer // 元数据tree页面 icon 背景色
                 : null,
             onPressed: () {
               services.goToTree();
@@ -490,7 +497,7 @@ class SessionDrawerBar extends ConsumerWidget {
             tooltip: AppLocalizations.of(context)!.button_tooltip_sql_result,
             icon: Icons.article_outlined,
             backgroundColor: (model.drawerPage == DrawerPage.sqlResult)
-                ? Theme.of(context).colorScheme.primaryContainer
+                ? Theme.of(context).colorScheme.primaryContainer // 结果页面 icon 背景色
                 : null,
             onPressed: () {
               services.showSQLResult();
@@ -502,7 +509,7 @@ class SessionDrawerBar extends ConsumerWidget {
             icon: Icons.auto_awesome,
             iconColor: Colors.purple[600]!,
             backgroundColor: (model.drawerPage == DrawerPage.aiChat)
-                ? Theme.of(context).colorScheme.primaryContainer
+                ? Theme.of(context).colorScheme.primaryContainer // AI chat 页面 icon 背景色
                 : null,
             onPressed: () {
               services.showChat();
@@ -511,14 +518,14 @@ class SessionDrawerBar extends ConsumerWidget {
           const SizedBox(width: kSpacingSmall),
           RectangleIconButton.medium(
             icon: model.isRightPageOpen ? Icons.menu : Icons.menu_open,
-            iconColor: Theme.of(context).colorScheme.onSurface,
+            iconColor: Theme.of(context).colorScheme.onSurface, // 关闭drawer页面 icon 颜色
             onPressed: () => services.hideRightPage(),
           ),
         ],
         if (!model.isRightPageOpen)
           RectangleIconButton.medium(
             icon: model.isRightPageOpen ? Icons.menu : Icons.menu_open,
-            iconColor: Theme.of(context).colorScheme.onSurface,
+            iconColor: Theme.of(context).colorScheme.onSurface, // 打开drawer页面 icon 颜色
             onPressed: () => services.showRightPage(),
           ),
       ],

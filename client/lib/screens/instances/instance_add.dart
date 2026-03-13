@@ -200,7 +200,7 @@ class DatabaseTypeCard extends StatelessWidget {
         color: selected
             ? Theme.of(context)
                   .colorScheme
-                  .surfaceContainer // db type card selected color
+                  .primaryContainer // db type card selected color
             : null,
       ),
       child: InkWell(
@@ -213,23 +213,13 @@ class DatabaseTypeCard extends StatelessWidget {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: kSpacingTiny),
+              padding: const EdgeInsets.only(top: kSpacingSmall),
               child: Image.asset(logoPath),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(0, kSpacingTiny, 0, kSpacingTiny),
-              child: Text(name, style: Theme.of(context).textTheme.bodyMedium),
+              padding: const EdgeInsets.fromLTRB(0, kSpacingTiny, 0, kSpacingSmall),
+              child: Text(name),
             ),
-            if (selected)
-              Container(
-                padding: const EdgeInsets.only(bottom: kSpacingTiny),
-                width: 5,
-                height: 5,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: selectedColor, // Green when selected, grey when not
-                ),
-              ),
           ],
         ),
       ),
@@ -666,7 +656,7 @@ class AddInstanceForm extends StatelessWidget {
                           backgroundColor: group == selectedGroup
                               ? Theme.of(context)
                                     .colorScheme
-                                    .surfaceContainerHigh // custom config tab selected color
+                                    .primaryContainer // custom config tab selected color
                               : null,
                         ),
                         child: Text(

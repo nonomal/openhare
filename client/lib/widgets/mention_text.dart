@@ -712,8 +712,8 @@ class _MentionTextFieldState extends State<MentionTextField> {
 
     final textField = TextSelectionTheme(
       data: TextSelectionTheme.of(context).copyWith(
-        selectionColor: widget.selectionColor ?? Theme.of(context).colorScheme.primaryContainer,
-      ), // 文字选择背景色
+        selectionColor: widget.selectionColor ?? Theme.of(context).colorScheme.primaryContainer, // 文字选择背景色
+      ),
       child: Actions(
         actions: <Type, Action<Intent>>{
           CopySelectionTextIntent: CallbackAction<CopySelectionTextIntent>(
@@ -847,7 +847,7 @@ class _MentionTextFieldState extends State<MentionTextField> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: theme.colorScheme.shadow.withValues(alpha: 0.12),
+                    color: theme.colorScheme.shadow.withValues(alpha: 0.12), // mention text 提示窗口阴影颜色
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -856,7 +856,7 @@ class _MentionTextFieldState extends State<MentionTextField> {
               child: ValueListenableBuilder<int>(
                 valueListenable: _selectedIndex,
                 builder: (context, selected, _) {
-                  final surface = theme.colorScheme.surfaceContainer;
+                  final surface = theme.colorScheme.surfaceContainer; // mention text 提示窗口选中项背景色
                   return ListView(
                     padding: EdgeInsets.zero,
                     shrinkWrap: true,

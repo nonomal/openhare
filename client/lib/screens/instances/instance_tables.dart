@@ -153,12 +153,11 @@ class _InstanceTableState extends ConsumerState<InstanceTable> {
                   child: SearchBar(
                     controller: instanceSearchTextController,
                     backgroundColor: WidgetStatePropertyAll(
-                      Theme.of(context).colorScheme.surfaceContainer,
+                      Theme.of(context).colorScheme.surfaceContainerLow, // instance 页面搜索框背景色
                     ),
                     side: WidgetStatePropertyAll(
                       BorderSide(
-                        color: Theme.of(context).colorScheme.outlineVariant,
-                        width: 0.5,
+                        color: Theme.of(context).colorScheme.outlineVariant, // instance 页面搜索框边框颜色
                       ),
                     ),
                     onChanged: (value) {

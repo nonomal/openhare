@@ -32,7 +32,7 @@ class FuzzyMatchCodePrompt extends CodeKeywordPrompt {
     final matchResult = cachedResult ?? FuzzyMatch.matchWithResult(input, word);
     final baseStyle = GoogleFonts.robotoMono(
       textStyle: Theme.of(context).textTheme.bodyMedium,
-      color: Theme.of(context).colorScheme.onSurface,
+      color: Theme.of(context).colorScheme.onSurface, // 代码补全提示词文字默认颜色
     );
 
     // If no match or no matchPositions, return plain text
@@ -317,7 +317,7 @@ class _SQLEditorAutoCompleteListViewState extends State<SQLEditorAutoCompleteLis
   Widget _buildPromptText(BuildContext context, CodePrompt prompt) {
     final baseStyle = GoogleFonts.robotoMono(
       textStyle: Theme.of(context).textTheme.bodyMedium,
-      color: Theme.of(context).colorScheme.onSurface,
+      color: Theme.of(context).colorScheme.onSurface, // 代码补全提示词文字默认颜色
     );
 
     if (prompt is FuzzyMatchCodePrompt) {
@@ -395,7 +395,6 @@ class _SQLEditorAutoCompleteListViewState extends State<SQLEditorAutoCompleteLis
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
           color: Theme.of(context).colorScheme.outlineVariant, // 提示窗边框颜色
-          width: 1,
         ),
       ),
       child: SQLEditorAutoCompleteScrollListView(

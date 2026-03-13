@@ -195,7 +195,7 @@ class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogConte
             ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant), // 导出任务SQL信息卡片边框颜色
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -210,7 +210,7 @@ class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogConte
                       TextSpan(
                         text: '`${widget.schema}`',
                         style: textStyle?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
+                          color: Theme.of(context).colorScheme.primary, // 导出任务SQL信息卡片schema高亮颜色
                         ),
                       ),
                       TextSpan(text: ' ${AppLocalizations.of(context)!.export_data_schema_sql}'),
@@ -276,7 +276,7 @@ class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogConte
   }) {
     final defaultBorder = OutlineInputBorder(
       borderSide: BorderSide(
-        color: Theme.of(context).colorScheme.outlineVariant,
+        color: Theme.of(context).colorScheme.outlineVariant, // 输入框边框颜色
       ),
     );
     final errorBorderStyle = OutlineInputBorder(
@@ -356,7 +356,7 @@ class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogConte
                   child: RectangleIconButton.medium(
                     icon: Icons.folder_open,
                     tooltip: AppLocalizations.of(context)!.tooltip_select_directory,
-                    iconColor: Theme.of(context).colorScheme.primary,
+                    iconColor: Theme.of(context).colorScheme.primary, // 导出任务的目录选择按钮颜色
                     onPressed: _selectDirectory,
                   ),
                 ),

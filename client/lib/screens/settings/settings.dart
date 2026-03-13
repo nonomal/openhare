@@ -301,7 +301,7 @@ class LLMApiSettingItem extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLow, // LLM API配置卡片的背景颜色
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant, width: 0.5),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant), // 添加模型的卡片边框颜色
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(kSpacingMedium, kSpacingSmall, kSpacingMedium, kSpacingSmall),

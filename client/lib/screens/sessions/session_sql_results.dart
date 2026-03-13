@@ -26,8 +26,9 @@ class SqlResultTables extends ConsumerWidget {
       maxWidth: 100,
       minWidth: 90,
       labelAlign: TextAlign.center,
-      selectedColor: Theme.of(context).colorScheme.surfaceContainer, // sql result tab 的选中颜色
-      hoverColor: Theme.of(context).colorScheme.surfaceContainerLow, // sql result tab 的鼠标移入色
+      color: Theme.of(context).colorScheme.surfaceContainerLow, // sql result tab 的背景色
+      selectedColor: Theme.of(context).colorScheme.primaryContainer, // sql result tab 的选中颜色
+      hoverColor: Theme.of(context).colorScheme.surfaceContainer, // sql result tab 的鼠标移入色
     );
 
     Widget tab = Row(
@@ -134,7 +135,9 @@ class SqlResultTable extends ConsumerWidget {
         return EmptyPage(
           child: Text(
             AppLocalizations.of(context)!.display_msg_no_data,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant), // 没有数据时显示的文字颜色
           ),
         );
       },
@@ -157,7 +160,7 @@ class SqlResultTable extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error, size: kIconSizeLarge, color: Colors.red),
+                Icon(Icons.error, size: kIconSizeLarge, color: Theme.of(context).colorScheme.error), // SQL执行错误时图标颜色
                 const SizedBox(height: kSpacingMedium),
                 TooltipText(text: '${model.error}${model.query}'),
               ],

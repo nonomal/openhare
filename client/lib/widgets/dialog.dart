@@ -41,7 +41,7 @@ void doActionDialog(
             onPressed: () => Navigator.of(context).pop(),
             child: Text(
               AppLocalizations.of(context)!.cancel,
-              style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+              style: TextStyle(color: Theme.of(context).colorScheme.secondary), // 取消按钮文字颜色
             ),
           ),
           TextButton(
@@ -51,7 +51,7 @@ void doActionDialog(
             },
             child: Text(
               AppLocalizations.of(context)!.confirm,
-              style: TextStyle(color: icon?.color ?? Theme.of(context).colorScheme.primary),
+              style: TextStyle(color: icon?.color ?? Theme.of(context).colorScheme.primary), // 确认按钮文字颜色
             ),
           ),
         ],

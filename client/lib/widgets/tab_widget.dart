@@ -115,7 +115,7 @@ class _CommonTabBarState extends State<CommonTabBar> {
           child: Icon(
             size: 20,
             Icons.more_vert,
-            color: Theme.of(context).colorScheme.onSurface,
+            color: Theme.of(context).colorScheme.onSurface, // 更多tab图标颜色
           ),
         );
 
