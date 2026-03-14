@@ -195,7 +195,7 @@ class _ExportDataDialogContentState extends ConsumerState<_ExportDataDialogConte
             ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant), // 导出任务SQL信息卡片边框颜色
+              border: Border.all(color: Theme.of(context).colorScheme.outline), // 导出任务SQL信息卡片边框颜色
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
