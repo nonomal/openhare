@@ -67,6 +67,14 @@ class InstancesServices extends _$InstancesServices {
     final repo = ref.read(instanceRepoProvider);
     return await repo.getSchemas(instanceId);
   }
+
+  Future<InstanceMetadataModel> getMetadata(InstanceId instanceId) async {
+    return await ref.read(instanceRepoProvider).getMetadata(instanceId);
+  }
+
+  Future<void> refreshMetadata(InstanceId instanceId) async {
+    await ref.read(instanceRepoProvider).refreshMetadata(instanceId);
+  }
 }
 
 @Riverpod(keepAlive: true)

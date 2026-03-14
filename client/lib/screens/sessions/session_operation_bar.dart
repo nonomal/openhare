@@ -2,11 +2,11 @@ import 'package:client/models/instances.dart';
 import 'package:client/models/sessions.dart';
 import 'package:client/screens/tasks/export_data.dart';
 import 'package:client/screens/tasks/task_overview.dart';
-import 'package:client/services/instances/instances.dart';
 import 'package:client/services/sessions/session_drawer.dart';
 import 'package:client/services/sessions/session_sql_editor.dart';
 import 'package:client/services/sessions/session_sql_result.dart';
 import 'package:client/services/sessions/session_conn.dart';
+import 'package:client/services/sessions/session_metadata.dart';
 import 'package:client/services/sessions/sessions.dart';
 import 'package:client/widgets/const.dart';
 import 'package:client/widgets/menu.dart';
@@ -294,7 +294,6 @@ class SchemaBar extends ConsumerStatefulWidget {
 
 class _SchemaBarState extends ConsumerState<SchemaBar> {
   bool isEnter = false;
-  List<String>? _schemas;
   late final TextEditingController _schemaSearchController;
 
   @override
@@ -309,15 +308,6 @@ class _SchemaBarState extends ConsumerState<SchemaBar> {
     super.dispose();
   }
 
-  @override
-  void didUpdateWidget(covariant SchemaBar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.instanceId != widget.instanceId) {
-      _schemas = null;
-      _schemaSearchController.clear();
-    }
-  }
-
   void _onSchemaSearchChanged() {
     setState(() {});
   }
@@ -327,17 +317,9 @@ class _SchemaBarState extends ConsumerState<SchemaBar> {
     return schemas.where((s) => s.toLowerCase().contains(searchText.toLowerCase())).toList();
   }
 
-  Future<void> _fetchSchemas() async {
-    if (widget.disable || widget.instanceId == null) return;
-    if (_schemas != null) return;
-    final schemas = await ref.read(instancesServicesProvider.notifier).getSchemas(widget.instanceId!);
-    if (mounted) {
-      setState(() => _schemas = schemas);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final schemasAsync = ref.watch(selectedSessionSchemaProvider);
     final color = (isEnter && !widget.disable)
         ? Theme.of(context).colorScheme.primary
         : Theme.of(context).colorScheme.onSurface; // schema 框鼠标移入的颜色
@@ -347,93 +329,123 @@ class _SchemaBarState extends ConsumerState<SchemaBar> {
       child: MouseRegion(
         onEnter: (_) => setState(() => isEnter = true),
         onExit: (_) => setState(() => isEnter = false),
-        child: Listener(
-          onPointerDown: (_) => _fetchSchemas(),
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(0, kSpacingTiny, 0, kSpacingTiny),
-            child: Row(
-              children: [
-                HugeIcon(
-                  icon: HugeIcons.strokeRoundedDatabase,
-                  color: color,
-                  size: kIconSizeSmall,
-                ),
-                Container(
-                  padding: const EdgeInsets.only(left: kSpacingTiny),
-                  width: 120,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      widget.currentSchema ?? "",
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: color),
-                    ),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(0, kSpacingTiny, 0, kSpacingTiny),
+          child: Row(
+            children: [
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedDatabase,
+                color: color,
+                size: kIconSizeSmall,
+              ),
+              Container(
+                padding: const EdgeInsets.only(left: kSpacingTiny),
+                width: 120,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    widget.currentSchema ?? "",
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: color),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
 
-    final filteredSchemas = _schemas == null ? null : _filteredSchemas(_schemas!, _schemaSearchController.text);
-
-    final tabs = filteredSchemas == null
-        ? [
+    final tabs = schemasAsync.when(
+      loading: () => [
+        OverlayMenuItem(
+          height: 72,
+          child: const Center(child: Loading.medium()),
+        ),
+      ],
+      error: (error, _) => [
+        OverlayMenuItem(
+          height: 36,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: kSpacingSmall),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: TooltipText(
+                text: error.toString(),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            ),
+          ),
+        ),
+      ],
+      data: (schemas) {
+        final filteredSchemas = _filteredSchemas(schemas, _schemaSearchController.text);
+        if (filteredSchemas.isEmpty) {
+          return [
             OverlayMenuItem(
               height: 36,
-              child: const Center(child: Loading.medium()),
-            ),
-          ]
-        : filteredSchemas.map((schema) {
-            final isSelected = schema == widget.currentSchema;
-            final color = isSelected
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.onSurface; // schema list 里当前schema的颜色
-
-            return OverlayMenuItem(
-              height: 30,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: kSpacingSmall),
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Row(
-                    children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedDatabase,
-                        color: color,
-                        size: kIconSizeSmall,
-                      ),
-                      const SizedBox(width: kSpacingTiny),
-                      Expanded(
-                        child: TooltipText(
-                          text: schema,
-                          style: TextStyle(color: color),
-                        ),
-                      ),
-                    ],
-                  ),
+                  child: Text(AppLocalizations.of(context)!.display_msg_no_data),
                 ),
               ),
-              onTabSelected: () async {
-                await ref.read(sessionConnsServicesProvider.notifier).setCurrentSchema(widget.connId!, schema);
-              },
-            );
-          }).toList();
+            ),
+          ];
+        }
+        return filteredSchemas.map((schema) {
+          final isSelected = schema == widget.currentSchema;
+          final color = isSelected
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.onSurface; // schema list 里当前schema的颜色
+
+          return OverlayMenuItem(
+            height: 30,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: kSpacingSmall),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  children: [
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedDatabase,
+                      color: color,
+                      size: kIconSizeSmall,
+                    ),
+                    const SizedBox(width: kSpacingTiny),
+                    Expanded(
+                      child: TooltipText(
+                        text: schema,
+                        style: TextStyle(color: color),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            onTabSelected: () async {
+              await ref.read(sessionConnsServicesProvider.notifier).setCurrentSchema(widget.connId!, schema);
+            },
+          );
+        }).toList();
+      },
+    );
 
     if (widget.disable) {
       return schemaBarContent;
     }
 
     final header = OverlayMenuHeader(
-      height: 36,
+      height: 42,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(kSpacingSmall, kSpacingTiny, kSpacingSmall, kSpacingTiny),
+        padding: const EdgeInsets.fromLTRB(kSpacingSmall, kSpacingSmall, kSpacingSmall, kSpacingTiny),
         child: SearchBarTheme(
           data: SearchBarThemeData(
             textStyle: WidgetStatePropertyAll(Theme.of(context).textTheme.bodySmall),
-            backgroundColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.surfaceContainerLowest), // schema 页面搜索框背景色
+            backgroundColor: WidgetStatePropertyAll(
+              Theme.of(context).colorScheme.surfaceContainerLowest, // schema 页面搜索框背景色
+            ),
             elevation: const WidgetStatePropertyAll(0),
             constraints: const BoxConstraints(minHeight: 24),
           ),
@@ -442,12 +454,28 @@ class _SchemaBarState extends ConsumerState<SchemaBar> {
             side: WidgetStatePropertyAll(
               BorderSide(
                 color: Theme.of(context).colorScheme.outlineVariant, // session 页面搜索框边框颜色
-                // width: 0.5,
               ),
             ),
             controller: _schemaSearchController,
             onChanged: (_) => _onSchemaSearchChanged(),
             trailing: const [Icon(Icons.search, size: kIconSizeSmall)],
+          ),
+        ),
+      ),
+    );
+
+    final footer = OverlayMenuFooter(
+      height: kIconButtonSizeSmall + kSpacingTiny * 2,
+      child: Padding(
+        padding: const EdgeInsets.only(right: kSpacingSmall, top: kSpacingTiny, bottom: kSpacingTiny),
+        child: Align(
+          alignment: Alignment.bottomRight,
+          child: RectangleIconButton.small(
+            tooltip: AppLocalizations.of(context)!.button_tooltip_refresh_metadata,
+            icon: Icons.refresh,
+            onPressed: () async {
+              ref.read(selectedSessionMetadataProvider.notifier).refreshMetadata();
+            },
           ),
         ),
       ),
@@ -459,7 +487,7 @@ class _SchemaBarState extends ConsumerState<SchemaBar> {
       maxWidth: 300,
       tabs: tabs,
       header: header,
-      footer: OverlayMenuFooter(height: kSpacingSmall, child: SizedBox()),
+      footer: footer,
       child: schemaBarContent,
     );
   }
@@ -487,7 +515,9 @@ class SessionDrawerBar extends ConsumerWidget {
             tooltip: AppLocalizations.of(context)!.button_tooltip_metadata_tree,
             icon: Icons.account_tree_outlined,
             backgroundColor: (model.drawerPage == DrawerPage.metadataTree)
-                ? Theme.of(context).colorScheme.primaryContainer // 元数据tree页面 icon 背景色
+                ? Theme.of(context)
+                      .colorScheme
+                      .primaryContainer // 元数据tree页面 icon 背景色
                 : null,
             onPressed: () {
               services.goToTree();
@@ -497,7 +527,9 @@ class SessionDrawerBar extends ConsumerWidget {
             tooltip: AppLocalizations.of(context)!.button_tooltip_sql_result,
             icon: Icons.article_outlined,
             backgroundColor: (model.drawerPage == DrawerPage.sqlResult)
-                ? Theme.of(context).colorScheme.primaryContainer // 结果页面 icon 背景色
+                ? Theme.of(context)
+                      .colorScheme
+                      .primaryContainer // 结果页面 icon 背景色
                 : null,
             onPressed: () {
               services.showSQLResult();
@@ -509,7 +541,9 @@ class SessionDrawerBar extends ConsumerWidget {
             icon: Icons.auto_awesome,
             iconColor: Colors.purple[600]!,
             backgroundColor: (model.drawerPage == DrawerPage.aiChat)
-                ? Theme.of(context).colorScheme.primaryContainer // AI chat 页面 icon 背景色
+                ? Theme.of(context)
+                      .colorScheme
+                      .primaryContainer // AI chat 页面 icon 背景色
                 : null,
             onPressed: () {
               services.showChat();
