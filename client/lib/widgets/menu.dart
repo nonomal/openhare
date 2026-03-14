@@ -67,12 +67,12 @@ class _OverlayMenuState extends State<OverlayMenu> {
       constraints: BoxConstraints(maxWidth: widget.maxWidth, maxHeight: maxHeight),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLowest, // 菜单库默认背景色
+        border: Border.all(color: Theme.of(context).colorScheme.outline),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.outlineVariant, // 菜单阴影颜色
-            blurRadius: 5,
-            offset: const Offset(0, 1), // todo: 如何菜单是朝上的那么怎么处理好
+            color: Theme.of(context).colorScheme.outline, // 菜单阴影颜色
+            blurRadius: 10,
           ),
         ],
       ),
