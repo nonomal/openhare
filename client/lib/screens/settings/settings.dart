@@ -231,6 +231,30 @@ class LLMApiSettingPage extends ConsumerWidget {
   }
 }
 
+// todo: 表单输入框抽取公共库
+InputDecoration _buildDialogInputDecoration(BuildContext context, {required String labelText}) {
+  final defaultBorder = OutlineInputBorder(
+    borderSide: BorderSide(
+      color: Theme.of(context).colorScheme.outline,
+    ),
+  );
+  final errorBorderStyle = OutlineInputBorder(
+    borderSide: BorderSide(
+      color: Theme.of(context).colorScheme.error,
+    ),
+  );
+
+  return InputDecoration(
+    labelText: labelText,
+    border: defaultBorder,
+    enabledBorder: defaultBorder,
+    disabledBorder: defaultBorder,
+    focusedBorder: defaultBorder,
+    errorBorder: errorBorderStyle,
+    focusedErrorBorder: errorBorderStyle,
+  );
+}
+
 void showLLMApiSettingDialog(
   BuildContext context,
   String title,
@@ -247,8 +271,9 @@ void showLLMApiSettingDialog(
     builder: (context) {
       return CustomDialog(
         title: title,
+        titleTail: _OnlyOpenAICompatibleTip(),
         maxWidth: 600,
-        maxHeight: 380,
+        maxHeight: 400,
         actions: [
           TextButton(
             onPressed: () {
@@ -280,22 +305,34 @@ void showLLMApiSettingDialog(
           children: [
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(labelText: 'Description'),
+              decoration: _buildDialogInputDecoration(
+                context,
+                labelText: 'Description',
+              ),
             ),
-            const SizedBox(height: kSpacingSmall),
+            const SizedBox(height: kSpacingMedium),
             TextField(
               controller: baseUrlController,
-              decoration: const InputDecoration(labelText: 'Base URL'),
+              decoration: _buildDialogInputDecoration(
+                context,
+                labelText: 'Base URL',
+              ),
             ),
-            const SizedBox(height: kSpacingSmall),
+            const SizedBox(height: kSpacingMedium),
             TextField(
               controller: apiKeyController,
-              decoration: const InputDecoration(labelText: 'API Key'),
+              decoration: _buildDialogInputDecoration(
+                context,
+                labelText: 'API Key',
+              ),
             ),
-            const SizedBox(height: kSpacingSmall),
+            const SizedBox(height: kSpacingMedium),
             TextField(
               controller: modelNameController,
-              decoration: const InputDecoration(labelText: 'Model'),
+              decoration: _buildDialogInputDecoration(
+                context,
+                labelText: 'Model',
+              ),
             ),
           ],
         ),
@@ -426,7 +463,7 @@ class AddLLMApiSettingItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLow, // 添加模型的卡片的背景颜色
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant, width: 0.5), // 添加模型的卡片边框颜色
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant), // 添加模型的卡片边框颜色
       ),
       child: Center(
         child: IconButton(
@@ -441,7 +478,7 @@ class AddLLMApiSettingItem extends StatelessWidget {
           icon: Icon(
             Icons.add,
             size: kIconSizeLarge,
-            color: Theme.of(context).colorScheme.primary, // 添加模型的按钮颜色
+            color: Theme.of(context).colorScheme.onSurfaceVariant, // 添加模型的按钮颜色
           ),
         ),
       ),

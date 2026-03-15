@@ -64,6 +64,7 @@ void doActionDialog(
 class CustomDialog extends StatelessWidget {
   final String title;
   final Widget? titleIcon;
+  final Widget? titleTail;
   final Widget content;
   final List<Widget>? actions;
   final double? maxWidth;
@@ -73,6 +74,7 @@ class CustomDialog extends StatelessWidget {
     super.key,
     required this.title,
     this.titleIcon,
+    this.titleTail,
     required this.content,
     this.actions,
     this.maxWidth = 640,
@@ -110,6 +112,16 @@ class CustomDialog extends StatelessWidget {
                 children: [
                   if (titleIcon != null) titleIcon!,
                   Text(title, style: Theme.of(context).textTheme.titleLarge, textAlign: TextAlign.center),
+                  if (titleTail != null)
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          titleTail!,
+                          const SizedBox(width: kSpacingSmall),
+                        ],
+                      ),
+                    ),
                 ],
               ),
               const SizedBox(height: kSpacingMedium),
