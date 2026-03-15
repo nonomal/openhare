@@ -36,23 +36,19 @@ class SettingsPage extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.settings, color: Theme.of(context).colorScheme.primary), // 个性化设置的标题icon颜色
-                const SizedBox(width: kSpacingSmall),
                 Text(
                   AppLocalizations.of(context)!.preferences,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ],
             ),
-            const SizedBox(height: kSpacingSmall),
+            const SizedBox(height: kSpacingMedium),
             SystemSettingPage(model: model.systemSetting),
             const SizedBox(height: kSpacingMedium),
             const PixelDivider(),
             const SizedBox(height: kSpacingMedium),
             Row(
               children: [
-                Icon(Icons.api, color: Theme.of(context).colorScheme.primary), // LLM API的标题icon颜色
-                const SizedBox(width: kSpacingSmall),
                 Text(
                   AppLocalizations.of(context)!.llm_api,
                   style: Theme.of(context).textTheme.titleMedium,
@@ -91,40 +87,27 @@ class SystemSettingPage extends ConsumerWidget {
                 ],
               ),
             ),
-            SizedBox(
-              width: 140,
-              child: RadioListTile<String>(
-                title: const Text("English"),
-                value: "en",
-                groupValue: model.language,
-                onChanged: (value) {
-                  ref.read(systemSettingServiceProvider.notifier).setLanguage(value!);
-                },
-                dense: true,
-                visualDensity: VisualDensity.compact,
-                contentPadding: EdgeInsets.zero,
-              ),
-            ),
-            SizedBox(
-              width: 140,
-              child: RadioListTile<String>(
-                title: const Text("中文"),
-                value: "zh",
-                groupValue: model.language,
-                onChanged: (value) {
-                  ref.read(systemSettingServiceProvider.notifier).setLanguage(value!);
-                },
-                dense: true,
-                visualDensity: VisualDensity.compact,
-                contentPadding: EdgeInsets.zero,
-              ),
+            Row(
+              children: [
+                _SettingRadioOption(
+                  title: const Text("English"),
+                  value: "en",
+                  selectedValue: model.language,
+                  onTap: () => ref.read(systemSettingServiceProvider.notifier).setLanguage("en"),
+                ),
+                const SizedBox(width: 8),
+                _SettingRadioOption(
+                  title: const Text("中文"),
+                  value: "zh",
+                  selectedValue: model.language,
+                  onTap: () => ref.read(systemSettingServiceProvider.notifier).setLanguage("zh"),
+                ),
+              ],
             ),
             const Spacer(),
           ],
         ),
-        const SizedBox(height: kSpacingTiny),
-        const PixelDivider(),
-        const SizedBox(height: kSpacingTiny),
+        const SizedBox(height: kSpacingSmall),
         Row(
           children: [
             SizedBox(
@@ -137,38 +120,79 @@ class SystemSettingPage extends ConsumerWidget {
                 ],
               ),
             ),
-            SizedBox(
-              width: 140,
-              child: RadioListTile<String>(
-                title: Text(AppLocalizations.of(context)!.theme_light),
-                value: "light",
-                groupValue: model.theme,
-                onChanged: (value) {
-                  ref.read(systemSettingServiceProvider.notifier).setTheme(value!);
-                },
-                dense: true,
-                visualDensity: VisualDensity.compact,
-                contentPadding: EdgeInsets.zero, // Remove default padding
-              ),
-            ),
-            SizedBox(
-              width: 140,
-              child: RadioListTile<String>(
-                title: Text(AppLocalizations.of(context)!.theme_dark),
-                value: "dark",
-                groupValue: model.theme,
-                onChanged: (value) {
-                  ref.read(systemSettingServiceProvider.notifier).setTheme(value!);
-                },
-                dense: true,
-                visualDensity: VisualDensity.compact,
-                contentPadding: EdgeInsets.zero,
-              ),
+            Row(
+              children: [
+                _SettingRadioOption(
+                  title: Text(AppLocalizations.of(context)!.theme_light),
+                  value: "light",
+                  selectedValue: model.theme,
+                  onTap: () => ref.read(systemSettingServiceProvider.notifier).setTheme("light"),
+                ),
+                const SizedBox(width: 8),
+                _SettingRadioOption(
+                  title: Text(AppLocalizations.of(context)!.theme_dark),
+                  value: "dark",
+                  selectedValue: model.theme,
+                  onTap: () => ref.read(systemSettingServiceProvider.notifier).setTheme("dark"),
+                ),
+              ],
             ),
             const Spacer(),
           ],
         ),
       ],
+    );
+  }
+}
+
+class _SettingRadioOption extends StatelessWidget {
+  final Widget title;
+  final String value;
+  final String selectedValue;
+  final VoidCallback onTap;
+
+  const _SettingRadioOption({
+    required this.title,
+    required this.value,
+    required this.selectedValue,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isSelected = selectedValue == value;
+
+    return SizedBox(
+      width: 140,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 120),
+            curve: Curves.easeOut,
+            padding: const EdgeInsets.all(kSpacingSmall),
+            decoration: BoxDecoration(
+              color: isSelected ? colorScheme.surfaceContainerLow : colorScheme.surfaceContainerLowest,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: colorScheme.outlineVariant),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                  size: kIconSizeSmall,
+                  color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: kSpacingSmall),
+                Expanded(child: title),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
