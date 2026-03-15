@@ -131,6 +131,10 @@
   "@display_msg_no_data": {
     "description": "No data"
   },
+  "display_msg_execution_success": "Execution successful",
+  "@display_msg_execution_success": {
+    "description": "SQL execution success message"
+  },
   "effect_rows": "Effect rows",
   "@effect_rows": {
     "description": "Effect rows"

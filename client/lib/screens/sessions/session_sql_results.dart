@@ -125,89 +125,77 @@ class SqlResultTable extends ConsumerWidget {
   }
 
   Widget buildEmptyBody(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const maxWidth = 64 + kSpacingSmall;
-        const maxHeight = 64 + kSpacingSmall;
-        if (constraints.maxWidth < maxWidth || constraints.maxHeight < maxHeight) {
-          return const SizedBox.shrink();
-        }
-        return EmptyPage(
-          child: Text(
-            AppLocalizations.of(context)!.display_msg_no_data,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant), // 没有数据时显示的文字颜色
+    return EmptyPage(
+      child: Text(
+        AppLocalizations.of(context)!.display_msg_no_data,
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant), // 没有数据时显示的文字颜色
+      ),
+    );
+  }
+
+  Widget buildSuccessBody(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.check_circle,
+            size: 64,
+            color: Theme.of(context).colorScheme.primaryContainer, // SQL执行成功图标颜色
           ),
-        );
-      },
+          const SizedBox(height: kSpacingSmall),
+          Text(AppLocalizations.of(context)!.display_msg_execution_success),
+        ],
+      ),
     );
   }
 
   Widget buildErrorBody(BuildContext context, SQLResultDetailModel model) {
-    // 监听父容器大小，小于内容高度则隐藏
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const maxHeight = kIconSizeLarge + kSpacingMedium + 20.0 + kSpacingSmall * 2;
-        const maxWidth = kIconSizeLarge + kSpacingLarge * 2;
-        if (constraints.maxHeight < maxHeight || constraints.maxWidth < maxWidth) {
-          // 父容器太小，隐藏内容
-          return const SizedBox.shrink();
-        }
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(kSpacingLarge, kSpacingSmall, kSpacingLarge, kSpacingSmall),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error, size: kIconSizeLarge, color: Theme.of(context).colorScheme.error), // SQL执行错误时图标颜色
-                const SizedBox(height: kSpacingMedium),
-                TooltipText(text: '${model.error}${model.query}'),
-              ],
-            ),
-          ),
-        );
-      },
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(kSpacingLarge, kSpacingSmall, kSpacingLarge, kSpacingSmall),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error, size: kIconSizeLarge, color: Theme.of(context).colorScheme.error), // SQL执行错误时图标颜色
+            const SizedBox(height: kSpacingMedium),
+            TooltipText(text: '${model.error}${model.query}'),
+          ],
+        ),
+      ),
     );
   }
 
   Widget buildWaitingBody(BuildContext context, WidgetRef ref, SQLResultDetailModel model) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const maxHeight = kIconButtonSizeLarge + kSpacingMedium + 40;
-        const maxWidth = kIconButtonSizeLarge + 80;
-        if (constraints.maxHeight < maxHeight || constraints.maxWidth < maxWidth) {
-          return const SizedBox.shrink();
-        }
-        return Container(
-          alignment: Alignment.topLeft,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Loading.large(),
-                const SizedBox(height: kSpacingMedium),
-                FilledButton(
-                  onPressed: () async {
-                    SessionModel? sessionModel = ref
-                        .read(sessionsServicesProvider.notifier)
-                        .getSession(
-                          model.resultId.sessionId,
-                        );
+    return Container(
+      alignment: Alignment.topLeft,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Loading.large(),
+            const SizedBox(height: kSpacingMedium),
+            FilledButton(
+              onPressed: () async {
+                SessionModel? sessionModel = ref
+                    .read(sessionsServicesProvider.notifier)
+                    .getSession(
+                      model.resultId.sessionId,
+                    );
 
-                    if (sessionModel == null || sessionModel.connId == null) {
-                      return;
-                    }
-                    await ref.read(sessionConnsServicesProvider.notifier).killQuery(sessionModel.connId!);
-                  },
-                  child: Text(AppLocalizations.of(context)!.cancel),
-                ),
-              ],
+                if (sessionModel == null || sessionModel.connId == null) {
+                  return;
+                }
+                await ref.read(sessionConnsServicesProvider.notifier).killQuery(sessionModel.connId!);
+              },
+              child: Text(AppLocalizations.of(context)!.cancel),
             ),
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 
@@ -218,6 +206,10 @@ class SqlResultTable extends ConsumerWidget {
       return buildEmptyBody(context);
     }
     if (model.state == SQLExecuteState.done) {
+      // 非查询语句没有返回值，此时展示空页面
+      if (model.data!.columns.isEmpty) {
+        return buildSuccessBody(context);
+      }
       final controller = SQLResultController.sqlResultController(
         model.resultId,
         () => DataGridController(
