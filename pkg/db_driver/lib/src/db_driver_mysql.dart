@@ -200,20 +200,11 @@ class MySQLConnection extends BaseConnection {
     return BaseQueryResult(queryId, resultColumns, rows, resultAffectedRows);
   }
 
-  String _wrapLimit(String sql, int limit) {
-    sql = sql.trimRight();
-    if (sql.endsWith(";")) sql = sql.substring(0, sql.length - 1);
-    return "SELECT * FROM ($sql) AS dt_1 Limit $limit;";
-  }
-
   @override
   Stream<BaseQueryStreamItem> queryStream(String sql, {int? limit}) async* {
-    // 判断是否是 SELECT 语句, 若是则根据 limit 参数决定是否嵌套一层 LIMIT 限制返回数据量
-    final firstTok = Lexer(sql).firstTrim();
-    if (limit != null &&
-        firstTok != null &&
-        firstTok.content.toLowerCase() == "select") {
-      sql = _wrapLimit(sql, limit);
+    final SQLDefiner sd = parser(DialectType.mysql, sql);
+    if (sd.canLimit) {
+      sql = sd.wrapLimit(limit: limit ?? 100);
     }
 
     final queryId = Uuid().v4(); // todo: 统一处理
@@ -252,7 +243,7 @@ class MySQLConnection extends BaseConnection {
     }
 
     // 如果执行的语句包含`use schema`
-    if (firstTok != null && firstTok.content.toLowerCase() == "use") {
+    if (sd.changeSchema) {
       final schema = await getCurrentSchema();
       onSchemaChanged(schema ?? "");
     }
@@ -308,10 +299,10 @@ ORDER BY
 
           final columnRows = byTable[table]!;
           final columnNodes = columnRows
-              .map((result) =>
-                  MetaDataNode(MetaType.column, result.getString("COLUMN_NAME")!)
-                    ..withProp(MetaDataPropType.dataType,
-                        getDataType(result.getString("DATA_TYPE")!)))
+              .map((result) => MetaDataNode(
+                  MetaType.column, result.getString("COLUMN_NAME")!)
+                ..withProp(MetaDataPropType.dataType,
+                    getDataType(result.getString("DATA_TYPE")!)))
               .toList();
           tableNode.items = columnNodes;
         }
@@ -330,7 +321,7 @@ ORDER BY
       schemas.add(result.getString("Database") ?? "");
     }
     return schemas;
-  } 
+  }
 
   @override
   Future<void> setCurrentSchema(String schema) async {
@@ -346,18 +337,6 @@ ORDER BY
     final currentSchema = rows.first.getString("DATABASE()");
     return currentSchema;
   }
-
-  // Future<List<MetaDataNode>> getTables(String schema) async {
-  //   List<MetaDataNode> tables = List.empty(growable: true);
-  //   final results = await _query(
-  //       "select TABLE_NAME from information_schema.tables where table_schema='$schema' and TABLE_TYPE in ('BASE TABLE','SYSTEM VIEW')");
-  //   final rows = results.rows;
-  //   for (final result in rows) {
-  //     tables.add(MetaDataNode(MetaType.table, result.getString("TABLE_NAME")!));
-  //     // tables.add();
-  //   }
-  //   return tables;
-  // }
 
   static DataType getDataType(String dataType) {
     return switch (dataType) {
@@ -383,34 +362,4 @@ ORDER BY
       _ => DataType.blob,
     };
   }
-
-  // Future<List<MetaDataNode>> getTableColumns(
-  //     String schema, String table) async {
-  //   List<MetaDataNode> columns = List.empty(growable: true);
-  //   // ref: https://dev.mysql.com/doc/refman/8.4/en/information-schema-columns-table.html
-  //   final results = await _query(
-  //       "select COLUMN_NAME, COLUMN_DEFAULT, IS_NULLABLE, DATA_TYPE, CHARACTER_SET_NAME, COLLATION_NAME, COLUMN_TYPE, COLUMN_KEY, COLUMN_COMMENT, EXTRA from information_schema.columns where TABLE_SCHEMA = '$schema' and TABLE_NAME = '$table'");
-  //   final rows = results.rows;
-  //   for (final result in rows) {
-  //     final node =
-  //         MetaDataNode(MetaType.column, result.getString("COLUMN_NAME")!)
-  //           ..withProp(MetaDataPropType.dataType,
-  //               getDataType(result.getString("DATA_TYPE")!));
-
-  //     columns.add(node);
-  //     // columns.add(TableColumnMeta.loadFromRow(result));
-  //   }
-  //   return columns;
-  // }
-
-  // Future<List<MetaDataNode>> getTableKeys(String schema, String table) async {
-  //   List<TableKeyMeta> keys = List.empty(growable: true);
-  //   final results = await _query(
-  //       "SELECT INDEX_NAME, GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX SEPARATOR \",\") AS COLUMNS FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = '$schema' AND TABLE_NAME = '$table' GROUP BY INDEX_NAME");
-  //   final rows = results.rows;
-  //   for (final result in rows) {
-  //     keys.add(TableKeyMeta.loadFromRow(result));
-  //   }
-  //   return keys;
-  // }
 }
