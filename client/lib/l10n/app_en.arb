@@ -239,6 +239,10 @@
   "@tip_delete_instance_desc": {
     "description": "tips when delete instance desc"
   },
+  "tip_dangerous_sql_title": "Execute query",
+  "@tip_dangerous_sql_title": {
+    "description": "Title for dangerous SQL confirmation dialog"
+  },
   "tip_dangerous_sql_desc": "The SQL may have significant impact. Proceed with execution?",
   "@tip_dangerous_sql_desc": {
     "description": "Warning message before executing dangerous SQL"

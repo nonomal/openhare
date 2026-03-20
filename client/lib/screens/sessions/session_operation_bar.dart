@@ -613,7 +613,7 @@ void queryDangerousSQLDialog(
   showDialog(
     context: context,
     builder: (_) => CustomDialog(
-      title: "tips",
+      title: AppLocalizations.of(context)!.tip_dangerous_sql_title,
       titleIcon: Icon(
         Icons.play_circle_outline_rounded,
         color: Colors.green,
