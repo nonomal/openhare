@@ -623,6 +623,10 @@
   "@ai_chat_execution_failed": {
     "description": "AI chat execution failed status"
   },
+  "ai_chat_execution_cancelled": "Cancelled",
+  "@ai_chat_execution_cancelled": {
+    "description": "AI chat tool execution cancelled by user"
+  },
   "ai_chat_thinking_process": "Thought process",
   "@ai_chat_thinking_process": {
     "description": "AI chat thinking process label"
@@ -650,6 +654,14 @@
   "ai_chat_budget_context_hard_stopped": "Context limit reached; cannot continue",
   "@ai_chat_budget_context_hard_stopped": {
     "description": "AI chat context limit reached message"
+  },
+  "ai_chat_tool_confirm_run": "Run",
+  "@ai_chat_tool_confirm_run": {
+    "description": "AI tool SQL confirm button"
+  },
+  "ai_chat_tool_confirm_decline": "Cancel",
+  "@ai_chat_tool_confirm_decline": {
+    "description": "AI tool SQL confirm decline button"
   },
   "paginated_total_filtered": "Count {filteredCount}/{count}",
   "@paginated_total_filtered": {

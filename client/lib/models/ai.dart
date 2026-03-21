@@ -24,6 +24,7 @@ abstract class AIChatRepo {
   AIChatModel create(AIChatModel model);
   AIChatModel? getAIChatById(AIChatId id);
   void delete(AIChatId id);
+  AIChatMessageItem? getMessageById(AIChatId id, AIChatMessageId messageId);
   void updateMessages(AIChatId id, List<AIChatMessageItem> messages);
   void addMessage(AIChatId id, AIChatMessageItem message);
   void updateState(AIChatId id, AIChatState state);
@@ -203,13 +204,46 @@ abstract class AIChatAssistantMessageModel with _$AIChatAssistantMessageModel {
   }
 }
 
+enum AIChatToolQueryState {
+  /// 等待用户在聊天内确认
+  awaitingUserConfirm,
+
+  /// 已确认且正在向数据库发起请求
+  running,
+
+  /// 用户拒绝执行该 SQL
+  rejected,
+
+  /// 执行成功（[queryResult] 有值）
+  finished,
+
+  /// 执行失败或空结果（[errorMessage] 有值）
+  failed,
+}
+
 @freezed
 abstract class AIChatMessageToolCallQueryModel with _$AIChatMessageToolCallQueryModel {
+  const AIChatMessageToolCallQueryModel._();
+
   const factory AIChatMessageToolCallQueryModel({
     required String query,
-    StateValue<BaseQueryResult>? result,
+
+    /// 执行成功时的查询结果；仅 [finished] 时有值。
+    BaseQueryResult? queryResult,
+
+    /// 执行失败或空结果时的说明；仅 [failed] 时有值。
+    String? errorMessage,
     Duration? executeTime,
+    @Default(AIChatToolQueryState.running) AIChatToolQueryState execState,
   }) = _AIChatMessageToolCallQueryModel;
+
+  bool get isAwaitingUserConfirm => execState == AIChatToolQueryState.awaitingUserConfirm;
+
+  bool get isRejected => execState == AIChatToolQueryState.rejected;
+
+  bool get isFinished => execState == AIChatToolQueryState.finished;
+
+  bool get isFailed => execState == AIChatToolQueryState.failed;
 }
 
 @freezed
@@ -222,12 +256,21 @@ abstract class AIChatMessageToolCallsModel with _$AIChatMessageToolCallsModel {
   }) = _AIChatMessageToolCallsModel;
 
   String toMessage() {
-    if (toolCall.result == null) return '';
-    return toolCall.result!.match(
-      (result) => _getSQLResultString(result) ?? '',
-      (error) => error,
-      () => '正在执行查询...',
-    );
+    if (toolCall.isAwaitingUserConfirm) {
+      return jsonEncode({
+        'pending_user_confirm': true,
+        'query': toolCall.query,
+      });
+    }
+    if (toolCall.isRejected) return '';
+    if (toolCall.execState == AIChatToolQueryState.running) return '正在执行查询...';
+    if (toolCall.isFinished && toolCall.queryResult != null) {
+      return _getSQLResultString(toolCall.queryResult!) ?? '';
+    }
+    if (toolCall.isFailed) {
+      return toolCall.errorMessage ?? '';
+    }
+    return '';
   }
 
   /// 获取 SQL Result 字符串

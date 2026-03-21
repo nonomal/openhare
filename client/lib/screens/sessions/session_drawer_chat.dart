@@ -18,6 +18,8 @@ import 'package:client/screens/sessions/ai_chat/message_tool.dart';
 import 'package:client/screens/sessions/ai_chat/message_user.dart';
 import 'package:client/screens/sessions/ai_chat/message_ai.dart';
 import 'package:client/screens/sessions/ai_chat/input_user.dart';
+import 'package:client/services/ai/chat.dart';
+import 'package:client/services/ai/prompt.dart';
 import 'package:sql_parser/parser.dart';
 
 class SessionDrawerChat extends ConsumerStatefulWidget {
@@ -93,9 +95,22 @@ class _SessionChatMessagesState extends ConsumerState<SessionChatMessages> {
         onRunSQL: SQLConnectState.isIdle(model.state) ? (code) => _runSQL(context, ref, model, code) : null,
       ),
       toolsResult: (msg) => ToolCallWidget(
+        chatId: model.chatModel.id,
+        toolsMessageId: msg.id,
         dbType: model.dbType ?? DatabaseType.mysql,
         toolCall: msg.toolCall,
         onRun: SQLConnectState.isIdle(model.state) ? (query) => _runSQL(context, ref, model, query) : null,
+        onResolveToolQuery: model.llmAgents.lastUsedLLMAgent != null
+            ? (approved) => ref
+                  .read(aIChatServiceProvider.notifier)
+                  .resolveToolQueryExecution(
+                    model.chatModel.id,
+                    msg.id,
+                    approved,
+                    model.llmAgents.lastUsedLLMAgent!.id,
+                    genChatSystemPrompt(model),
+                  )
+            : null,
       ),
     );
   }

@@ -239,6 +239,10 @@
     "@ai_chat_execution_failed": {
       "description": "AI对话执行失败状态"
     },
+    "ai_chat_execution_cancelled": "已取消",
+    "@ai_chat_execution_cancelled": {
+      "description": "AI对话用户取消执行工具"
+    },
     "ai_chat_thinking_process": "思考过程",
     "@ai_chat_thinking_process": {
       "description": "AI对话思考过程标签"
@@ -266,6 +270,14 @@
     "ai_chat_budget_context_hard_stopped": "已达到上下文上限；无法继续",
     "@ai_chat_budget_context_hard_stopped": {
       "description": "AI对话上下文已达上限提示"
+    },
+    "ai_chat_tool_confirm_run": "执行",
+    "@ai_chat_tool_confirm_run": {
+      "description": "AI 工具 SQL 确认按钮"
+    },
+    "ai_chat_tool_confirm_decline": "取消",
+    "@ai_chat_tool_confirm_decline": {
+      "description": "AI 工具 SQL 取消按钮"
     },
     "paginated_total_filtered": "总数 {filteredCount}/{count}",
     "@paginated_total_filtered": {
