@@ -99,7 +99,8 @@ final class SqlExecuteQueryToolExecutor implements AIChatToolExecutor {
       }
       final startTime = DateTime.now();
       final connServices = ref.read(sessionConnsServicesProvider.notifier);
-      final queryResult = await connServices.query(sessionModel.connId!, query);
+      // tool 的调用默认会limit, 防止上下文太长
+      final queryResult = await connServices.query(sessionModel.connId!, query, limit: 100);
       final executeTime = DateTime.now().difference(startTime);
 
       model = model.copyWith(

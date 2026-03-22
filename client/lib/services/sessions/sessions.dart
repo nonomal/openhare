@@ -43,6 +43,11 @@ class SessionsServices extends _$SessionsServices {
     _invalidateSelf();
   }
 
+  void updateSessionConfig(SessionId sessionId, SessionConfigModel config) {
+    ref.read(sessionRepoProvider).updateSessionConfig(sessionId, config);
+    _invalidateSelf();
+  }
+
   Future<void> addSession(InstanceModel instance, {String? schema}) async {
     SessionId selectedSessionId;
     final selectedSession = ref.read(sessionRepoProvider).seletedSession();
@@ -191,6 +196,7 @@ class SelectedSessionDetailNotifier extends _$SelectedSessionDetailNotifier {
     InstanceModel? selectedInstance = session.instanceId == null
         ? null
         : instanceServices.getInstanceById(session.instanceId!);
+
     return SessionDetailModel(
       sessionId: session.sessionId,
       instanceId: session.instanceId,
@@ -200,6 +206,7 @@ class SelectedSessionDetailNotifier extends _$SelectedSessionDetailNotifier {
       connState: conns.conns[session.connId]?.state,
       connErrorMsg: conns.conns[session.connId]?.errorMsg,
       currentSchema: session.currentSchema,
+      config: session.config,
     );
   }
 }
@@ -231,6 +238,7 @@ class SessionTabNotifier extends _$SessionTabNotifier {
           connState: conns.conns[session.connId]?.state,
           connErrorMsg: conns.conns[session.connId]?.errorMsg,
           currentSchema: session.currentSchema,
+          config: session.config,
         );
       }).toList(),
       selectedSession: selectedSession,
@@ -258,6 +266,7 @@ class SessionOpBarNotifier extends _$SessionOpBarNotifier {
 
     return SessionOpBarModel(
       sessionId: session.sessionId,
+      config: session.config,
       instanceId: session.instanceId,
       dbType: session.dbType,
       connId: session.connId,

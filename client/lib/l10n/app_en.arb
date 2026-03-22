@@ -335,6 +335,34 @@
   "@button_tooltip_ai_test": {
     "description": "Button tooltip test LLM API"
   },
+  "button_tooltip_session_config": "Session query options",
+  "@button_tooltip_session_config": {
+    "description": "Button tooltip session SQL config"
+  },
+  "session_config_title": "Query options",
+  "@session_config_title": {
+    "description": "Session config overlay title"
+  },
+  "session_config_subtitle": "Applies to this session only",
+  "@session_config_subtitle": {
+    "description": "Session config overlay subtitle"
+  },
+  "session_config_query_limit": "Row limit per query",
+  "@session_config_query_limit": {
+    "description": "Session config query limit label"
+  },
+  "session_config_query_limit_hint": "DQL statements automatically get a LIMIT clause; 0 means unlimited",
+  "@session_config_query_limit_hint": {
+    "description": "Session config query limit hint: auto LIMIT for DQL, 0 = no limit"
+  },
+  "session_config_query_check": "Execution confirmation",
+  "@session_config_query_check": {
+    "description": "Session config: confirm before executing certain SQL"
+  },
+  "session_config_query_check_desc": "When enabled, prompt before running potentially destructive statements",
+  "@session_config_query_check_desc": {
+    "description": "Session config: dangerous SQL confirmation description"
+  },
   "metadata_tree_database": "Database",
   "@metadata_tree_database": {
     "description": "Metadata tree database"

@@ -22,6 +22,8 @@ abstract class SessionRepo {
   void reorderSession(int oldIndex, int newIndex);
   String? getCode(SessionId sessionId);
   void saveCode(SessionId sessionId, String code);
+  void updateSessionConfig(SessionId sessionId, SessionConfigModel config);
+  SessionConfigModel getSessionConfig(SessionId sessionId);
 }
 
 abstract class SessionConnRepo {
@@ -37,7 +39,7 @@ abstract class SessionConnRepo {
   });
   Future<void> close(ConnId connId);
   Future<void> setCurrentSchema(ConnId connId, String schema);
-  Future<BaseQueryResult?> query(ConnId connId, String query);
+  Future<BaseQueryResult?> query(ConnId connId, String query, {int? limit});
   Stream<BaseQueryStreamItem> queryStream(ConnId connId, String query);
   Future<void> killQuery(ConnId connId);
 }
@@ -70,7 +72,16 @@ abstract class SessionModel with _$SessionModel {
     InstanceId? instanceId,
     ConnId? connId,
     String? currentSchema,
+    required SessionConfigModel config,
   }) = _SessionModel;
+}
+
+@freezed
+abstract class SessionConfigModel with _$SessionConfigModel {
+  const factory SessionConfigModel({
+    @Default(100) int queryLimit, // 每次查询的记录数, 0 表示不限制, 会自动补全limit语句
+    @Default(true) bool enableQueryCheck, // 是否启用查询二次检查, true 表示启用, false 表示不启用
+  }) = _SessionConfigModel;
 }
 
 @freezed
@@ -88,6 +99,9 @@ abstract class SessionDetailModel with _$SessionDetailModel {
 
     // schema
     String? currentSchema,
+
+    // config
+    required SessionConfigModel config,
   }) = _SessionDetailModel;
 }
 
@@ -110,6 +124,7 @@ abstract class SessionDetailListModel with _$SessionDetailListModel {
 abstract class SessionOpBarModel with _$SessionOpBarModel {
   const factory SessionOpBarModel({
     required SessionId sessionId,
+    required SessionConfigModel config,
     InstanceId? instanceId,
     DatabaseType? dbType,
     required ConnId? connId,
@@ -288,6 +303,7 @@ abstract class SQLResultsModel with _$SQLResultsModel {
 abstract class SessionAIChatModel with _$SessionAIChatModel {
   const factory SessionAIChatModel({
     required SessionId sessionId,
+    required SessionConfigModel config,
     required String? currentSchema,
     required DatabaseType? dbType,
     required InstanceMetadataModel? metadata,

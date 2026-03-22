@@ -144,7 +144,7 @@ class SessionOpBar extends ConsumerWidget {
               String query = getQuery(model);
               if (query.isNotEmpty) {
                 final df = parser(model.dbType?.dialectType ?? DialectType.mysql, query);
-                if (df.isDangerousSQL) {
+                if (df.isDangerousSQL && model.config.enableQueryCheck) {
                   queryDangerousSQLDialog(
                     context,
                     ref,
@@ -176,7 +176,7 @@ class SessionOpBar extends ConsumerWidget {
                   String query = getQuery(model);
                   if (query.isNotEmpty) {
                     final df = parser(model.dbType?.dialectType ?? DialectType.mysql, query);
-                    if (df.isDangerousSQL) {
+                    if (df.isDangerousSQL && model.config.enableQueryCheck) {
                       queryDangerousSQLDialog(
                         context,
                         ref,
@@ -298,6 +298,7 @@ class SessionOpBar extends ConsumerWidget {
           explainWidget(context, ref, model),
           exportDataWidget(context, model),
           taskOverviewWidget(context, ref, model),
+          SessionConfigBar(model: model),
           divider(context),
           saveWidget(context, ref, model),
           const Expanded(child: SessionDrawerBar()),
@@ -524,6 +525,128 @@ class _SchemaBarState extends ConsumerState<SchemaBar> {
       header: header,
       footer: footer,
       child: schemaBarContent,
+    );
+  }
+}
+
+class SessionConfigBar extends ConsumerStatefulWidget {
+  final SessionOpBarModel model;
+
+  const SessionConfigBar({
+    super.key,
+    required this.model,
+  });
+
+  @override
+  ConsumerState<SessionConfigBar> createState() => _SessionConfigBarState();
+}
+
+class _SessionConfigBarState extends ConsumerState<SessionConfigBar> {
+  void _onQueryLimitChanged(int? value) {
+    if (value == null) {
+      return;
+    }
+    setState(() {
+      ref
+          .read(sessionsServicesProvider.notifier)
+          .updateSessionConfig(
+            widget.model.sessionId,
+            widget.model.config.copyWith(queryLimit: value),
+          );
+    });
+  }
+
+  void _onEnableQueryCheckChanged(bool value) {
+    setState(() {
+      ref
+          .read(sessionsServicesProvider.notifier)
+          .updateSessionConfig(
+            widget.model.sessionId,
+            widget.model.config.copyWith(enableQueryCheck: value),
+          );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
+    final header = OverlayMenuHeader(
+      height: 74,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(kSpacingMedium, kSpacingMedium, kSpacingSmall, kSpacingSmall),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: cs.primaryContainer,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(kSpacingSmall),
+                child: Icon(
+                  Icons.settings,
+                  size: 20,
+                  color: cs.onPrimaryContainer,
+                ),
+              ),
+            ),
+            const SizedBox(width: kSpacingSmall),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.session_config_title,
+                    style: textTheme.titleMedium,
+                  ),
+                  Text(
+                    l10n.session_config_subtitle,
+                    style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    return OverlayMenu(
+      closeOnSelectItem: false,
+      spacing: kSpacingTiny,
+      maxHeight: 320,
+      maxWidth: 420,
+      header: header,
+      footer: OverlayMenuFooter(height: kSpacingMedium, child: const SizedBox.shrink()),
+      tabs: [
+        OverlayConfigItem.number(
+          height: 64,
+          title: l10n.session_config_query_limit,
+          description: l10n.session_config_query_limit_hint,
+          value: widget.model.config.queryLimit,
+          onChanged: _onQueryLimitChanged,
+        ),
+        OverlayConfigItem.checkbox(
+          height: 64,
+          title: l10n.session_config_query_check,
+          description: l10n.session_config_query_check_desc,
+          value: widget.model.config.enableQueryCheck,
+          onChanged: (v) {
+            _onEnableQueryCheckChanged(v);
+          },
+        ),
+      ],
+      child: RectangleIconButton.medium(
+        tooltip: l10n.button_tooltip_session_config,
+        icon: Icons.settings,
+        onPressed: null,
+        iconColor: Theme.of(context).colorScheme.onSurface,
+      ),
     );
   }
 }
