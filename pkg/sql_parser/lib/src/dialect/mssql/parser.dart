@@ -62,7 +62,17 @@ class MssqlSQLDefiner extends SQLDefiner {
 
   @override
   bool get canLimit {
-    return Matcher(MssqlLexer(content)).match("select {*}");
+    if (sqlType != SQLType.dql) {
+      return false;
+    }
+    if (Matcher(MssqlLexer(content)).match("select {*}")) {
+      // 排除 order by 语法, mssql 不支持 order by 子查询, 先忽略后续考虑支持
+      if (Matcher(MssqlLexer(content)).match("select {*} order by")) {
+        return false;
+      }
+      return true;
+    }
+    return false;
   }
 
   @override
@@ -71,7 +81,7 @@ class MssqlSQLDefiner extends SQLDefiner {
   }
 
   @override
-  String wrapLimit({int limit = 100}) {
+  String wrapLimit(int limit) {
     // todo: 实现 MSSQL 分页查询, 直接包裹子查询的方式不行，内部不能用order by
     if (!Matcher(MssqlLexer(content)).match("select {*}")) {
       return content;

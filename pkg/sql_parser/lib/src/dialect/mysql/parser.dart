@@ -25,6 +25,9 @@ class MysqlSQLDefiner extends SQLDefiner {
   SQLType get sqlType {
     // DQL: 数据查询相关.
     if (Matcher(MySQLLexer(content)).match("{select|show|desc|describe|explain} {*}")) {
+      if (Matcher(MySQLLexer(content)).match("select {*} into")) {
+        return SQLType.dml;
+      }
       return SQLType.dql;
     }
 
@@ -71,6 +74,9 @@ class MysqlSQLDefiner extends SQLDefiner {
 
   @override
   bool get canLimit {
+    if (sqlType != SQLType.dql) {
+      return false;
+    }
     return Matcher(MySQLLexer(content)).match("select {*}");
   }
 
@@ -80,7 +86,7 @@ class MysqlSQLDefiner extends SQLDefiner {
   }
 
   @override
-  String wrapLimit({int limit = 100}) {
+  String wrapLimit(int limit) {
     if (Matcher(MySQLLexer(content)).match("select {*}")) {
       // 去掉结尾的注释和分号，这样才能被子查询包裹
       final sql = MySQLLexer(content).trimEndWhere((token) {

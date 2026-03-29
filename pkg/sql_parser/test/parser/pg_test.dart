@@ -1,6 +1,4 @@
 import 'package:sql_parser/parser.dart';
-import 'package:sql_parser/src/lexer/token.dart';
-import 'package:sql_parser/src/parser/parser.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -51,7 +49,7 @@ SELECT 1;
   });
 
   test('pg wrap limit', () {
-    final wrapped = parser(DialectType.pg, "select * from t1;").wrapLimit(limit: 20);
+    final wrapped = parser(DialectType.pg, "select * from t1;").wrapLimit(20);
     expect(wrapped, "SELECT * FROM (select * from t1) AS dt_1 LIMIT 20");
   });
 }

@@ -130,7 +130,12 @@ abstract class BaseConnection {
           resultColumns = columns;
           resultAffectedRows = affectedRows;
         case QueryStreamItemRow(:final row):
-          rows.add(row);
+          // 增加防护：如果limit > 0，则只取limit条数据.
+          if (limit != null && limit > 0 && rows.length >= limit) {
+            continue;
+          } else {
+            rows.add(row);
+          }
       }
     }
 
@@ -144,11 +149,10 @@ abstract class BaseConnection {
   Stream<BaseQueryStreamItem> queryStream(String sql, {int? limit}) async* {
     final sd = parser(sql);
     if (limit != null && limit > 0 && sd.canLimit) {
-      sql = sd.wrapLimit(limit: limit);
+      sql = sd.wrapLimit(limit);
     }
     final queryId = Uuid().v4();
     sql = '/* call by openhare, uuid: $queryId */ $sql';
-    print("sql: 【$sql】");
 
     yield* queryStreamInternal(sql);
     if (sd.changeSchema) {

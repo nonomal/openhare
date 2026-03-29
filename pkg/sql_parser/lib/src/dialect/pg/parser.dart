@@ -63,6 +63,9 @@ class PgSQLDefiner extends SQLDefiner {
 
   @override
   bool get canLimit {
+    if (sqlType != SQLType.dql) {
+      return false;
+    }
     return Matcher(PgLexer(content)).match("select {*}");
   }
 
@@ -73,7 +76,7 @@ class PgSQLDefiner extends SQLDefiner {
   }
 
   @override
-  String wrapLimit({int limit = 100}) {
+  String wrapLimit(int limit) {
     if (!Matcher(PgLexer(content)).match("select {*}")) {
       return content;
     }

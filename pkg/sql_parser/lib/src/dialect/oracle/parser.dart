@@ -61,6 +61,9 @@ class OracleSQLDefiner extends SQLDefiner {
 
   @override
   bool get canLimit {
+    if (sqlType != SQLType.dql) {
+      return false;
+    }
     return Matcher(OracleLexer(content)).match("select {*}");
   }
 
@@ -70,7 +73,7 @@ class OracleSQLDefiner extends SQLDefiner {
   }
 
   @override
-  String wrapLimit({int limit = 100}) {
+  String wrapLimit(int limit) {
     if (!Matcher(OracleLexer(content)).match("select {*}")) {
       return content;
     }

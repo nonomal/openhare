@@ -53,7 +53,7 @@ class SessionConnsServices extends _$SessionConnsServices {
     ref.invalidateSelf();
   }
 
-  Future<BaseQueryResult?> query(ConnId connId, String query, {int? limit = 100}) async {
+  Future<BaseQueryResult?> query(ConnId connId, String query, {int? limit}) async {
     return ref.read(sessionConnRepoProvider).query(connId, query, limit: limit);
   }
 
