@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:db_driver/db_driver.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:client/utils/state_value.dart';
+import 'package:client/utils/time_format.dart';
 import 'package:uuid/uuid.dart';
 
 part 'ai.freezed.dart';
@@ -261,59 +262,51 @@ abstract class AIChatMessageToolCallsModel with _$AIChatMessageToolCallsModel {
   }) = _AIChatMessageToolCallsModel;
 
   String toMessage() {
-    if (toolCall.isAwaitingUserConfirm) {
-      return jsonEncode({
-        'pending_user_confirm': true,
-        'query': toolCall.query,
-      });
-    }
-    if (toolCall.isRejected) return '';
-    if (toolCall.execState == AIChatToolQueryState.running) return '正在执行查询...';
-    if (toolCall.isFinished && toolCall.queryResult != null) {
-      return _getSQLResultString(toolCall.queryResult!) ?? '';
-    }
-    if (toolCall.isFailed) {
-      return toolCall.errorMessage ?? '';
-    }
-    return '';
-  }
+    final m = <String, dynamic>{
+      'query': toolCall.query,
+      'status': toolCall.execState.name,
+    };
 
-  /// 获取 SQL Result 字符串
-  ///
-  /// [result] SQL 查询结果
-  ///
-  /// 返回 JSON 字符串，包含查询结果的列信息和数据行
-  String? _getSQLResultString(BaseQueryResult result) {
-    try {
-      final data = <String, dynamic>{
-        'success': true,
-        'affectedRows': result.affectedRows.toString(),
-        'columns': result.columns
-            .map(
-              (c) => {
-                'name': c.name,
-                'type': c.dataType().name,
-              },
-            )
-            .toList(),
-        'rows': result.rows.map((row) {
-          final rowMap = <String, dynamic>{};
-          for (var i = 0; i < row.values.length && i < result.columns.length; i++) {
-            final column = result.columns[i];
-            final value = row.values[i];
-            rowMap[column.name] = value.getString();
-          }
-          return rowMap;
-        }).toList(),
-      };
-      final jsonString = jsonEncode(data);
-      return jsonString;
-    } catch (e) {
-      return jsonEncode({
-        'success': false,
-        'error': e.toString(),
-      });
+    switch (toolCall.execState) {
+      case AIChatToolQueryState.failed:
+        m['error'] = toolCall.errorMessage ?? '';
+        break;
+      case AIChatToolQueryState.finished:
+        final result = toolCall.queryResult;
+        if (result != null) {
+          final executeTimeStr = toolCall.executeTime?.format() ?? '';
+          final columns = result.columns
+              .map(
+                (c) => {
+                  'name': c.name,
+                  'type': c.dataType().name,
+                },
+              )
+              .toList();
+          final rows = result.rows.map((row) {
+            final rowMap = <String, dynamic>{};
+            for (var i = 0; i < row.values.length && i < result.columns.length; i++) {
+              final column = result.columns[i];
+              final value = row.values[i];
+              rowMap[column.name] = value.getString();
+            }
+            return rowMap;
+          }).toList();
+          m['affectedRows'] = result.affectedRows.toString();
+          m['executeTime'] = executeTimeStr;
+          m['columns'] = columns;
+          m['rows'] = rows;
+        }
+        break;
+      case AIChatToolQueryState.initializing:
+      case AIChatToolQueryState.awaitingUserConfirm:
+      case AIChatToolQueryState.rejected:
+      case AIChatToolQueryState.approved:
+      case AIChatToolQueryState.running:
+        break;
     }
+
+    return jsonEncode(m);
   }
 }
 
