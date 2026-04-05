@@ -2,10 +2,64 @@ package main
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	go_ora "github.com/sijms/go-ora/v2"
+)
+
+// Oracle 类型名称常量（来源：github.com/sijms/go-ora/v2）
+// 参考：go_ora 驱动源码中的 TNSType 枚举定义
+const (
+	// Number types
+	oraNUMBER   = "NUMBER"
+	oraBInteger = "BInteger"
+	oraFLOAT    = "FLOAT"
+	oraUINT     = "UINT"
+	oraIBFloat  = "IBFloat"
+	oraIBDouble = "IBDouble"
+	oraBFloat   = "BFloat"
+	oraBDouble  = "BDouble"
+
+	// Character types
+	oraNCHAR          = "NCHAR"
+	oraVARCHAR        = "VARCHAR"
+	oraLONG           = "LONG"
+	oraLongVarChar    = "LongVarChar"
+	oraCHAR           = "CHAR"
+	oraCHARZ          = "CHARZ"
+	oraOCIString      = "OCIString"
+	oraOCIClobLocator = "OCIClobLocator"
+
+	// Date/Time types
+	oraDATE             = "DATE"
+	oraOCIDate          = "OCIDate"
+	oraTimeStampDTY     = "TimeStampDTY"
+	oraTimeStampTZ_DTY  = "TimeStampTZ_DTY"
+	oraIntervalYM_DTY   = "IntervalYM_DTY"
+	oraIntervalDS_DTY   = "IntervalDS_DTY"
+	oraTimeTZ           = "TimeTZ"
+	oraTIMESTAMP        = "TIMESTAMP"
+	oraTIMESTAMPTZ      = "TIMESTAMPTZ"
+	oraIntervalYM       = "IntervalYM"
+	oraIntervalDS       = "IntervalDS"
+	oraTimeStampLTZ_DTY = "TimeStampLTZ_DTY"
+	oraTimeStampeLTZ    = "TimeStampeLTZ"
+
+	// Binary types
+	oraRAW            = "RAW"
+	oraLongRaw        = "LongRaw"
+	oraVarRaw         = "VarRaw"
+	oraLongVarRaw     = "LongVarRaw"
+	oraOCIBlobLocator = "OCIBlobLocator"
+	oraOCIFileLocator = "OCIFileLocator"
+
+	// JSON/XML types
+	oraXMLType    = "XMLType"
+	oraOCIXMLType = "OCIXMLType"
+
+	// Special types
+	oraREFCURSOR = "REFCURSOR"
+	oraRESULTSET = "RESULTSET"
 )
 
 type oraConn struct {
@@ -15,41 +69,36 @@ type oraConn struct {
 func (c *oraConn) Close() error { return c.conn.Close() }
 
 func oracleDataType(typeName string) int32 {
-	t := strings.ToUpper(typeName)
-
-	// Oracle number types
-	if strings.Contains(t, "NUMBER") || strings.Contains(t, "NUMERIC") ||
-		strings.Contains(t, "INTEGER") || strings.Contains(t, "INT") ||
-		strings.Contains(t, "FLOAT") || strings.Contains(t, "DOUBLE") ||
-		strings.Contains(t, "PRECISION") {
+	switch typeName {
+	// Number types
+	case oraNUMBER, oraBInteger, oraFLOAT, oraUINT, oraIBFloat, oraIBDouble, oraBFloat, oraBDouble:
 		return dataTypeNumber
-	}
 
-	// Oracle character types
-	if strings.Contains(t, "CHAR") || strings.Contains(t, "VARCHAR") ||
-		strings.Contains(t, "CLOB") || strings.Contains(t, "NCLOB") ||
-		strings.Contains(t, "LONG") || strings.Contains(t, "XMLTYPE") {
+	// Character types
+	case oraNCHAR, oraVARCHAR, oraLONG, oraLongVarChar, oraCHAR, oraCHARZ, oraOCIString, oraOCIClobLocator:
+		return dataTypeChar
+
+	// Date/Time types
+	case oraDATE, oraOCIDate, oraTimeStampDTY, oraTimeStampTZ_DTY, oraIntervalYM_DTY,
+		oraIntervalDS_DTY, oraTimeTZ, oraTIMESTAMP, oraTIMESTAMPTZ, oraIntervalYM,
+		oraIntervalDS, oraTimeStampLTZ_DTY, oraTimeStampeLTZ:
+		return dataTypeTime
+
+	// Binary types
+	case oraRAW, oraLongRaw, oraVarRaw, oraLongVarRaw, oraOCIBlobLocator, oraOCIFileLocator:
+		return dataTypeBlob
+
+	// JSON/XML types
+	case oraXMLType, oraOCIXMLType:
+		return dataTypeJson
+
+	// Special types
+	case oraREFCURSOR, oraRESULTSET:
+		return dataTypeDataSet
+
+	default:
 		return dataTypeChar
 	}
-
-	// Oracle date/time types
-	if strings.Contains(t, "DATE") || strings.Contains(t, "TIMESTAMP") ||
-		strings.Contains(t, "INTERVAL") {
-		return dataTypeTime
-	}
-
-	// Oracle binary types
-	if strings.Contains(t, "BLOB") || strings.Contains(t, "BFILE") ||
-		strings.Contains(t, "RAW") || strings.Contains(t, "LONG RAW") {
-		return dataTypeBlob
-	}
-
-	// Oracle JSON
-	if strings.Contains(t, "JSON") {
-		return dataTypeJson
-	}
-
-	return dataTypeChar
 }
 
 func (c *oraConn) OpenQuery(sql string) (rowCursor, error) {

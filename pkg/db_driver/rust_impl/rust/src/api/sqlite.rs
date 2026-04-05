@@ -3,23 +3,53 @@ use crate::frb_generated::StreamSink;
 use rusqlite::Connection;
 use std::sync::Mutex;
 
+/// SQLite 类型名称处理
+/// 参考：SQLite 官方文档 https://www.sqlite.org/datatype3.html
+/// 
+/// SQLite 使用类型亲和性（Type Affinity）系统：
+/// - 如果类型字符串包含 "INT" → INTEGER 亲和性
+/// - 如果类型字符串包含 "CHAR", "CLOB", or "TEXT" → TEXT 亲和性
+/// - 如果类型字符串包含 "BLOB" 或未指定类型 → BLOB 亲和性
+/// - 如果类型字符串包含 "REAL", "FLOA", or "DOUB" → REAL 亲和性
+/// - 其他情况 → NUMERIC 亲和性
+/// 
+/// 运行时存储类型只有 5 种：NULL, INTEGER, REAL, TEXT, BLOB
+/// 参考：rusqlite::types::Type 枚举定义
 fn sqlite_type_to_data_type(type_name: &str) -> DataType {
-    let t = type_name.to_uppercase();
-    if t.contains("INT") || t.contains("REAL") || t.contains("FLOA") || t.contains("DOUB") || t.contains("NUMERIC") || t.contains("DECIMAL") {
-        return DataType::Number;
-    }
+    let t = type_name.trim().to_uppercase();
+    
+    // 按照 SQLite 类型亲和性规则匹配
+    // 优先检查 TEXT 亲和性（避免 "INTEGER" 包含 "INT" 导致误判为字符类型）
+
+    // TEXT
     if t.contains("CHAR") || t.contains("CLOB") || t.contains("TEXT") {
         return DataType::Char;
     }
-    if t.contains("DATE") || t.contains("TIME") {
-        return DataType::Time;
+    // INTEGER
+    if t.contains("INT") {
+        return DataType::Number;
     }
+    // REAL
+    if t.contains("REAL") || t.contains("FLOA") || t.contains("DOUB") {
+        return DataType::Number;
+    }
+    // NUMERIC
+    if t.contains("NUMERIC") || t.contains("DECIMAL") || t.contains("BOOLEAN") {
+        return DataType::Number;
+    }
+    // BLOB
     if t.contains("BLOB") {
         return DataType::Blob;
     }
+    // DATE/TIME (SQLite 推荐存储为 TEXT, REAL, 或 INTEGER)
+    if t.contains("DATE") || t.contains("TIME") {
+        return DataType::Time;
+    }
+    // JSON (存储为 TEXT)
     if t.contains("JSON") {
         return DataType::Json;
     }
+    // 默认：NUMERIC
     DataType::Char
 }
 
