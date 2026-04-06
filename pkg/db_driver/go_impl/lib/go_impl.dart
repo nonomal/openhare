@@ -65,6 +65,8 @@ final class ImplConnection {
 
   static Future<ImplConnection> openMysql(String dsn) => open(go_impl_db_type_t.GO_IMPL_DB_MYSQL, dsn);
 
+  static Future<ImplConnection> openSqlite(String dsn) => open(go_impl_db_type_t.GO_IMPL_DB_SQLITE, dsn);
+
   Stream<DbQueryEvent> streamQuery(String sql) async* {
     final port = ReceivePort();
     final sqlPtr = sql.toNativeUtf8();

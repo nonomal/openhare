@@ -1,29 +1,25 @@
 import 'package:collection/collection.dart';
 import 'package:sql_parser/parser.dart' as sp;
-import 'package:rust_impl/rust_impl.dart' as rust_impl;
+import 'package:go_impl/go_impl.dart' as impl;
 
 import 'db_driver_conn_meta.dart';
 import 'db_driver_interface.dart';
 import 'db_driver_metadata.dart';
 
 class SqliteQueryValue extends BaseQueryValue {
-  final rust_impl.DbQueryValue _value;
+  final impl.DbQueryValue _value;
 
   SqliteQueryValue(this._value);
 
   @override
-  String? getString() {
-    return _value.asString();
-  }
+  String? getString() => _value.asString();
 
   @override
-  List<int> getBytes() {
-    return _value.asBytes()?.toList() ?? <int>[];
-  }
+  List<int> getBytes() => _value.asBytes();
 }
 
 class SqliteQueryColumn extends BaseQueryColumn {
-  final rust_impl.DbQueryColumn _column;
+  final impl.DbQueryColumn _column;
 
   SqliteQueryColumn(this._column);
 
@@ -33,18 +29,18 @@ class SqliteQueryColumn extends BaseQueryColumn {
   @override
   DataType dataType() {
     return switch (_column.dataType) {
-      rust_impl.DbDataType.number => DataType.number,
-      rust_impl.DbDataType.char => DataType.char,
-      rust_impl.DbDataType.time => DataType.time,
-      rust_impl.DbDataType.blob => DataType.blob,
-      rust_impl.DbDataType.json => DataType.json,
-      rust_impl.DbDataType.dataSet => DataType.dataSet,
+      impl.DbDataType.number => DataType.number,
+      impl.DbDataType.char => DataType.char,
+      impl.DbDataType.time => DataType.time,
+      impl.DbDataType.blob => DataType.blob,
+      impl.DbDataType.json => DataType.json,
+      impl.DbDataType.dataSet => DataType.dataSet,
     };
   }
 }
 
 class SQLiteConnection extends BaseConnection {
-  final rust_impl.ImplConnection _conn;
+  final impl.ImplConnection _conn;
 
   SQLiteConnection(this._conn);
 
@@ -57,8 +53,8 @@ class SQLiteConnection extends BaseConnection {
     if (dsn.startsWith("file://")) {
       dsn = Uri.parse(dsn).toFilePath();
     }
-    final conn = await rust_impl.ImplConnection.openSqlite(
-        dsn.isEmpty ? ":memory:" : dsn);
+    final conn =
+        await impl.ImplConnection.openSqlite(dsn.isEmpty ? ":memory:" : dsn);
     final sqliteConn = SQLiteConnection(conn);
     return sqliteConn;
   }
@@ -75,7 +71,6 @@ class SQLiteConnection extends BaseConnection {
 
   @override
   Future<void> killQuery() async {
-    // sqlite 单进程连接，暂不支持跨连接 cancel
     return;
   }
 
@@ -85,22 +80,25 @@ class SQLiteConnection extends BaseConnection {
 
     await for (final item in _conn.streamQuery(sql)) {
       switch (item) {
-        case rust_impl.DbQueryHeader():
+        case impl.DbQueryHeader():
           columns = item.columns
               .map<BaseQueryColumn>((c) => SqliteQueryColumn(c))
-              .toList();
+              .toList(growable: false);
           yield QueryStreamItemHeader(
             columns: columns,
             affectedRows: item.affectedRows,
           );
-        case rust_impl.DbQueryRow():
-          if (columns == null) {
-            throw StateError('Received row before header');
+        case impl.DbQueryRow():
+          final currentColumns = columns;
+          if (currentColumns == null) {
+            throw StateError('No header received before row');
           }
           yield QueryStreamItemRow(
             row: QueryResultRow(
-              columns,
-              item.values.map((v) => SqliteQueryValue(v)).toList(),
+              currentColumns,
+              item.values
+                  .map<BaseQueryValue>((v) => SqliteQueryValue(v))
+                  .toList(growable: false),
             ),
           );
       }
@@ -109,7 +107,7 @@ class SQLiteConnection extends BaseConnection {
 
   @override
   Future<String> version() async {
-    final results = await query("SELECT sqlite_version() AS version;");
+    final results = await query("SELECT sqlite_version() AS version");
     return results.rows.first.getString("version") ?? "";
   }
 
