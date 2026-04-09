@@ -148,9 +148,13 @@ abstract class BaseConnection {
 
   Stream<BaseQueryStreamItem> queryStream(String sql, {int? limit}) async* {
     final sd = parser(sql);
+    // 去掉末尾分隔符
+    sql = sd.trimDelimiter(sql);
+    // 包裹limit
     if (limit != null && limit > 0 && sd.canLimit) {
-      sql = sd.wrapLimit(limit);
+      sql = sd.wrapLimit(sql, limit);
     }
+    // 添加注释
     final queryId = Uuid().v4();
     sql = '/* call by openhare, uuid: $queryId */ $sql';
 
