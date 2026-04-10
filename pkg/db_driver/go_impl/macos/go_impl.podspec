@@ -25,35 +25,22 @@ cd "$PODS_TARGET_SRCROOT/../src"
 # caused undefined symbols for go_impl_* despite dummy.c referencing them.
 OUT_A="${DERIVED_FILE_DIR}/libgo_impl.a"
 
-build_arch() {
-  case "$1" in
-    arm64)  GOARCH="arm64" ;;
-    x86_64) GOARCH="amd64" ;;
-    *) echo "Unsupported architecture: $1"; exit 1 ;;
-  esac
-  CGO_ENABLED=1 GOOS=darwin GOARCH=$GOARCH go build -buildmode=c-archive -o "${OUT_A}.$1" .
-}
-
 LIPO_INPUTS=""
 for arch in $ARCHS; do
-  build_arch "$arch"
+  case "$arch" in
+    arm64)  goarch=arm64 ;;
+    x86_64) goarch=amd64 ;;
+    *) echo "Unsupported architecture: $arch" >&2; exit 1 ;;
+  esac
+  CGO_ENABLED=1 GOOS=darwin GOARCH=$goarch go build -buildmode=c-archive -o "${OUT_A}.${arch}" .
   LIPO_INPUTS="$LIPO_INPUTS ${OUT_A}.${arch}"
 done
-
-if echo "$ARCHS" | grep -q " "; then
-  lipo -create -output "$OUT_A" $LIPO_INPUTS
-else
-  mv "${OUT_A}.${ARCHS}" "$OUT_A"
-fi
-rm -f ${OUT_A}.*
+lipo -create -output "$OUT_A" $LIPO_INPUTS
+rm -f "${OUT_A}".*
 SCRIPT
     :execution_position => :before_compile,
-    :input_files => [
-      '${PODS_TARGET_SRCROOT}/../src/impl.go',
-      '${PODS_TARGET_SRCROOT}/../src/oracle.go',
-      '${PODS_TARGET_SRCROOT}/../src/mssql.go',
-      '${PODS_TARGET_SRCROOT}/../src/stream_bridge.c',
-    ],
+    # 每次构建都跑 go build（vendor 等依赖无法用 input 列全）；不必再维护 input_files。
+    :always_out_of_date => '1',
     :output_files => ['${DERIVED_FILE_DIR}/libgo_impl.a'],
   }
 
