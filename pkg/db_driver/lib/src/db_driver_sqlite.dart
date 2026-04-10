@@ -114,7 +114,6 @@ class SQLiteConnection extends BaseConnection {
   @override
   Future<List<MetaDataNode>> metadata() async {
     final results = await query("""SELECT
-    'main' AS TABLE_SCHEMA,
     m.name AS TABLE_NAME,
     p.name AS COLUMN_NAME,
     p.type AS DATA_TYPE
@@ -129,38 +128,27 @@ ORDER BY
     m.name,
     p.cid;""");
 
-    final rows = results.rows;
-    final schemaNodes = <MetaDataNode>[];
-    final schemaRows =
-        rows.groupListsBy((result) => result.getString("TABLE_SCHEMA")!);
+    final tableNodes = <MetaDataNode>[];
+    final tableRows =
+        results.rows.groupListsBy((result) => result.getString("TABLE_NAME")!);
 
-    for (final schema in schemaRows.keys) {
-      final schemaNode = MetaDataNode(MetaType.schema, schema);
-      schemaNodes.add(schemaNode);
+    for (final table in tableRows.keys) {
+      final tableNode = MetaDataNode(MetaType.table, table);
+      tableNodes.add(tableNode);
 
-      final tableNodes = <MetaDataNode>[];
-      final tableRows = schemaRows[schema]!
-          .groupListsBy((result) => result.getString("TABLE_NAME")!);
-      for (final table in tableRows.keys) {
-        final tableNode = MetaDataNode(MetaType.table, table);
-        tableNodes.add(tableNode);
-
-        final columnRows = tableRows[table]!;
-        final columnNodes = columnRows
-            .map((result) =>
-                MetaDataNode(MetaType.column, result.getString("COLUMN_NAME")!)
-                  ..withProp(
-                    MetaDataPropType.dataType,
-                    _getDataType(result.getString("DATA_TYPE") ?? ""),
-                  ))
-            .toList();
-        tableNode.items = columnNodes;
-      }
-
-      schemaNode.items = tableNodes;
+      final columnRows = tableRows[table]!;
+      final columnNodes = columnRows
+          .map((result) =>
+              MetaDataNode(MetaType.column, result.getString("COLUMN_NAME")!)
+                ..withProp(
+                  MetaDataPropType.dataType,
+                  _getDataType(result.getString("DATA_TYPE") ?? ""),
+                ))
+          .toList();
+      tableNode.items = columnNodes;
     }
 
-    return schemaNodes;
+    return tableNodes;
   }
 
   static DataType _getDataType(String dataType) {
@@ -190,16 +178,16 @@ ORDER BY
 
   @override
   Future<List<String>> schemas() async {
-    return ["main"];
+    return [];
   }
 
   @override
   Future<void> setCurrentSchema(String schema) async {
-    onSchemaChanged("main");
+    onSchemaChanged("");
   }
 
   @override
   Future<String?> getCurrentSchema() async {
-    return "main";
+    return null;
   }
 }
