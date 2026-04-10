@@ -48,6 +48,16 @@ class PGConnection extends BaseConnection {
 
   PGConnection(this._conn, this._dsn);
 
+  static const Set<String> _pgSystemSchemasLower = {
+    'information_schema',
+    'pg_catalog',
+    'pg_logical',
+    'pg_toast',
+  };
+
+  static String _pgSystemSchemasNotInSql() =>
+      _pgSystemSchemasLower.map((s) => "'$s'").join(', ');
+
   @override
   sp.SQLDefiner parser(String sql) => sp.parser(sp.DialectType.pg, sql);
 
@@ -151,6 +161,8 @@ class PGConnection extends BaseConnection {
 
   @override
   Future<List<MetaDataNode>> metadata() async {
+    final schemaList = await schemas();
+
     final results = await query("""SELECT 
     t.table_schema,
     t.table_name,
@@ -170,33 +182,33 @@ ORDER BY
     c.ordinal_position;""");
 
     final rows = results.rows;
-    final schemaNodes = <MetaDataNode>[];
-
     final schemaRows =
         rows.groupListsBy((result) => result.getString("table_schema")!);
 
-    for (final schema in schemaRows.keys) {
+    final schemaNodes = <MetaDataNode>[];
+    for (final schema in schemaList) {
       final schemaNode = MetaDataNode(MetaType.schema, schema);
       schemaNodes.add(schemaNode);
 
       final tableNodes = <MetaDataNode>[];
-      final tableRows = schemaRows[schema]!
-          .groupListsBy((result) => result.getString("table_name")!);
+      final tableRowsForSchema = schemaRows[schema];
+      if (tableRowsForSchema != null) {
+        final byTable = tableRowsForSchema
+            .groupListsBy((result) => result.getString("table_name")!);
+        for (final table in byTable.keys) {
+          final tableNode = MetaDataNode(MetaType.table, table);
+          tableNodes.add(tableNode);
 
-      for (final table in tableRows.keys) {
-        final tableNode = MetaDataNode(MetaType.table, table);
-        tableNodes.add(tableNode);
-
-        final columnRows = tableRows[table]!;
-        final columnNodes = columnRows
-            .map((result) =>
-                MetaDataNode(MetaType.column, result.getString("column_name")!)
-                  ..withProp(MetaDataPropType.dataType,
-                      _getDataType(result.getString("data_type")!)))
-            .toList();
-        tableNode.items = columnNodes;
+          final columnRows = byTable[table]!;
+          final columnNodes = columnRows
+              .map((result) => MetaDataNode(
+                  MetaType.column, result.getString("column_name")!)
+                ..withProp(MetaDataPropType.dataType,
+                    _getDataType(result.getString("data_type")!)))
+              .toList();
+          tableNode.items = columnNodes;
+        }
       }
-
       schemaNode.items = tableNodes;
     }
 
@@ -258,7 +270,11 @@ ORDER BY
 
   @override
   Future<List<String>> schemas() async {
-    final results = await query("SELECT nspname FROM pg_namespace;");
+    final results = await query(
+      'SELECT nspname FROM pg_namespace '
+      'WHERE LOWER(nspname) NOT IN (${_pgSystemSchemasNotInSql()}) '
+      'ORDER BY nspname;',
+    );
     return results.rows
         .map((r) => r.getString("nspname") ?? "")
         .where((s) => s.isNotEmpty)
