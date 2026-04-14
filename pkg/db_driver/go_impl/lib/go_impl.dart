@@ -67,6 +67,10 @@ final class ImplConnection {
 
   static Future<ImplConnection> openSqlite(String dsn) => open(go_impl_db_type_t.GO_IMPL_DB_SQLITE, dsn);
 
+  static Future<ImplConnection> openRedis(String dsn) => open(go_impl_db_type_t.GO_IMPL_DB_REDIS, dsn);
+
+  static Future<ImplConnection> openMongo(String dsn) => open(go_impl_db_type_t.GO_IMPL_DB_MONGODB, dsn);
+
   Stream<DbQueryEvent> streamQuery(String sql) async* {
     final port = ReceivePort();
     final sqlPtr = sql.toNativeUtf8();

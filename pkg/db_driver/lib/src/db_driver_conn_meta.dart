@@ -9,7 +9,9 @@ enum DatabaseType {
   pg,
   oracle,
   mssql,
-  sqlite;
+  sqlite,
+  redis,
+  mongodb;
 
   DialectType get dialectType {
     switch (this) {
@@ -23,6 +25,10 @@ enum DatabaseType {
         return DialectType.mssql;
       case DatabaseType.sqlite:
         return DialectType.sqlite;
+      case DatabaseType.redis:
+        return DialectType.redis;
+      case DatabaseType.mongodb:
+        return DialectType.mongodb;
     }
   }
 }

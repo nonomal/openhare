@@ -205,6 +205,9 @@ class GoImplConnection extends BaseConnection {
 
   GoImplConnection(this._conn);
 
+  /// 供同包内子类（如 Redis）重写 [queryStreamInternal] 时使用。
+  impl.ImplConnection get implConn => _conn;
+
   @override
   Future<void> ping() async {
     throw UnimplementedError();

@@ -5,6 +5,8 @@ import 'db_driver_oracle.dart';
 import 'db_driver_mssql.dart';
 import 'db_driver_sqlite.dart';
 import 'db_driver_pg.dart';
+import 'db_driver_redis.dart';
+import 'db_driver_mongodb.dart';
 
 class ConnectionFactory {
   static Future<BaseConnection> open(
@@ -24,6 +26,10 @@ class ConnectionFactory {
           await MSSQLConnection.open(meta: meta, schema: schema),
         DatabaseType.sqlite =>
           await SQLiteConnection.open(meta: meta, schema: schema),
+        DatabaseType.redis =>
+          await RedisConnection.open(meta: meta, schema: schema),
+        DatabaseType.mongodb =>
+          await MongoConnection.open(meta: meta, schema: schema),
       };
       conn.listen(onSchemaChangedCallback: onSchemaChangedCallback);
 
@@ -157,6 +163,75 @@ List<ConnectionMeta> connectionMetas = [
       "PRAGMA temp_store = MEMORY;",
       "PRAGMA journal_mode = MEMORY;",
     ],
+  ),
+  ConnectionMeta(
+    displayName: "Redis",
+    type: DatabaseType.redis,
+    logoAssertPath: "assets/icons/redis_icon.png",
+    connMeta: [
+      NameMeta(),
+      TargetNetworkHostMeta(),
+      TargetNetworkPortMeta("6379"),
+      UserMeta(),
+      PasswordMeta(),
+      DescMeta(),
+      CustomMeta(
+        name: "db",
+        type: "text",
+        group: "connection",
+        defaultValue: "0",
+      ),
+      CustomMeta(
+        name: "tls",
+        type: "text",
+        group: "connection",
+        defaultValue: "false",
+      ),
+    ],
+    initQuerys: const [],
+  ),
+  ConnectionMeta(
+    displayName: 'MongoDB',
+    type: DatabaseType.mongodb,
+    logoAssertPath: 'assets/icons/mongodb_icon.png',
+    connMeta: [
+      NameMeta(),
+      TargetNetworkHostMeta(),
+      TargetNetworkPortMeta('27017'),
+      UserMeta(),
+      PasswordMeta(),
+      DescMeta(),
+      CustomMeta(
+        name: 'database',
+        type: 'text',
+        group: 'connection',
+        isRequired: true,
+        defaultValue: 'test',
+        comment: '连接 URI 路径中的默认数据库名，并作为 shell 执行的默认库',
+      ),
+      CustomMeta(
+        name: 'authSource',
+        type: 'text',
+        group: 'connection',
+        defaultValue: 'admin',
+        comment: 'SCRAM 等认证时查找用户凭证所在的数据库（URI 参数 authSource）',
+      ),
+      CustomMeta(
+        name: 'tls',
+        type: 'text',
+        group: 'connection',
+        defaultValue: 'false',
+        comment: '是否启用 TLS（true/false，对应 URI 中 tls 选项）',
+      ),
+      CustomMeta(
+        name: 'directConnection',
+        type: 'text',
+        group: 'connection',
+        defaultValue: 'true',
+        comment: '为 true 时只连当前主机端口，不解析副本集拓扑（URI 参数 directConnection）',
+      ),
+    ],
+    initQuerys: const [],
   ),
 ];
 

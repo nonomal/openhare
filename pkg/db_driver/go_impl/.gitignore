@@ -39,3 +39,5 @@ src/libgo_impl.so
 src/libgo_impl.dll
 src/libgo_impl.h
 src/go_impl
+*.a
+*.o
