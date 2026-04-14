@@ -18,6 +18,10 @@ import 'src/dialect/pg/lexer.dart';
 import 'src/dialect/pg/parser.dart';
 import 'src/dialect/sqlite/lexer.dart';
 import 'src/dialect/sqlite/parser.dart';
+import 'src/dialect/redis/lexer.dart';
+import 'src/dialect/redis/parser.dart';
+import 'src/dialect/mongodb/lexer.dart';
+import 'src/dialect/mongodb/parser.dart';
 import 'src/lexer/lexer.dart';
 import 'src/parser/parser.dart';
 import 'src/dialect/mysql/keyword.dart' as mysql_keywords;
@@ -25,9 +29,11 @@ import 'src/dialect/mssql/keyword.dart' as mssql_keywords;
 import 'src/dialect/oracle/keyword.dart' as oracle_keywords;
 import 'src/dialect/pg/keyword.dart' as pg_keywords;
 import 'src/dialect/sqlite/keyword.dart' as sqlite_keywords;
+import 'src/dialect/redis/keyword.dart' as redis_keywords;
+import 'src/dialect/mongodb/keyword.dart' as mongodb_keywords;
 
 // 定义方言类型枚举
-enum DialectType { mysql, oracle, pg, mssql, sqlite }
+enum DialectType { mysql, oracle, pg, mssql, sqlite, redis, mongodb }
 
 Lexer createLexer(DialectType dialect, String content) {
   switch (dialect) {
@@ -41,6 +47,10 @@ Lexer createLexer(DialectType dialect, String content) {
       return MssqlLexer(content);
     case DialectType.sqlite:
       return SqliteLexer(content);
+    case DialectType.redis:
+      return RedisLexer(content);
+    case DialectType.mongodb:
+      return MongoLexer(content);
   }
 }
 
@@ -57,6 +67,10 @@ List<SQLChunk> splitSQL(DialectType dialect, String content,
       return MssqlSplitter(content).split(skipWhitespace: skipWhitespace, skipComment: skipComment);
     case DialectType.sqlite:
       return SqliteSplitter(content).split(skipWhitespace: skipWhitespace, skipComment: skipComment);
+    case DialectType.redis:
+      return RedisSplitter(content).split(skipWhitespace: skipWhitespace, skipComment: skipComment);
+    case DialectType.mongodb:
+      return MongoSplitter(content).split(skipWhitespace: skipWhitespace, skipComment: skipComment);
   }
 }
 
@@ -71,6 +85,10 @@ bool match(DialectType dialect, String content, String pattern) {
     case DialectType.mssql:
       return Matcher(createLexer(dialect, content)).match(pattern);
     case DialectType.sqlite:
+      return Matcher(createLexer(dialect, content)).match(pattern);
+    case DialectType.redis:
+      return Matcher(createLexer(dialect, content)).match(pattern);
+    case DialectType.mongodb:
       return Matcher(createLexer(dialect, content)).match(pattern);
   }
 }
@@ -87,6 +105,10 @@ SQLDefiner parser(DialectType dialect, String content) {
       return MssqlSQLDefiner(content);
     case DialectType.sqlite:
       return SqliteSQLDefiner(content);
+    case DialectType.redis:
+      return RedisSQLDefiner(content);
+    case DialectType.mongodb:
+      return MongoSQLDefiner(content);
   }
 }
 
@@ -102,5 +124,9 @@ Set<String> keywords(DialectType dialect) {
       return mssql_keywords.keywords;
     case DialectType.sqlite:
       return sqlite_keywords.keywords;
+    case DialectType.redis:
+      return redis_keywords.keywords;
+    case DialectType.mongodb:
+      return mongodb_keywords.keywords;
   }
 }
