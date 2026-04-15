@@ -66,8 +66,14 @@ const String settingMetaNameTargetNetworkPort = "tartget_network_port";
 const String settingMetaNameDesc = "desc";
 
 class ConnectionMeta {
-  String displayName;
   DatabaseType type;
+
+  // 界面显示的名称
+  String displayName;
+
+  // 数据库描述，主要会被ai chat 使用，这里记录与数据库有关的特性, 例如语法。
+  String? description;
+
   // todo: 这里反向依赖了flutter 主体的 asserts
   String logoAssertPath;
 
@@ -75,12 +81,14 @@ class ConnectionMeta {
 
   List<String> initQuerys;
 
-  ConnectionMeta(
-      {required this.connMeta,
-      required this.type,
-      this.logoAssertPath = "",
-      required this.displayName,
-      this.initQuerys = const []});
+  ConnectionMeta({
+    required this.connMeta,
+    required this.type,
+    this.logoAssertPath = "",
+    required this.displayName,
+    this.description,
+    this.initQuerys = const [],
+  });
 
   String initQueryText() {
     if (initQuerys.isEmpty) {

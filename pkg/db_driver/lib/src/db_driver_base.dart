@@ -192,6 +192,12 @@ List<ConnectionMeta> connectionMetas = [
   ),
   ConnectionMeta(
     displayName: 'MongoDB',
+    description: """
+The connection driver uses mongosh-compatible shell syntax and leverages the gomongo library. Summary of unsupported features:
+1. No interactive features (cursor methods, native shell functions), no JavaScript execution, and no database switching. 
+2. It also excludes cluster/administration features (replication, sharding, user/role management, encryption) and Atlas-specific capabilities.
+3. Database is set at connection time only, no database switching.
+""",
     type: DatabaseType.mongodb,
     logoAssertPath: 'assets/icons/mongodb_icon.png',
     connMeta: [
