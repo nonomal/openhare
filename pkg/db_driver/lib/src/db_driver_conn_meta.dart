@@ -120,19 +120,13 @@ class NameMeta extends SettingMeta {
   String get name => settingMetaNameName;
 }
 
-class TargetNetworkHostMeta extends SettingMeta {
+class TargetNetworkMeta extends SettingMeta {
+  final String? defaultPort;
+
+  TargetNetworkMeta({this.defaultPort, super.group});
+
   @override
   String get name => settingMetaNameTargetNetworkHost;
-}
-
-class TargetNetworkPortMeta extends SettingMeta {
-  @override
-  String get name => settingMetaNameTargetNetworkPort;
-
-  @override
-  String? defaultValue; // set default port for host:port
-
-  TargetNetworkPortMeta(this.defaultValue);
 }
 
 class UserMeta extends SettingMeta {
@@ -155,23 +149,38 @@ class DescMeta extends SettingMeta {
   String get name => settingMetaNameDesc;
 }
 
+enum SettingMetaType {
+  text,
+  enumValue,
+}
+
 class CustomMeta extends SettingMeta {
   @override
   String name;
-  String type;
+
+  /// 参数类型
+  SettingMetaType type;
+
+  /// 是否必填
+  bool isRequired = false;
 
   @override
   String? defaultValue;
-  String? comment;
-  bool isRequired = false;
 
-  CustomMeta(
-      {required this.name,
-      required this.type,
-      required super.group,
-      this.defaultValue,
-      this.comment,
-      this.isRequired = false});
+  /// 参数枚举值, 例如: ["true", "false"]
+  List<String>? enumValues;
+
+  String? comment;
+
+  CustomMeta({
+    required this.name,
+    required this.type,
+    required super.group,
+    this.defaultValue,
+    this.enumValues,
+    this.comment,
+    this.isRequired = false,
+  });
 }
 
 class ConnectValue {
