@@ -3,34 +3,46 @@ import 'package:flutter/material.dart';
 /// 分割视图控制器
 /// first 区域总是自适应（Expanded），second 区域固定大小（可拖拽调整）
 class SplitViewController extends ChangeNotifier {
-  final double firstMinSize; // first 区域的最小尺寸
-  final double secondMinSize; // second 区域的最小尺寸
+  /// first 区域的最小尺寸
+  final double firstMinSize;
 
-  double _secondSize; // 当前 second 区域的大小（拖拽时可能改变）
+  /// second 区域的最小尺寸
+  final double secondMinSize;
+
+  /// 分割条厚度（与 [SplitView] 中分割条一致）
+  final double dividerThickness;
+
+  /// 当前 second 区域的大小（拖拽时可能改变）
+  double _secondSize;
+
+  double get secondSize => _secondSize;
 
   SplitViewController({
     required double secondSize,
     this.firstMinSize = 0,
     this.secondMinSize = 0,
+    this.dividerThickness = 5.0,
   }) : _secondSize = secondSize;
 
-  /// 获取第二个区域的当前大小
-  double get secondSize => _secondSize;
+  void syncSecondToLayoutTotalSize(double totalSize) {
+    _secondSize = _applySecondPanDelta(totalSize, 0);
+    // 无需更新订阅, 这个函数在build内调用, 后续会读到新的secondSize.
+  }
 
-  /// 设置第二个区域的大小（带边界检查）
-  /// [size] 要设置的大小值
-  /// [maxSize] 最大允许的大小（通常是 totalSize - dividerThickness - firstMinSize）
-  void setSecondSize(double size, double? maxSize) {
-    final double clampedSize = maxSize != null
-        ? size.clamp(secondMinSize, maxSize)
-        : size.clamp(secondMinSize, double.infinity);
-    if (_secondSize == clampedSize) return;
-    _secondSize = clampedSize;
+  void applyPanSecondDelta(double totalSize, double delta) {
+    _secondSize = _applySecondPanDelta(totalSize, delta);
     notifyListeners();
+  }
+
+  double _applySecondPanDelta(double totalSize, double delta) {
+    if (totalSize <= 0) return _secondSize;
+    // 计算最大second size, 必须确保留下最小的first size.
+    final double secondMaxSize = totalSize - dividerThickness - firstMinSize;
+    final double newSecondSize = _secondSize - delta;
+    return newSecondSize.clamp(secondMinSize, secondMaxSize);
   }
 }
 
-/// 分割视图组件
 class SplitView extends StatefulWidget {
   final SplitViewController controller;
   final Widget first;
@@ -50,42 +62,22 @@ class SplitView extends StatefulWidget {
 }
 
 class _SplitViewState extends State<SplitView> {
-  static const double _dividerThickness = 5.0;
   bool _isDragging = false; // 是否正在拖拽，用于控制 IgnorePointer
-  double? _currentTotalSize; // 保存当前的总尺寸，用于拖拽时计算
 
-  // 重复计算的抽取
   bool get _isHorizontal => widget.axis == Axis.horizontal;
 
-  /// 计算总尺寸（根据轴方向从约束中提取）
-  double _calculateTotalSize(BoxConstraints constraints) {
-    return _isHorizontal ? constraints.maxWidth : constraints.maxHeight;
-  }
-
-  /// 计算第二个区域的最大尺寸
-  double _calculateMaxSecondSize(double totalSize) {
-    return totalSize - _dividerThickness - widget.controller.firstMinSize;
-  }
-
-  void _onPanStart(DragStartDetails details) {
+  void _onPanStart() {
     setState(() {
       _isDragging = true;
     });
   }
 
-  void _onPanUpdate(DragUpdateDetails details) {
-    if (_currentTotalSize == null || _currentTotalSize! <= 0) return;
-
+  void _onPanUpdate(double totalSize, DragUpdateDetails details) {
     final double delta = _isHorizontal ? details.delta.dx : details.delta.dy;
-
-    // 拖拽 second：向右拖 second 变小（delta 为正，size 要减）
-    double newSecondSize = widget.controller.secondSize - delta;
-    final double maxSecondSize = _calculateMaxSecondSize(_currentTotalSize!);
-    // 使用 setSecondSize，会自动触发通知，_onControllerChanged 会调用 setState 更新 UI
-    widget.controller.setSecondSize(newSecondSize, maxSecondSize);
+    widget.controller.applyPanSecondDelta(totalSize, delta);
   }
 
-  void _onPanEnd(DragEndDetails details) {
+  void _onPanEnd() {
     setState(() {
       _isDragging = false;
     });
@@ -98,13 +90,14 @@ class _SplitViewState extends State<SplitView> {
       builder: (context, _) {
         return LayoutBuilder(
           builder: (context, constraints) {
-            final double totalSize = _calculateTotalSize(constraints);
+            // 获取最大尺寸
+            final double totalSize = (widget.axis == Axis.horizontal) ? constraints.maxWidth : constraints.maxHeight;
             if (totalSize <= 0) return const SizedBox.shrink();
 
-            // 保存当前的总尺寸，供拖拽时使用
-            _currentTotalSize = totalSize;
-
-            final children = [
+            widget.controller.syncSecondToLayoutTotalSize(totalSize);
+            final double dividerThickness = widget.controller.dividerThickness;
+            final body = [
+              // first 区域
               Expanded(
                 child: RepaintBoundary(
                   child: IgnorePointer(
@@ -113,7 +106,26 @@ class _SplitViewState extends State<SplitView> {
                   ),
                 ),
               ),
-              _buildDivider(),
+
+              // 拖动的分割线
+              RepaintBoundary(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque, // 阻止事件穿透到底层
+                  onPanStart: (details) => _onPanStart(),
+                  onPanUpdate: (details) => _onPanUpdate(totalSize, details),
+                  onPanEnd: (details) => _onPanEnd(),
+                  child: SizedBox(
+                    width: _isHorizontal ? dividerThickness : double.infinity,
+                    height: _isHorizontal ? double.infinity : dividerThickness,
+                    child: MouseRegion(
+                      cursor: _isHorizontal ? SystemMouseCursors.resizeColumn : SystemMouseCursors.resizeRow,
+                      child: const SizedBox.expand(),
+                    ),
+                  ),
+                ),
+              ),
+
+              // second 区域
               SizedBox(
                 width: _isHorizontal ? widget.controller.secondSize : null,
                 height: _isHorizontal ? null : widget.controller.secondSize,
@@ -125,30 +137,10 @@ class _SplitViewState extends State<SplitView> {
                 ),
               ),
             ];
-
-            return _isHorizontal ? Row(children: children) : Column(children: children);
+            return _isHorizontal ? Row(children: body) : Column(children: body);
           },
         );
       },
-    );
-  }
-
-  Widget _buildDivider() {
-    return RepaintBoundary(
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque, // 阻止事件穿透到底层
-        onPanStart: _onPanStart,
-        onPanUpdate: _onPanUpdate,
-        onPanEnd: _onPanEnd,
-        child: SizedBox(
-          width: _isHorizontal ? _dividerThickness : double.infinity,
-          height: _isHorizontal ? double.infinity : _dividerThickness,
-          child: MouseRegion(
-            cursor: _isHorizontal ? SystemMouseCursors.resizeColumn : SystemMouseCursors.resizeRow,
-            child: const SizedBox.expand(),
-          ),
-        ),
-      ),
     );
   }
 }
