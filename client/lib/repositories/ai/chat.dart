@@ -52,16 +52,6 @@ class AIChatRepoImpl extends AIChatRepo {
   }
 
   @override
-  void addMessage(AIChatId id, AIChatMessageItem message) {
-    final chat = _aiChats[id];
-    if (chat == null) {
-      return;
-    }
-    assert(!chat.messages.containsKey(message.messageId), 'addMessage requires a new message id');
-    chat.messages[message.messageId] = message;
-  }
-
-  @override
   void updateMessages(AIChatId id, List<AIChatMessageItem> messages) {
     final chat = _aiChats[id];
     if (chat == null) {
@@ -133,6 +123,16 @@ class AIChatRepoImpl extends AIChatRepo {
       return null;
     }
     return chat.messages.values.elementAtOrNull(index);
+  }
+
+  @override
+  void addMessage(AIChatId id, AIChatMessageItem message) {
+    final chat = _aiChats[id];
+    if (chat == null) {
+      return;
+    }
+    assert(!chat.messages.containsKey(message.messageId), 'addMessage requires a new message id');
+    chat.messages[message.messageId] = message;
   }
 
   @override

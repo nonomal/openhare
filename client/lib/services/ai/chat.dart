@@ -181,6 +181,7 @@ class AIChatService extends _$AIChatService {
         content: '',
         status: State.running,
       );
+      repo.addMessage(chatId, AIChatMessageItem.assistantMessage(lastMessage));
 
       ChatUsage? usage;
 
