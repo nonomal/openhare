@@ -32,7 +32,7 @@ class _UserMessageState extends ConsumerState<UserMessage> {
     ref
         .read(aIChatServiceProvider.notifier)
         .retryChat(
-          model.chatModel.id,
+          model.chatOverviewModel.id,
           model.llmAgents.lastUsedLLMAgent!.id,
           genChatSystemPrompt(model),
           widget.message,
@@ -43,7 +43,7 @@ class _UserMessageState extends ConsumerState<UserMessage> {
   Widget build(BuildContext context) {
     final model = widget.sessionChatModel;
     final hasAgent = model?.llmAgents.lastUsedLLMAgent != null;
-    final isIdle = model?.chatModel.state == AIChatState.idle;
+    final isIdle = model?.chatOverviewModel.state == AIChatState.idle;
     final canRetry = hasAgent && isIdle;
     final showRetry = _hovering && hasAgent;
     return Padding(

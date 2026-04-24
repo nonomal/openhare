@@ -75,7 +75,7 @@ final class SqlExecuteQueryToolExecutor implements AIChatToolExecutor {
     model = model.copyWith(
       toolCall: model.toolCall.copyWith(execState: status),
     );
-    ref.read(aiChatRepoProvider).updateMessageById(chatId, model.id, AIChatMessageItem.toolsResult(model));
+    ref.read(aiChatRepoProvider).updateMessage(chatId, AIChatMessageItem.toolsResult(model));
     onInvalidate();
   }
 
@@ -90,7 +90,7 @@ final class SqlExecuteQueryToolExecutor implements AIChatToolExecutor {
     model = model.copyWith(
       toolCall: model.toolCall.copyWith(execState: AIChatToolQueryState.running),
     );
-    ref.read(aiChatRepoProvider).updateMessageById(chatId, model.id, AIChatMessageItem.toolsResult(model));
+    ref.read(aiChatRepoProvider).updateMessage(chatId, AIChatMessageItem.toolsResult(model));
     onInvalidate();
 
     // 执行查询
@@ -121,7 +121,7 @@ final class SqlExecuteQueryToolExecutor implements AIChatToolExecutor {
                 execState: AIChatToolQueryState.finished,
               ),
       );
-      ref.read(aiChatRepoProvider).updateMessageById(chatId, model.id, AIChatMessageItem.toolsResult(model));
+      ref.read(aiChatRepoProvider).updateMessage(chatId, AIChatMessageItem.toolsResult(model));
       onInvalidate();
     } catch (e) {
       model = model.copyWith(
@@ -131,7 +131,7 @@ final class SqlExecuteQueryToolExecutor implements AIChatToolExecutor {
           execState: AIChatToolQueryState.failed,
         ),
       );
-      ref.read(aiChatRepoProvider).updateMessageById(chatId, model.id, AIChatMessageItem.toolsResult(model));
+      ref.read(aiChatRepoProvider).updateMessage(chatId, AIChatMessageItem.toolsResult(model));
       onInvalidate();
     }
   }
