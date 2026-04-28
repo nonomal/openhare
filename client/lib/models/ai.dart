@@ -21,15 +21,16 @@ abstract class LLMAgentRepo {
 }
 
 abstract class AIChatRepo {
-  AIChatListModel getAIChatList();
   AIChatModel create(AIChatModel model);
   AIChatModel? getAIChatById(AIChatId id);
+  AIChatOverviewModel? getAIChatOverview(AIChatId id);
   void delete(AIChatId id);
   AIChatMessageItem? getMessageById(AIChatId id, AIChatMessageId messageId);
+  AIChatMessageItem? getMessageByIndex(AIChatId id, int index);
   void updateMessages(AIChatId id, List<AIChatMessageItem> messages);
   void addMessage(AIChatId id, AIChatMessageItem message);
   void updateState(AIChatId id, AIChatState state);
-  void updateMessageById(AIChatId chatId, AIChatMessageId messageId, AIChatMessageItem message);
+  void updateMessage(AIChatId chatId, AIChatMessageItem message);
   void updateProgress(AIChatId id, AIChatProgressModel progress);
   bool isCancel(AIChatId id);
 }
@@ -158,6 +159,18 @@ abstract class AIChatModel with _$AIChatModel {
     required AIChatState state,
     @Default(AIChatProgressModel()) AIChatProgressModel progress,
   }) = _AIChatModel;
+}
+
+/// ai chat 摘要
+@freezed
+abstract class AIChatOverviewModel with _$AIChatOverviewModel{
+  const factory AIChatOverviewModel({
+    required AIChatId id,
+    required int messageCount,
+    required AIChatState state,
+    @Default(AIChatProgressModel()) AIChatProgressModel progress,
+    AIChatMessageItem? latestMessage,
+  }) = _AIChatOverviewModel;
 }
 
 // user message
@@ -313,10 +326,18 @@ abstract class AIChatMessageToolCallsModel with _$AIChatMessageToolCallsModel {
 /// 消息项联合类型，可以存储消息或工具调用结果
 @freezed
 abstract class AIChatMessageItem with _$AIChatMessageItem {
+  const AIChatMessageItem._();
+
   const factory AIChatMessageItem.userMessage(AIChatUserMessageModel message) = _AIChatMessageItemUserMessage;
   const factory AIChatMessageItem.assistantMessage(AIChatAssistantMessageModel message) =
       _AIChatMessageItemAssistantMessage;
   const factory AIChatMessageItem.toolsResult(AIChatMessageToolCallsModel toolsResult) = _AIChatMessageItemToolResult;
+
+  AIChatMessageId get messageId => when(
+    userMessage: (message) => message.id,
+    assistantMessage: (message) => message.id,
+    toolsResult: (result) => result.id,
+  );
 }
 
 @freezed

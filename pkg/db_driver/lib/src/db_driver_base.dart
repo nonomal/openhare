@@ -82,13 +82,13 @@ List<ConnectionMeta> connectionMetas = [
         CustomMeta(
           name: "connectTimeout",
           type: SettingMetaType.text,
-          group: settingMetaGroupVariables,
+          group: settingMetaGroupParams,
           defaultValue: "10",
         ),
         CustomMeta(
           name: "queryTimeout",
           type: SettingMetaType.text,
-          group: settingMetaGroupVariables,
+          group: settingMetaGroupParams,
           defaultValue: "600",
         ),
       ],
@@ -134,14 +134,14 @@ List<ConnectionMeta> connectionMetas = [
       CustomMeta(
         name: "encrypt",
         type: SettingMetaType.enumValue,
-        group: settingMetaGroupVariables,
+        group: settingMetaGroupParams,
         defaultValue: "true",
         enumValues: ['true', 'false'],
       ),
       CustomMeta(
         name: "trustServerCertificate",
         type: SettingMetaType.enumValue,
-        group: settingMetaGroupVariables,
+        group: settingMetaGroupParams,
         defaultValue: "true",
         enumValues: ['true', 'false'],
       ),
@@ -181,7 +181,7 @@ List<ConnectionMeta> connectionMetas = [
       CustomMeta(
         name: "tls",
         type: SettingMetaType.enumValue,
-        group: settingMetaGroupVariables,
+        group: settingMetaGroupParams,
         defaultValue: "false",
         enumValues: ['true', 'false'],
       ),
@@ -210,30 +210,30 @@ The connection driver uses mongosh-compatible shell syntax and leverages the gom
         group: settingMetaGroupBase,
         isRequired: true,
         defaultValue: 'test',
-        comment: '连接 URI 路径中的默认数据库名，并作为 shell 执行的默认库',
+        // comment: '连接 URI 路径中的默认数据库名，并作为 shell 执行的默认库',
       ),
       CustomMeta(
         name: 'authSource',
         type: SettingMetaType.text,
-        group: settingMetaGroupVariables,
+        group: settingMetaGroupParams,
         defaultValue: 'admin',
-        comment: 'SCRAM 等认证时查找用户凭证所在的数据库（URI 参数 authSource）',
+        // comment: 'SCRAM 等认证时查找用户凭证所在的数据库（URI 参数 authSource）',
       ),
       CustomMeta(
         name: 'tls',
         type: SettingMetaType.enumValue,
-        group: settingMetaGroupVariables,
+        group: settingMetaGroupParams,
         enumValues: ['true', 'false'],
         defaultValue: 'false',
-        comment: '是否启用 TLS（true/false，对应 URI 中 tls 选项）',
+        // comment: '是否启用 TLS（true/false，对应 URI 中 tls 选项）',
       ),
       CustomMeta(
         name: 'directConnection',
         type: SettingMetaType.enumValue,
-        group: settingMetaGroupVariables,
+        group: settingMetaGroupParams,
         defaultValue: 'true',
         enumValues: ['true', 'false'],
-        comment: '为 true 时只连当前主机端口，不解析副本集拓扑（URI 参数 directConnection）',
+        // comment: '为 true 时只连当前主机端口，不解析副本集拓扑（URI 参数 directConnection）',
       ),
     ],
     initQuerys: const [],
@@ -246,3 +246,7 @@ List<DatabaseType> allDatabaseType =
 Map<DatabaseType, ConnectionMeta> connectionMetaMap = {
   for (var meta in connectionMetas) meta.type: meta
 };
+
+List<SettingMeta> getConnMetas(DatabaseType type) {
+  return connectionMetaMap[type]?.connMeta ?? const <SettingMeta>[];
+}

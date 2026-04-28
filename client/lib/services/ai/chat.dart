@@ -27,7 +27,11 @@ class AIChatService extends _$AIChatService {
   }
 
   AIChatModel? getAIChatById(AIChatId id) {
-    return ref.watch(aiChatRepoProvider).getAIChatById(id);
+    return ref.read(aiChatRepoProvider).getAIChatById(id);
+  }
+
+  AIChatOverviewModel? getAIChatOverview(AIChatId id) {
+    return ref.read(aiChatRepoProvider).getAIChatOverview(id);
   }
 
   void create(AIChatModel model) {
@@ -35,7 +39,11 @@ class AIChatService extends _$AIChatService {
   }
 
   List<AIChatMessageItem> _getChatMessage(AIChatId id) {
-    return ref.read(aiChatRepoProvider).getAIChatById(id)!.messages;
+    return ref.read(aiChatRepoProvider).getAIChatById(id)?.messages ?? [];
+  }
+
+  AIChatMessageItem? getMessageByIndex(AIChatId id, int index) {
+    return ref.read(aiChatRepoProvider).getMessageByIndex(id, index);
   }
 
   void _updateState(AIChatId id, AIChatState state) {
@@ -50,10 +58,14 @@ class AIChatService extends _$AIChatService {
 
   /// 通过最后一条消息判断是否正在执行工具（query）
   bool _isExecutingTool(AIChatId id) {
-    final model = ref.read(aiChatRepoProvider).getAIChatById(id);
-    final messages = model?.messages ?? [];
-    if (messages.isEmpty) return false;
-    final last = messages.last;
+    final model = ref.read(aiChatRepoProvider).getAIChatOverview(id);
+    if (model == null) {
+      return false;
+    }
+    final last = model.latestMessage;
+    if (last == null) {
+      return false;
+    }
     return last.maybeWhen(
       toolsResult: (toolsResult) => toolsResult.toolCall.execState == AIChatToolQueryState.running,
       orElse: () => false,
@@ -145,10 +157,6 @@ class AIChatService extends _$AIChatService {
 
     final llmSdk = LLMProvider.create(lastUsedLLMAgent.setting, systemPrompt, tools: [QueryTool()]);
 
-    // 节流：限制 UI 刷新频率（跨 turn 持续生效）
-    DateTime? lastUpdateTime;
-    const throttleDuration = Duration(milliseconds: 200);
-
     chatLoop:
     while (true) {
       final model = repo.getAIChatById(chatId);
@@ -173,40 +181,25 @@ class AIChatService extends _$AIChatService {
         content: '',
         status: State.running,
       );
+      repo.addMessage(chatId, AIChatMessageItem.assistantMessage(lastMessage));
 
       ChatUsage? usage;
 
       List<AIChatMessageToolCall> toolCalls = [];
       try {
-        final chatStream = llmSdk.stream(model.messages);
-
-        DateTime? lastUpdate = lastUpdateTime;
-
-        await for (final chunk in chatStream) {
+        await for (final chunk in llmSdk.stream(model.messages)) {
           if (_isCancelled(chatId)) {
             break;
           }
-
           usage = chunk.usage;
-
           toolCalls = chunk.toolCalls ?? [];
           lastMessage = lastMessage.copyWith(
             content: chunk.content,
             thinking: chunk.thinking,
           );
-
           // 数据始终更新到 repo
-          repo.updateMessageById(chatId, lastMessage.id, AIChatMessageItem.assistantMessage(lastMessage));
-
-          // 节流 UI 更新
-          final now = DateTime.now();
-          if (lastUpdate == null) {
-            lastUpdate = now;
-            _invalidateSelf();
-          } else if (now.difference(lastUpdate) >= throttleDuration) {
-            lastUpdate = now;
-            _invalidateSelf();
-          }
+          repo.updateMessage(chatId, AIChatMessageItem.assistantMessage(lastMessage));
+          _invalidateSelf();
         }
 
         // 更新统计信息
@@ -221,16 +214,15 @@ class AIChatService extends _$AIChatService {
         }
         // 更新对话状态
         lastMessage = lastMessage.copyWith(status: State.done);
-        repo.updateMessageById(chatId, lastMessage.id, AIChatMessageItem.assistantMessage(lastMessage));
+        repo.updateMessage(chatId, AIChatMessageItem.assistantMessage(lastMessage));
 
         _invalidateSelf();
-        lastUpdateTime = lastUpdate;
       } catch (e) {
         lastMessage = lastMessage.copyWith(
           error: e.toString(),
           status: State.failing,
         );
-        repo.updateMessageById(chatId, lastMessage.id, AIChatMessageItem.assistantMessage(lastMessage));
+        repo.updateMessage(chatId, AIChatMessageItem.assistantMessage(lastMessage));
         _invalidateSelf();
         break;
       }
@@ -273,23 +265,23 @@ class AIChatService extends _$AIChatService {
 
   void retryChat(AIChatId id, LLMAgentId agentId, String systemPrompt, AIChatUserMessageModel retryMessage) {
     final messages = _getChatMessage(id);
-    final index = messages.indexWhere(
-      (item) => item.maybeWhen(
-        userMessage: (msg) => msg.id.value == retryMessage.id.value,
-        orElse: () => false,
-      ),
-    );
-    if (index == -1) return;
-    // 保留当前及之前的 message（含当前这条用户消息），然后重新 chat
-    ref.read(aiChatRepoProvider).updateMessages(id, messages.sublist(0, index + 1));
+    final newMessages = <AIChatMessageItem>[];
+    for (final message in messages) {
+      if (message.messageId == retryMessage.id) {
+        newMessages.add(AIChatMessageItem.userMessage(retryMessage));
+        break;
+      } else {
+        newMessages.add(message);
+      }
+    }
+    ref.read(aiChatRepoProvider).updateMessages(id, newMessages);
     _invalidateSelf();
-    // 重新 chat
     chat(id, agentId, systemPrompt);
+    return;
   }
 
   void cleanMessages(AIChatId id) {
-    final List<AIChatMessageItem> messages = [];
-    ref.read(aiChatRepoProvider).updateMessages(id, messages);
+    ref.read(aiChatRepoProvider).updateMessages(id, []);
     ref.read(aiChatRepoProvider).updateProgress(id, const AIChatProgressModel());
     _invalidateSelf();
   }

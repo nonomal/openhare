@@ -69,14 +69,14 @@ abstract class LLMProvider {
   /// [messages] 聊天消息列表
   ///
   /// 返回流式的 ChatResult，每次 yield 累积后的完整结果
-  Stream<ChatResult> stream(List<AIChatMessageItem> messages);
+  Stream<ChatResult> stream(Iterable<AIChatMessageItem> messages);
 
   /// 同步调用 LLM
   ///
   /// [messages] 聊天消息列表
   ///
   /// 返回 AI 响应的 ChatResult（与 stream 一致）
-  Future<ChatResult> call(List<AIChatMessageItem> messages);
+  Future<ChatResult> call(Iterable<AIChatMessageItem> messages);
 
   /// 释放资源
   void dispose();
@@ -150,7 +150,7 @@ class OpenAIProvider implements LLMProvider {
   /// 将 AIChatMessageItem 列表转换为 ChatCompletionMessage 列表
   ///
   /// 使用各个模型类型的 toMessage 方法进行转换
-  List<ChatCompletionMessage> _buildChatMessages(List<AIChatMessageItem> items) {
+  List<ChatCompletionMessage> _buildChatMessages(Iterable<AIChatMessageItem> items) {
     final chatMessages = <ChatCompletionMessage>[];
     if (systemMessage.trim().isNotEmpty) {
       chatMessages.add(ChatCompletionMessage.system(content: systemMessage));
@@ -294,7 +294,7 @@ class OpenAIProvider implements LLMProvider {
   }
 
   @override
-  Stream<ChatResult> stream(List<AIChatMessageItem> messages) async* {
+  Stream<ChatResult> stream(Iterable<AIChatMessageItem> messages) async* {
     try {
       final request = CreateChatCompletionRequest(
         model: ChatCompletionModel.modelId(modelName),
@@ -368,7 +368,7 @@ class OpenAIProvider implements LLMProvider {
   }
 
   @override
-  Future<ChatResult> call(List<AIChatMessageItem> messages) async {
+  Future<ChatResult> call(Iterable<AIChatMessageItem> messages) async {
     try {
       final request = CreateChatCompletionRequest(
         model: ChatCompletionModel.modelId(modelName),

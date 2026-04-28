@@ -165,7 +165,7 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
   @override
   Widget build(BuildContext context) {
     final services = ref.read(aIChatServiceProvider.notifier);
-    final progress = widget.model.chatModel.progress;
+    final progress = widget.model.chatOverviewModel.progress;
     final hardStopped = progress.contextHardStopped;
 
     return Padding(
@@ -187,7 +187,7 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
               model: widget.model,
               controller: widget.controller,
               onSubmitted: (widget.model.canSendMessage() && !hardStopped && _hasInputContent())
-                  ? () => _sendMessage(widget.model.chatModel.id, widget.model)
+                  ? () => _sendMessage(widget.model.chatOverviewModel.id, widget.model)
                   : null,
               enabled: !hardStopped,
             ),
@@ -212,26 +212,26 @@ class _SessionChatInputCardState extends ConsumerState<SessionChatInputCard> {
                   tooltip: AppLocalizations.of(context)!.button_tooltip_clear_chat,
                   icon: Icons.cleaning_services,
                   onPressed: widget.model.canClearMessage()
-                      ? () => services.cleanMessages(widget.model.chatModel.id)
+                      ? () => services.cleanMessages(widget.model.chatOverviewModel.id)
                       : null,
                 ),
 
                 // 发送消息 / 中止生成
-                (widget.model.chatModel.state == AIChatState.waiting)
+                (widget.model.chatOverviewModel.state == AIChatState.waiting)
                     ? RectangleIconButton(
                         size: kIconButtonSizeSmall,
                         iconSize: kIconSizeMedium,
                         padding: 2,
                         tooltip: AppLocalizations.of(context)!.button_tooltip_stop_chat,
                         icon: Icons.stop_circle,
-                        onPressed: () => services.cancelChat(widget.model.chatModel.id),
+                        onPressed: () => services.cancelChat(widget.model.chatOverviewModel.id),
                       )
                     : RectangleIconButton.small(
                         tooltip: AppLocalizations.of(context)!.button_tooltip_send_message,
                         icon: Icons.send,
                         onPressed: (widget.model.canSendMessage() && !hardStopped && _hasInputContent())
                             ? () {
-                                _sendMessage(widget.model.chatModel.id, widget.model);
+                                _sendMessage(widget.model.chatOverviewModel.id, widget.model);
                                 widget.controller.clear();
                               }
                             : null,
@@ -585,7 +585,7 @@ class _ChatInputFieldWidgetState extends ConsumerState<ChatInputFieldWidget> {
       textAlignVertical: TextAlignVertical.center,
       minLines: 1,
       maxLines: 5,
-      enabled: widget.enabled && widget.model.chatModel.state != AIChatState.waiting,
+      enabled: widget.enabled && widget.model.chatOverviewModel.state != AIChatState.waiting,
       textInputAction: TextInputAction.done,
       decoration: InputDecoration(
         hintText: AppLocalizations.of(context)!.ai_chat_input_tip,

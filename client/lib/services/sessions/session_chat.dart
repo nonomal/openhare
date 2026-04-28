@@ -17,33 +17,36 @@ class SessionAIChatNotifier extends _$SessionAIChatNotifier {
     if (session == null) {
       throw Exception("Session not found");
     }
+
+    AsyncValue<InstanceMetadataModel>? metadata; //todo: 如何优雅处理嵌套异步
+    if (session.instanceId != null) {
+      metadata = ref.watch(selectedSessionMetadataProvider);
+    }
     LLMAgentsModel llmAgents = ref.watch(lLMAgentProvider);
 
     ref.watch(aIChatServiceProvider);
 
-    AIChatModel? aiChatModel = ref
+    AIChatOverviewModel? aiChatOverviewModel = ref
         .read(aIChatServiceProvider.notifier)
-        .getAIChatById(
+        .getAIChatOverview(
           AIChatId(value: session.sessionId.value),
         );
 
-    if (aiChatModel == null) {
-      aiChatModel = AIChatModel(
+    if (aiChatOverviewModel == null) {
+      final aiChatModel = AIChatModel(
         id: AIChatId(value: session.sessionId.value), // todo: 暂时用session id 替代chatId
         messages: [],
         state: AIChatState.idle,
       );
 
       ref.read(aIChatServiceProvider.notifier).create(aiChatModel);
-    }
-
-    AsyncValue<InstanceMetadataModel>? metadata; //todo: 如何优雅处理嵌套异步
-    if (session.instanceId != null) {
-      metadata = ref.watch(selectedSessionMetadataProvider);
+      aiChatOverviewModel = ref
+          .read(aIChatServiceProvider.notifier)
+          .getAIChatOverview(AIChatId(value: session.sessionId.value));
     }
 
     return SessionAIChatModel(
-      chatModel: aiChatModel,
+      chatOverviewModel: aiChatOverviewModel!,
       sessionId: session.sessionId,
       config: session.config,
       currentSchema: session.currentSchema,

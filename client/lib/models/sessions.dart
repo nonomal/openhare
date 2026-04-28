@@ -313,18 +313,18 @@ abstract class SessionAIChatModel with _$SessionAIChatModel {
     required InstanceMetadataModel? metadata,
     required ConnId? connId,
     required SQLConnectState? state,
-    required AIChatModel chatModel,
+    required AIChatOverviewModel chatOverviewModel,
     required LLMAgentsModel llmAgents,
   }) = _SessionAIChatModel;
 
   const SessionAIChatModel._();
 
   bool canSendMessage() {
-    return llmAgents.lastUsedLLMAgent != null && chatModel.state != AIChatState.waiting;
+    return llmAgents.lastUsedLLMAgent != null && chatOverviewModel.state != AIChatState.waiting;
   }
 
   bool canClearMessage() {
-    return chatModel.state != AIChatState.waiting && chatModel.messages.isNotEmpty;
+    return chatOverviewModel.state != AIChatState.waiting && chatOverviewModel.messageCount > 0;
   }
 }
 

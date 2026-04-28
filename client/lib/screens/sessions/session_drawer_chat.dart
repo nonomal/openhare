@@ -69,14 +69,6 @@ class SessionChatMessages extends ConsumerStatefulWidget {
 }
 
 class _SessionChatMessagesState extends ConsumerState<SessionChatMessages> {
-  int _lastMessageCount = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _lastMessageCount = widget.model.chatModel.messages.length;
-  }
-
   void _runSQL(BuildContext context, WidgetRef ref, SessionAIChatModel model, String code) {
     final SQLDefiner sd = parser(model.dbType?.dialectType ?? DialectType.mysql, code);
     if (sd.isDangerousSQL && model.config.enableQueryCheck) {
@@ -108,7 +100,7 @@ class _SessionChatMessagesState extends ConsumerState<SessionChatMessages> {
         onRunSQL: SQLConnectState.isIdle(model.state) ? (code) => _runSQL(context, ref, model, code) : null,
       ),
       toolsResult: (msg) => ToolCallWidget(
-        chatId: model.chatModel.id,
+        chatId: model.chatOverviewModel.id,
         toolsMessageId: msg.id,
         dbType: model.dbType ?? DatabaseType.mysql,
         toolCall: msg.toolCall,
@@ -117,7 +109,7 @@ class _SessionChatMessagesState extends ConsumerState<SessionChatMessages> {
             ? (approved) => ref
                   .read(aIChatServiceProvider.notifier)
                   .resolveToolQueryExecution(
-                    model.chatModel.id,
+                    model.chatOverviewModel.id,
                     msg.id,
                     approved,
                     model.llmAgents.lastUsedLLMAgent!.id,
@@ -131,27 +123,29 @@ class _SessionChatMessagesState extends ConsumerState<SessionChatMessages> {
   @override
   void didUpdateWidget(SessionChatMessages oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final messages = widget.model.chatModel.messages;
-
-    if (messages.length != _lastMessageCount) {
-      _lastMessageCount = messages.length;
-    }
-
     // 新消息加入或流式输出更新时，若仍处于自动滚动状态则跟随底部。
     widget.chatScrollController.onContentChanged();
   }
 
   @override
   Widget build(BuildContext context) {
-    final messages = widget.model.chatModel.messages;
+    final messageCount = widget.model.chatOverviewModel.messageCount;
 
     return ChatListView(
       chatScrollController: widget.chatScrollController,
-      itemCount: messages.length,
+      itemCount: messageCount,
       bottomAnchorHeight: 100,
       padding: const EdgeInsets.fromLTRB(kSpacingSmall, 0, kSpacingSmall + kSpacingTiny, 0),
       itemBuilder: (context, index) {
-        return _buildMessage(context, ref, widget.model, messages[index], index);
+        return _buildMessage(
+          context,
+          ref,
+          widget.model,
+          ref
+              .read(aIChatServiceProvider.notifier)
+              .getMessageByIndex(widget.model.chatOverviewModel.id, index)!, // 这里实时获取的, 稍微有点破坏订阅行为，目前为了性能优化暂时接受
+          index,
+        );
       },
     );
   }

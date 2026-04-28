@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:client/models/ai.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -5,7 +7,7 @@ part 'chat.g.dart';
 
 class AIChatStorage {
   final AIChatId id;
-  final List<AIChatMessageItem> messages;
+  final LinkedHashMap<AIChatMessageId, AIChatMessageItem> messages;
   AIChatState state;
   AIChatProgressModel progress;
 
@@ -19,7 +21,7 @@ class AIChatStorage {
   factory AIChatStorage.fromModel(AIChatModel model) {
     return AIChatStorage(
       id: model.id,
-      messages: List<AIChatMessageItem>.from(model.messages),
+      messages: LinkedHashMap.fromEntries(model.messages.map((e) => MapEntry(e.messageId, e))),
       state: model.state,
       progress: model.progress,
     );
@@ -28,7 +30,7 @@ class AIChatStorage {
   AIChatModel toModel() {
     return AIChatModel(
       id: id,
-      messages: List<AIChatMessageItem>.from(messages),
+      messages: messages.values.toList(),
       state: state,
       progress: progress,
     );
@@ -41,15 +43,6 @@ class AIChatRepoImpl extends AIChatRepo {
   AIChatRepoImpl();
 
   @override
-  AIChatListModel getAIChatList() {
-    final chats = <AIChatId, AIChatModel>{};
-    for (final entry in _aiChats.entries) {
-      chats[entry.key] = entry.value.toModel();
-    }
-    return AIChatListModel(chats: chats);
-  }
-
-  @override
   AIChatModel create(AIChatModel model) {
     if (_aiChats.containsKey(model.id)) {
       return _aiChats[model.id]!.toModel();
@@ -59,22 +52,15 @@ class AIChatRepoImpl extends AIChatRepo {
   }
 
   @override
-  void addMessage(AIChatId id, AIChatMessageItem message) {
-    final chat = _aiChats[id];
-    if (chat == null) {
-      return;
-    }
-    chat.messages.add(message);
-  }
-
-  @override
   void updateMessages(AIChatId id, List<AIChatMessageItem> messages) {
     final chat = _aiChats[id];
     if (chat == null) {
       return;
     }
     chat.messages.clear();
-    chat.messages.addAll(messages);
+    for (final message in messages) {
+      chat.messages[message.messageId] = message;
+    }
   }
 
   @override
@@ -107,46 +93,58 @@ class AIChatRepoImpl extends AIChatRepo {
   }
 
   @override
+  AIChatOverviewModel? getAIChatOverview(AIChatId id) {
+    final chat = _aiChats[id];
+    if (chat == null) {
+      return null;
+    }
+    return AIChatOverviewModel(
+      id: chat.id,
+      messageCount: chat.messages.length,
+      state: chat.state,
+      progress: chat.progress,
+      latestMessage: chat.messages.values.lastOrNull,
+    );
+  }
+
+  @override
   AIChatMessageItem? getMessageById(AIChatId id, AIChatMessageId messageId) {
     final chat = _aiChats[id];
     if (chat == null) {
       return null;
     }
-    for (final item in chat.messages) {
-      final matches = item.maybeWhen(
-        userMessage: (msg) => msg.id.value == messageId.value,
-        assistantMessage: (msg) => msg.id.value == messageId.value,
-        toolsResult: (result) => result.id.value == messageId.value,
-        orElse: () => false,
-      );
-      if (matches) {
-        return item;
-      }
-    }
-    return null;
+    return chat.messages[messageId];
   }
 
   @override
-  void updateMessageById(AIChatId chatId, AIChatMessageId messageId, AIChatMessageItem message) {
+  AIChatMessageItem? getMessageByIndex(AIChatId id, int index) {
+    final chat = _aiChats[id];
+    if (chat == null) {
+      return null;
+    }
+    return chat.messages.values.elementAtOrNull(index);
+  }
+
+  @override
+  void addMessage(AIChatId id, AIChatMessageItem message) {
+    final chat = _aiChats[id];
+    if (chat == null) {
+      return;
+    }
+    assert(!chat.messages.containsKey(message.messageId), 'addMessage requires a new message id');
+    chat.messages[message.messageId] = message;
+  }
+
+  @override
+  void updateMessage(AIChatId chatId, AIChatMessageItem message) {
     final chat = _aiChats[chatId];
     if (chat == null) {
       return;
     }
-
-    final index = chat.messages.indexWhere((item) {
-      return item.maybeWhen(
-        userMessage: (msg) => msg.id.value == messageId.value,
-        assistantMessage: (msg) => msg.id.value == messageId.value,
-        toolsResult: (result) => result.id.value == messageId.value,
-        orElse: () => false,
-      );
-    });
-
-    if (index != -1) {
-      chat.messages[index] = message;
-    } else {
-      chat.messages.add(message);
+    if (!chat.messages.containsKey(message.messageId)) {
+      return;
     }
+    chat.messages[message.messageId] = message;
   }
 
   @override

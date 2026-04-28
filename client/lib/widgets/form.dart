@@ -508,7 +508,12 @@ class _TrackedCodeEditorFormFieldState extends State<TrackedCodeEditorFormField>
     if (!mounted) {
       return;
     }
-    TrackedFormScope.of(context)._formFieldKey(widget.fieldName).currentState?.didChange(widget.codeController.text);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      TrackedFormScope.of(context)._formFieldKey(widget.fieldName).currentState?.didChange(widget.codeController.text);
+    });
   }
 
   @override
