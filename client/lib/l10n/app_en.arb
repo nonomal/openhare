@@ -135,9 +135,17 @@
   "@submit_and_continue": {
     "description": "Submit and Continue"
   },
-  "db_base_config": "Base config",
+  "db_base_config": "Base",
   "@db_base_config": {
     "description": "DB base config"
+  },
+  "db_conn_params": "Params",
+  "@db_conn_params": {
+    "description": "DB connection variables tab label"
+  },
+  "db_conn_init_query": "Initialize query",
+  "@db_conn_init_query": {
+    "description": "DB connection initialization SQL tab label"
   },
   "field_val_msg_value_reqiured": "Value is required",
   "@field_val_msg_value_reqiured": {

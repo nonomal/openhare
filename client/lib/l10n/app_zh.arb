@@ -34,6 +34,8 @@
     "submit": "提交",
     "submit_and_continue": "提交并继续",
     "db_base_config": "基础配置",
+    "db_conn_params": "连接参数",
+    "db_conn_init_query": "初始化语句",
     "field_val_msg_value_reqiured": "值不能为空",
     "display_msg_no_data": "暂无数据",
     "display_msg_execution_success": "执行成功",

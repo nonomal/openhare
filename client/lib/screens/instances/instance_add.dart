@@ -17,8 +17,6 @@ import 'package:client/widgets/loading.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:client/widgets/form.dart';
 
-const String initQueryTabId = 'initize';
-
 class DatabaseFormController {
   final DatabaseType databaseType;
   final Map<String, TextEditingController> fieldControllers = {};
@@ -556,8 +554,8 @@ class InstanceFormWidget extends StatelessWidget {
     }
     children.add(
       TrackedCodeEditorFormField(
-        fieldName: initQueryTabId,
-        groupId: initQueryTabId,
+        fieldName: settingMetaGroupInitQuery,
+        groupId: settingMetaGroupInitQuery,
         codeController: codeController,
         child: Padding(
           padding: const EdgeInsets.all(kSpacingSmall),
@@ -594,7 +592,11 @@ class InstanceFormWidget extends StatelessWidget {
     );
     return TrackedForm.tabbed(
       controller: c.selectedDatabaseFormController.connectForm,
-      tabLabels: {settingMetaGroupBase: l10n.db_base_config},
+      tabLabels: {
+        settingMetaGroupBase: l10n.db_base_config,
+        settingMetaGroupParams: l10n.db_conn_params,
+        settingMetaGroupInitQuery: l10n.db_conn_init_query,
+      },
       children: children,
     );
   }
