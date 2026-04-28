@@ -19,43 +19,79 @@ import 'package:client/widgets/form.dart';
 
 const String initQueryTabId = 'initize';
 
-class AddInstanceController extends ChangeNotifier {
-  final Map<DatabaseType, Map<String, TextEditingController>> _fieldControllers = {};
+class DatabaseFormController {
+  final DatabaseType databaseType;
+  final Map<String, TextEditingController> fieldControllers = {};
+  final TrackedFormController connectForm = TrackedFormController();
+  late final CodeLineEditingController initQueryCodeController;
 
-  DatabaseType selectedDatabaseType = DatabaseType.mysql;
-
-  /// 每种 [DatabaseType] 一套 [GlobalKey] 与校验态；Tab/分组由各 [Tracked*] 的 [groupId] 声明，与 controller 无业务耦合。
-  final Map<DatabaseType, TrackedFormController> _connectForms = {
-    for (final t in allDatabaseType) t: TrackedFormController(),
-  };
-
-  /// 当前 [selectedDatabaseType] 对应的表单控制器（与 [TrackedForm] / [Tracked*] 共用）。
-  TrackedFormController get connectForm => _connectForms[selectedDatabaseType]!;
-
-  /// 编辑页在载入实例后曾用于对齐表单与 [selectedDatabaseType]；现为每类型独立 controller，无需再同步。
-  void syncConnectFormDatabaseType() {}
-
-  /// 提交前校验当前库类型下全部连接字段（与 [Tracked*] 共用同一套 [GlobalKey]）。
-  bool validateForm() {
-    return connectForm.validate();
+  void dispose() {
+    for (final c in fieldControllers.values) {
+      c.dispose();
+    }
+    initQueryCodeController.dispose();
+    connectForm.dispose();
   }
+
+  void reset() {
+    for (final meta in connectionMetaMap[databaseType]!.connMeta) {
+      if (meta is TargetNetworkMeta) {
+        fieldControllers[settingMetaNameTargetNetworkHost]?.text = meta.defaultValue ?? "";
+        fieldControllers[settingMetaNameTargetNetworkPort]?.text = meta.defaultPort ?? "";
+      } else {
+        fieldControllers[meta.name]?.text = meta.defaultValue ?? "";
+      }
+    }
+    initQueryCodeController.text = connectionMetaMap[databaseType]!.initQueryText();
+    connectForm.resetInvalidGroups();
+  }
+
+  DatabaseFormController(this.databaseType) {
+    for (final meta in connectionMetaMap[databaseType]!.connMeta) {
+      if (meta is TargetNetworkMeta) {
+        fieldControllers[settingMetaNameTargetNetworkHost] = TextEditingController(text: meta.defaultValue ?? "");
+        fieldControllers[settingMetaNameTargetNetworkPort] = TextEditingController(text: meta.defaultPort ?? "");
+      } else {
+        fieldControllers[meta.name] = TextEditingController(text: meta.defaultValue ?? "");
+      }
+    }
+    initQueryCodeController = CodeLineEditingController(
+      spanBuilder: ({required codeLines, required context, required style}) {
+        return getSQLHighlightTextSpan(
+          databaseType.dialectType,
+          codeLines.asString(TextLineBreak.lf),
+          defalutStyle: style,
+        );
+      },
+    );
+    initQueryCodeController.text = connectionMetaMap[databaseType]!.initQueryText();
+  }
+}
+
+class AddInstanceController extends ChangeNotifier {
+  final Map<DatabaseType, DatabaseFormController> databaseFormControllers = {};
+
+  DatabaseType selectedDatabaseType = connectionMetas.first.type;
+
+  DatabaseFormController get selectedDatabaseFormController => databaseFormControllers[selectedDatabaseType]!;
+
+  bool validateForm() => selectedDatabaseFormController.connectForm.validate();
 
   @override
   void dispose() {
-    for (final c in _connectForms.values) {
-      c.dispose();
+    for (final f in databaseFormControllers.values) {
+      f.dispose();
     }
     super.dispose();
   }
 
-  final Map<DatabaseType, CodeLineEditingController> initQueryCodeControllers = {};
-
+  // 数据库连接测试的状态
   bool? isDatabaseConnectable;
   bool isDatabasePingDoing = false;
   String? databaseConnectError;
 
+  // 向导步骤
   int _wizardStep = 0;
-
   int get wizardStep => _wizardStep;
 
   void setWizardStep(int step) {
@@ -67,141 +103,26 @@ class AddInstanceController extends ChangeNotifier {
     notifyListeners();
   }
 
-  CodeLineEditingController get initQueryCodeController {
-    return initQueryCodeControllers[selectedDatabaseType]!;
-  }
-
-  List<SettingMeta> get _connMetaList {
-    return connectionMetaMap[selectedDatabaseType]?.connMeta ?? const <SettingMeta>[];
-  }
-
-  List<SettingMeta> get connectionMetasSelected => List<SettingMeta>.unmodifiable(_connMetaList);
-
-  AddInstanceController() {
-    for (final connMeta in connectionMetas) {
-      final ctrls = _fieldControllers.putIfAbsent(connMeta.type, () => {});
-      for (final meta in connMeta.connMeta) {
-        if (meta is TargetNetworkMeta) {
-          ctrls[settingMetaNameTargetNetworkHost] = TextEditingController(text: meta.defaultValue ?? "");
-          ctrls[settingMetaNameTargetNetworkPort] = TextEditingController(text: meta.defaultPort ?? "");
-        } else {
-          ctrls[meta.name] = TextEditingController(text: meta.defaultValue ?? "");
-        }
-      }
-    }
-    for (final connMeta in connectionMetas) {
-      final codeController = CodeLineEditingController(
-        spanBuilder: ({required codeLines, required context, required style}) {
-          return getSQLHighlightTextSpan(
-            connMeta.type.dialectType,
-            codeLines.asString(TextLineBreak.lf),
-            defalutStyle: style,
-          );
-        },
-      );
-      codeController.text = connectionMetaMap[connMeta.type]!.initQueryText();
-      initQueryCodeControllers[connMeta.type] = codeController;
-    }
-  }
-
-  SettingMeta? _metaFor(DatabaseType db, String fieldName) {
-    for (final m in connectionMetaMap[db]?.connMeta ?? const <SettingMeta>[]) {
-      if (m.name == fieldName) {
-        return m;
-      }
-      if (m is TargetNetworkMeta && fieldName == settingMetaNameTargetNetworkPort) {
-        return m;
-      }
-    }
-    return null;
-  }
-
-  TextEditingController fieldTextController(DatabaseType db, String fieldName) {
-    return _fieldControllers[db]![fieldName]!;
-  }
-
-  TextEditingController fieldText(String fieldName) => fieldTextController(selectedDatabaseType, fieldName);
-
-  SettingMeta fieldMeta(String fieldName) {
-    final m = _metaFor(selectedDatabaseType, fieldName);
-    if (m == null) {
-      throw StateError('Unknown field $fieldName for $selectedDatabaseType');
-    }
-    return m;
-  }
-
-  String _fieldText(DatabaseType dbType, String fieldName) {
-    return _fieldControllers[dbType]?[fieldName]?.text ?? "";
-  }
-
-  String _addressFieldText(DatabaseType dbType) {
-    return _fieldControllers[dbType]?[settingMetaNameTargetNetworkHost]?.text ??
-        _fieldControllers[dbType]?[settingMetaNameTargetDBFile]?.text ??
-        "";
-  }
-
-  void _setFieldText(DatabaseType dbType, String fieldName, String value) {
-    _fieldControllers[dbType]?[fieldName]?.text = value;
-  }
-
   void onDatabaseTypeChange(DatabaseType type) {
-    final sourceType = selectedDatabaseType;
-    final sourcePortCtrl = _fieldControllers[sourceType]?[settingMetaNameTargetNetworkPort];
-    final sourceNetMeta = _metaFor(sourceType, settingMetaNameTargetNetworkHost);
-    final sourceDefaultPort = sourceNetMeta is TargetNetworkMeta ? (sourceNetMeta.defaultPort ?? "") : "";
-    final isPortChanged = sourcePortCtrl != null && sourcePortCtrl.text != sourceDefaultPort;
-    final name = _fieldText(sourceType, settingMetaNameName);
-    final desc = _fieldText(sourceType, settingMetaNameDesc);
-    final addr = _addressFieldText(sourceType);
-    final user = _fieldText(sourceType, settingMetaNameUser);
-    final password = _fieldText(sourceType, settingMetaNamePassword);
-
+    if (selectedDatabaseType == type) {
+      return;
+    }
     selectedDatabaseType = type;
     isDatabasePingDoing = false;
     isDatabaseConnectable = null;
     databaseConnectError = null;
-
-    _setFieldText(type, settingMetaNameName, name);
-    _setFieldText(type, settingMetaNameDesc, desc);
-    _setFieldText(type, settingMetaNameTargetNetworkHost, addr);
-    _setFieldText(type, settingMetaNameTargetDBFile, addr);
-    _setFieldText(type, settingMetaNameUser, user);
-    _setFieldText(type, settingMetaNamePassword, password);
-    if (!isPortChanged && _fieldControllers[type]?.containsKey(settingMetaNameTargetNetworkPort) == true) {
-      port = defaultPort;
-    }
     notifyListeners();
   }
 
   void clear() {
-    for (final e in _fieldControllers.entries) {
-      final db = e.key;
-      for (final meta in connectionMetaMap[db]?.connMeta ?? const <SettingMeta>[]) {
-        if (meta is TargetNetworkMeta) {
-          e.value[settingMetaNameTargetNetworkHost]?.text = meta.defaultValue ?? "";
-          e.value[settingMetaNameTargetNetworkPort]?.text = meta.defaultPort ?? "";
-        } else {
-          e.value[meta.name]?.text = meta.defaultValue ?? "";
-        }
-      }
+    for (final f in databaseFormControllers.values) {
+      f.reset();
     }
     _wizardStep = 0;
     isDatabasePingDoing = false;
     isDatabaseConnectable = null;
     databaseConnectError = null;
-    for (final c in _connectForms.values) {
-      c.resetInvalidGroups();
-    }
     notifyListeners();
-  }
-
-  String get defaultPort {
-    final m = _metaFor(selectedDatabaseType, settingMetaNameTargetNetworkHost);
-    return m is TargetNetworkMeta ? (m.defaultPort ?? "") : "";
-  }
-
-  set port(String port) {
-    _fieldControllers[selectedDatabaseType]?[settingMetaNameTargetNetworkPort]?.text = port;
   }
 
   ConnectValue getConnectValue() {
@@ -214,31 +135,33 @@ class AddInstanceController extends ChangeNotifier {
     String desc = "";
     Map<String, String> custom = {};
 
-    final db = selectedDatabaseType;
-    for (final meta in _connMetaList) {
+    final controller = selectedDatabaseFormController;
+    final initCode = controller.initQueryCodeController;
+    final fields = controller.fieldControllers;
+    for (final meta in getConnMetas(selectedDatabaseType)) {
       switch (meta) {
         case NameMeta():
-          name = _fieldControllers[db]![meta.name]!.text;
+          name = fields[meta.name]!.text;
         case TargetNetworkMeta():
-          addr = _fieldControllers[db]![settingMetaNameTargetNetworkHost]!.text;
-          port = int.tryParse(_fieldControllers[db]![settingMetaNameTargetNetworkPort]!.text.trim());
+          addr = fields[settingMetaNameTargetNetworkHost]!.text;
+          port = int.tryParse(fields[settingMetaNameTargetNetworkPort]!.text.trim());
         case TargetDBFileMeta():
-          final text = _fieldControllers[db]![meta.name]!.text;
+          final text = fields[meta.name]!.text;
           dbFile = text;
           addr = dbFile;
         case UserMeta():
-          user = _fieldControllers[db]![meta.name]!.text;
+          user = fields[meta.name]!.text;
         case PasswordMeta():
-          password = _fieldControllers[db]![meta.name]!.text;
+          password = fields[meta.name]!.text;
         case DescMeta():
-          desc = _fieldControllers[db]![meta.name]!.text;
+          desc = fields[meta.name]!.text;
         case CustomMeta():
-          custom[meta.name] = _fieldControllers[db]![meta.name]!.text;
+          custom[meta.name] = fields[meta.name]!.text;
       }
     }
     List<String> querys = splitSQL(
       selectedDatabaseType.dialectType,
-      initQueryCodeControllers[selectedDatabaseType]!.text.trim(),
+      initCode.text.trim(),
     ).map((e) => e.content.trim()).whereNot((e) => e.trim() == "").toList();
     final target = dbFile.isNotEmpty
         ? ConnectTarget.dbFile(dbFile: dbFile)
@@ -292,17 +215,10 @@ class AddInstanceController extends ChangeNotifier {
     );
   }
 
-  Color? get pingIndicatorColor {
-    if (isDatabasePingDoing) {
-      return null;
+  AddInstanceController() {
+    for (final cm in connectionMetas) {
+      databaseFormControllers[cm.type] = DatabaseFormController(cm.type);
     }
-    if (isDatabaseConnectable == null) {
-      return null;
-    }
-    if (isDatabaseConnectable == true) {
-      return Colors.green;
-    }
-    return Colors.red;
   }
 }
 
@@ -378,8 +294,6 @@ class _AddInstanceWizardStep1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final selected = addInstanceController.selectedDatabaseType;
-    final selectedColor = addInstanceController.pingIndicatorColor;
     return CustomDialogWidget(
       title: l10n.add_db_instance,
       titleIcon: HugeIcon(
@@ -408,10 +322,7 @@ class _AddInstanceWizardStep1 extends StatelessWidget {
                         name: meta.displayName,
                         type: meta.type,
                         logoPath: meta.logoAssertPath,
-                        selected: meta.type == selected,
-                        selectedColor: selectedColor,
-                        onTap: addInstanceController.onDatabaseTypeChange,
-                        onDoubleTap: () {
+                        onTap: () {
                           addInstanceController.onDatabaseTypeChange(meta.type);
                           addInstanceController.setWizardStep(1);
                         },
@@ -423,12 +334,7 @@ class _AddInstanceWizardStep1 extends StatelessWidget {
           ),
         ],
       ),
-      actions: [
-        FilledButton(
-          onPressed: () => addInstanceController.setWizardStep(1),
-          child: Text(l10n.wizard_next),
-        ),
-      ],
+      actions: [],
     );
   }
 }
@@ -458,7 +364,7 @@ class _AddInstanceWizardStep2 extends ConsumerWidget {
       body: ListenableBuilder(
         listenable: addInstanceController,
         builder: (context, _) => ListenableBuilder(
-          listenable: addInstanceController.connectForm,
+          listenable: addInstanceController.selectedDatabaseFormController.connectForm,
           builder: (context, _) => InstanceFormWidget.forAddInstanceWizard(),
         ),
       ),
@@ -477,58 +383,54 @@ class _AddInstanceWizardStep2 extends ConsumerWidget {
   }
 }
 
-class DatabaseTypeCard extends StatelessWidget {
+class DatabaseTypeCard extends StatefulWidget {
   final DatabaseType type;
   final String name;
   final String logoPath;
-  final bool selected;
-  final Color? selectedColor;
-  final Function(DatabaseType type)? onTap;
-  final VoidCallback? onDoubleTap;
+  final VoidCallback? onTap;
 
   const DatabaseTypeCard({
     super.key,
     required this.type,
     required this.name,
     required this.logoPath,
-    this.selected = false,
-    this.selectedColor,
     this.onTap,
-    this.onDoubleTap,
   });
 
   @override
+  State<DatabaseTypeCard> createState() => _DatabaseTypeCardState();
+}
+
+class _DatabaseTypeCardState extends State<DatabaseTypeCard> {
+  bool _hovering = false;
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(minHeight: 84, minWidth: 100),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: selected
-            ? Theme.of(context)
-                  .colorScheme
-                  .primaryContainer // db type card selected color
-            : null,
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(10),
-        onTap: () {
-          if (!selected && onTap != null) {
-            onTap!(type);
-          }
-        },
-        onDoubleTap: onDoubleTap,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(kSpacingTiny, kSpacingSmall, kSpacingTiny, kSpacingTiny),
-              child: Image.asset(logoPath),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(kSpacingTiny, kSpacingTiny, kSpacingTiny, kSpacingSmall),
-              child: Text(name),
-            ),
-          ],
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 84, minWidth: 100),
+        decoration: BoxDecoration(
+          color: _hovering ? Theme.of(context).colorScheme.surfaceContainer : null,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: widget.onTap,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(kSpacingTiny, kSpacingSmall, kSpacingTiny, kSpacingTiny),
+                child: Image.asset(widget.logoPath),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(kSpacingTiny, kSpacingTiny, kSpacingTiny, kSpacingSmall),
+                child: Text(widget.name),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -552,7 +454,7 @@ class InstanceFormWidget extends StatelessWidget {
     final c = addInstanceController;
     return InstanceFormWidget(
       controller: c,
-      codeController: c.initQueryCodeController,
+      codeController: c.selectedDatabaseFormController.initQueryCodeController,
     );
   }
 
@@ -562,7 +464,7 @@ class InstanceFormWidget extends StatelessWidget {
     final c = controller;
     // Tab 顺序由 [groupId] 首次出现顺序决定；每个 meta 一行；初始化 SQL 固定追加在末尾。
     final children = <Widget>[];
-    for (final meta in c.connectionMetasSelected) {
+    for (final meta in getConnMetas(c.selectedDatabaseType)) {
       switch (meta) {
         case NameMeta():
           children.add(
@@ -571,7 +473,7 @@ class InstanceFormWidget extends StatelessWidget {
               groupId: meta.group,
               label: l10n.db_instance_name,
               isRequired: true,
-              controller: c.fieldText(settingMetaNameName),
+              controller: c.selectedDatabaseFormController.fieldControllers[settingMetaNameName]!,
               readOnly: nameReadOnly,
             ),
           );
@@ -580,11 +482,11 @@ class InstanceFormWidget extends StatelessWidget {
             TrackedHostPortFields(
               groupId: meta.group,
               hostFieldName: settingMetaNameTargetNetworkHost,
-              hostController: c.fieldText(settingMetaNameTargetNetworkHost),
+              hostController: c.selectedDatabaseFormController.fieldControllers[settingMetaNameTargetNetworkHost]!,
               hostLabel: l10n.db_instance_host,
               hostRequired: true,
               portFieldName: settingMetaNameTargetNetworkPort,
-              portController: c.fieldText(settingMetaNameTargetNetworkPort),
+              portController: c.selectedDatabaseFormController.fieldControllers[settingMetaNameTargetNetworkPort]!,
               portLabel: l10n.db_instance_port,
               portRequired: true,
             ),
@@ -596,7 +498,7 @@ class InstanceFormWidget extends StatelessWidget {
               groupId: meta.group,
               isRequired: true,
               label: 'Path',
-              controller: c.fieldText(settingMetaNameTargetDBFile),
+              controller: c.selectedDatabaseFormController.fieldControllers[settingMetaNameTargetDBFile]!,
               pickTooltip: l10n.tooltip_select_directory,
             ),
           );
@@ -606,7 +508,7 @@ class InstanceFormWidget extends StatelessWidget {
               fieldName: settingMetaNameUser,
               groupId: meta.group,
               label: l10n.db_instance_user,
-              controller: c.fieldText(settingMetaNameUser),
+              controller: c.selectedDatabaseFormController.fieldControllers[settingMetaNameUser]!,
             ),
           );
         case PasswordMeta():
@@ -615,7 +517,7 @@ class InstanceFormWidget extends StatelessWidget {
               fieldName: settingMetaNamePassword,
               groupId: meta.group,
               label: l10n.db_instance_password,
-              controller: c.fieldText(settingMetaNamePassword),
+              controller: c.selectedDatabaseFormController.fieldControllers[settingMetaNamePassword]!,
             ),
           );
         case DescMeta():
@@ -624,7 +526,7 @@ class InstanceFormWidget extends StatelessWidget {
               fieldName: settingMetaNameDesc,
               groupId: meta.group,
               label: l10n.db_instance_desc,
-              controller: c.fieldText(settingMetaNameDesc),
+              controller: c.selectedDatabaseFormController.fieldControllers[settingMetaNameDesc]!,
             ),
           );
         case CustomMeta():
@@ -637,7 +539,7 @@ class InstanceFormWidget extends StatelessWidget {
                     groupId: meta.group,
                     isRequired: meta.isRequired,
                     label: meta.name,
-                    controller: c.fieldText(meta.name),
+                    controller: c.selectedDatabaseFormController.fieldControllers[meta.name]!,
                     enumValues: meta.enumValues!,
                     defaultValue: meta.defaultValue,
                     helperText: meta.comment,
@@ -647,7 +549,7 @@ class InstanceFormWidget extends StatelessWidget {
                     groupId: meta.group,
                     isRequired: meta.isRequired,
                     label: meta.name,
-                    controller: c.fieldText(meta.name),
+                    controller: c.selectedDatabaseFormController.fieldControllers[meta.name]!,
                   ),
           );
       }
@@ -691,14 +593,13 @@ class InstanceFormWidget extends StatelessWidget {
       ),
     );
     return TrackedForm.tabbed(
-      controller: c.connectForm,
+      controller: c.selectedDatabaseFormController.connectForm,
       tabLabels: {settingMetaGroupBase: l10n.db_base_config},
       children: children,
     );
   }
 }
 
-/// 数据源对话框底部：「测试连接」按钮与右侧状态（loading / 成功图标 / 失败图标+文案）。
 class DbInstanceConnectionTestWidget extends StatelessWidget {
   final bool isDatabasePingDoing;
   final bool? isDatabaseConnectable;

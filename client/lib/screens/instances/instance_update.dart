@@ -26,23 +26,25 @@ class UpdateInstanceController extends AddInstanceController {
     for (final meta in connectionMetaMap[db]?.connMeta ?? const <SettingMeta>[]) {
       switch (meta) {
         case NameMeta():
-          fieldTextController(db, meta.name).text = connectValue.name;
+          selectedDatabaseFormController.fieldControllers[meta.name]!.text = connectValue.name;
         case TargetNetworkMeta():
-          fieldTextController(db, settingMetaNameTargetNetworkHost).text = connectValue.getHost();
-          fieldTextController(db, settingMetaNameTargetNetworkPort).text = connectValue.getPort()?.toString() ?? "";
+          selectedDatabaseFormController.fieldControllers[settingMetaNameTargetNetworkHost]!.text = connectValue
+              .getHost();
+          selectedDatabaseFormController.fieldControllers[settingMetaNameTargetNetworkPort]!.text =
+              connectValue.getPort()?.toString() ?? "";
         case TargetDBFileMeta():
-          fieldTextController(db, meta.name).text = connectValue.getDbFile();
+          selectedDatabaseFormController.fieldControllers[meta.name]!.text = connectValue.getDbFile();
         case UserMeta():
-          fieldTextController(db, meta.name).text = connectValue.user;
+          selectedDatabaseFormController.fieldControllers[meta.name]!.text = connectValue.user;
         case PasswordMeta():
-          fieldTextController(db, meta.name).text = connectValue.password;
+          selectedDatabaseFormController.fieldControllers[meta.name]!.text = connectValue.password;
         case DescMeta():
-          fieldTextController(db, meta.name).text = connectValue.desc;
+          selectedDatabaseFormController.fieldControllers[meta.name]!.text = connectValue.desc;
         case CustomMeta():
-          fieldTextController(db, meta.name).text = connectValue.getValue(meta.name);
+          selectedDatabaseFormController.fieldControllers[meta.name]!.text = connectValue.getValue(meta.name);
       }
     }
-    initQueryCodeController.text = connectValue.initQueryText();
+    selectedDatabaseFormController.initQueryCodeController.text = connectValue.initQueryText();
   }
 
   void tryUpdateInstance(InstanceModel instance) {
@@ -50,7 +52,6 @@ class UpdateInstanceController extends AddInstanceController {
     databaseConnectError = null;
     isDatabasePingDoing = false;
     this.instance = instance;
-    syncConnectFormDatabaseType();
     loadFromMeta(instance.connectValue);
     notifyListeners();
   }
@@ -151,10 +152,10 @@ class _UpdateInstanceDialogState extends ConsumerState<_UpdateInstanceDialog> {
       content: ListenableBuilder(
         listenable: updateInstanceController,
         builder: (context, _) => ListenableBuilder(
-          listenable: updateInstanceController.connectForm,
+          listenable: updateInstanceController.selectedDatabaseFormController.connectForm,
           builder: (context, _) => InstanceFormWidget(
             controller: updateInstanceController,
-            codeController: updateInstanceController.initQueryCodeController,
+            codeController: updateInstanceController.selectedDatabaseFormController.initQueryCodeController,
             nameReadOnly: true,
           ),
         ),

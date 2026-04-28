@@ -246,3 +246,7 @@ List<DatabaseType> allDatabaseType =
 Map<DatabaseType, ConnectionMeta> connectionMetaMap = {
   for (var meta in connectionMetas) meta.type: meta
 };
+
+List<SettingMeta> getConnMetas(DatabaseType type) {
+  return connectionMetaMap[type]?.connMeta ?? const <SettingMeta>[];
+}
