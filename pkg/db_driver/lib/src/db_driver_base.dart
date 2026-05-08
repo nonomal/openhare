@@ -12,8 +12,8 @@ class ConnectionFactory {
   static Future<BaseConnection> open(
       {required DatabaseType type,
       required ConnectValue meta,
-      String? schema,
-      Function(String)? onSchemaChangedCallback}) async {
+      DatabaseRef? schema,
+      Function(DatabaseRef)? onSchemaChangedCallback}) async {
     BaseConnection? conn;
     try {
       conn = switch (type) {
