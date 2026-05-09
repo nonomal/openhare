@@ -367,6 +367,7 @@ class _SchemaBarState extends ConsumerState<SchemaBar> {
         onEnter: (_) => setState(() => isEnter = true),
         onExit: (_) => setState(() => isEnter = false),
         child: Container(
+          height: 26,
           padding: const EdgeInsets.fromLTRB(kSpacingTiny, 0, kSpacingTiny, 0),
           decoration: BoxDecoration(
             color: isEnter ? Theme.of(context).colorScheme.surfaceContainerLow : null, // schema 框鼠标移入的颜色
@@ -393,7 +394,6 @@ class _SchemaBarState extends ConsumerState<SchemaBar> {
                   child: Text(
                     widget.currentSchema?.toString() ?? "",
                     overflow: TextOverflow.ellipsis,
-                    // style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: color),
                   ),
                 ),
               ),
