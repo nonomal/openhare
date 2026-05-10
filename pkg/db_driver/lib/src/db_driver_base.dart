@@ -145,6 +145,13 @@ List<ConnectionMeta> connectionMetas = [
         defaultValue: "true",
         enumValues: ['true', 'false'],
       ),
+      CustomMeta(
+        name: "tlsmin",
+        type: SettingMetaType.enumValue,
+        group: settingMetaGroupParams,
+        defaultValue: "1.2",
+        enumValues: ["1.0", "1.1", "1.2", "1.3"],
+      ),
     ],
     initQuerys: const [],
   ),

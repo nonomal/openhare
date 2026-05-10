@@ -50,6 +50,8 @@ class MSSQLConnection extends GoImplConnection {
     final encrypt = meta.getValue("encrypt", "true");
     final trustServerCertificate =
         meta.getValue("trustServerCertificate", "true");
+    // ref: https://github.com/microsoft/go-mssqldb/issues/33
+    final tlsmin = meta.getValue("tlsmin", "1.2");
 
     final dsn = Uri(
       scheme: 'sqlserver',
@@ -60,6 +62,7 @@ class MSSQLConnection extends GoImplConnection {
         'database': database,
         'encrypt': encrypt,
         'trustServerCertificate': trustServerCertificate,
+        'tlsmin': tlsmin,
       },
     ).toString();
 
