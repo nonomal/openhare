@@ -26,7 +26,7 @@ class MySQLConnection extends GoImplConnection {
     final host = meta.getHost();
     final port = meta.getPort() ?? 3306;
     final user = meta.user;
-    final password = Uri.encodeComponent(meta.password);
+    final password = meta.password;
 
     final dsn = '$user:$password@tcp($host:$port)/$database';
 
@@ -119,7 +119,8 @@ ORDER BY
 
     final databaseNodes = <MetaDataNode>[];
     for (final database in databaseList) {
-      final databaseNode = MetaDataNode(MetaType.database, database.databaseName());
+      final databaseNode =
+          MetaDataNode(MetaType.database, database.databaseName());
       databaseNodes.add(databaseNode);
 
       final tableNodes = <MetaDataNode>[];
